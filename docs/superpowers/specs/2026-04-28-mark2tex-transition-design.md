@@ -1,16 +1,16 @@
-# Design Specification: Transition from LateXOS to Mark2TeX
+# Design Specification: Transition from Mark2TeX to Mark2TeX
 
 **Date:** 2026-04-28
 **Status:** Draft
 **Topic:** Project Renaming, Restructuring, and Governance Establishment
 
 ## 1. Overview
-This document outlines the transition of the project from `LateXOS` to `Mark2TeX`. The goal is to rename the project to better reflect its purpose, restructure the directory layout for professional distribution, and establish strict development governance.
+This document outlines the transition of the project from `Mark2TeX` to `Mark2TeX`. The goal is to rename the project to better reflect its purpose, restructure the directory layout for professional distribution, and establish strict development governance.
 
 ## 2. Renaming and Restructuring
 
 ### 2.1 Global Renaming
-All occurrences of the string `LateXOS` (case-insensitive where appropriate) will be replaced with `Mark2TeX` across:
+All occurrences of the string `Mark2TeX` (case-insensitive where appropriate) will be replaced with `Mark2TeX` across:
 - Folder names
 - File names
 - Variable names in `Makefile`
@@ -26,7 +26,7 @@ The project will be reorganized from a flat/mixed structure to a functional hier
 | `watch.sh` | `bin/watch.sh` | File watcher script |
 | `templates/` | `templates/` | LaTeX templates (preserved internal structure) |
 | `template_*.md` | `examples/*.md` | Markdown boilerplates for users |
-| `LateXOS_Manual_Teste.md` | `docs/manual.md` | Detailed technical documentation |
+| `Mark2TeX_Manual_Teste.md` | `docs/manual.md` | Detailed technical documentation |
 | `Dockerfile` | `Dockerfile` | Environment definition (Root) |
 | `Makefile` | `Makefile` | User interface / Command entry (Root) |
 | (New) | `README.md` | Quick-start guide and project overview |
@@ -61,7 +61,7 @@ Format: `MAJOR.MINOR.PATCH`
 - **Hierarchy**: `README.md` (Quick Start) $\rightarrow$ `docs/manual.md` (Deep Dive).
 
 ## 4. Success Criteria
-- All `LateXOS` references are removed.
+- All `Mark2TeX` references are removed.
 - The project compiles successfully from the new structure.
 - Git repository is initialized with `main` and `develop` branches.
 - Documentation is consistent with the new layout.

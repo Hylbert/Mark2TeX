@@ -1,5 +1,5 @@
 ---
-title: Manual de Operação e Guia de Referência LateXOS
+title: Manual de Operação e Guia de Referência Mark2TeX
 author: Hylbert Rodrigues
 institution: Ecossistema de Automação Acadêmica
 campus: Virtual Campus
@@ -10,16 +10,16 @@ coadvisor: Produtividade
 city: Mundo Digital
 year: "2026"
 acknowledgments: Agradecemos a todos os estudantes que buscam simplificar a formatação de seus trabalhos acadêmicos.
-abstract-pt: Este documento serve como manual de usuário e prova de conceito para a ferramenta LateXOS. Ele demonstra a capacidade de conversão de Markdown para PDF seguindo as normas ABNT, validando a instalação do ambiente Docker e do motor XeLaTeX.
-abstract-en: This document serves as a user manual and proof of concept for the LateXOS tool. It demonstrates the ability to convert Markdown to PDF following ABNT standards, validating the Docker environment and XeLaTeX engine installation.
+abstract-pt: Este documento serve como manual de usuário e prova de conceito para a ferramenta Mark2TeX. Ele demonstra a capacidade de conversão de Markdown para PDF seguindo as normas ABNT, validando a instalação do ambiente Docker e do motor XeLaTeX.
+abstract-en: This document serves as a user manual and proof of concept for the Mark2TeX tool. It demonstrates the ability to convert Markdown to PDF following ABNT standards, validating the Docker environment and XeLaTeX engine installation.
 siglas: \begin{description} \item[ABNT] Associação Brasileira de Normas Técnicas \item[PDF] Portable Document Format \item[YAML] Yet Another Markup Language \item[TCC] Trabalho de Conclusão de Curso \end{description}
 simbolos: \begin{description} \item[$\rightarrow$] Direcionamento de fluxo \item[$\sum$] Somatório de elementos \item[$\alpha$] Coeficiente de aprendizado \end{description}
 bibliography: referencias.bib
 ---
 
-# Introdução ao LateXOS
+# Introdução ao Mark2TeX
 
-O **LateXOS** é um sistema de automação de documentos acadêmicos que desacopla o conteúdo da formatação. Em vez de lutar com a sintaxe complexa do LaTeX, o usuário escreve em **Markdown**, e a ferramenta cuida de toda a burocracia da norma ABNT através de um pipeline Dockerizado.
+O **Mark2TeX** é um sistema de automação de documentos acadêmicos que desacopla o conteúdo da formatação. Em vez de lutar com a sintaxe complexa do LaTeX, o usuário escreve em **Markdown**, e a ferramenta cuida de toda a burocracia da norma ABNT através de um pipeline Dockerizado.
 
 ## O Fluxo de Trabalho
 O processo segue a seguinte cadeia:
@@ -29,7 +29,7 @@ Isso garante que qualquer pessoa com Docker instalado consiga gerar o mesmo PDF,
 
 # Guia de Operação (Comandos)
 
-Para operar a ferramenta, utilize os seguintes comandos no terminal dentro da pasta `LateXOS`:
+Para operar a ferramenta, utilize os seguintes comandos no terminal dentro da pasta `Mark2TeX`:
 
 ## Preparando o Ambiente
 Se for a primeira vez utilizando a ferramenta ou se o `Dockerfile` foi alterado:
@@ -52,7 +52,7 @@ Para não precisar digitar o comando a cada alteração:
 
 # Anatomia do Arquivo Markdown
 
-O segredo do LateXOS está no cabeçalho **YAML**, localizado no topo do arquivo entre dois conjuntos de `---`.
+O segredo do Mark2TeX está no cabeçalho **YAML**, localizado no topo do arquivo entre dois conjuntos de `---`.
 
 ## Campos Principais
 - `title`: Título do trabalho (aparece na capa e folha de rosto).
@@ -68,7 +68,7 @@ O segredo do LateXOS está no cabeçalho **YAML**, localizado no topo do arquivo
 Esta seção prova que a ferramenta está funcionando corretamente.
 
 ## Matemática e Fórmulas
-O LateXOS suporta matemática completa. Podemos ter fórmulas inline como $E = mc^2$ ou fórmulas em bloco:
+O Mark2TeX suporta matemática completa. Podemos ter fórmulas inline como $E = mc^2$ ou fórmulas em bloco:
 
 $$
 \int_{a}^{b} f(x) \,dx = F(b) - F(a)
@@ -79,7 +79,7 @@ Blocos de código são formatados com fontes monoespaçadas e realce de sintaxe.
 
 ```python
 def saudacao(nome):
-    print(f"Olá, {nome}! Bem-vindo ao LateXOS.")
+    print(f"Olá, {nome}! Bem-vindo ao Mark2TeX.")
 
 saudacao("Usuário")
 ```

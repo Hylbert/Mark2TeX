@@ -1,4 +1,4 @@
-# LateXOS Build Orchestrator
+# Mark2TeX Build Orchestrator
 
 # Default values
 TEMPLATE ?= tcc
@@ -8,7 +8,7 @@ INPUT ?= Reconhecimento_de_gestos.md
 
 # Build the Docker image
 build-image:
-	docker build -t latexos .
+	docker build -t mark2tex .
 
 # Compile the document using the Docker container
 # We map the current directory to /app inside the container
@@ -17,7 +17,7 @@ compile:
 	docker run --rm \
 		--user $(shell id -u):$(shell id -g) \
 		-v $(PWD):/app \
-		latexos \
+		mark2tex \
 		bash /app/scripts/build.sh $(INPUT) $(TEMPLATE)
 
 clean:

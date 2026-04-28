@@ -2,11 +2,11 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Transition project from LateXOS to Mark2TeX, restructure files for professional distribution, and initialize a Git repository with strict governance.
+**Goal:** Transition project from Mark2TeX to Mark2TeX, restructure files for professional distribution, and initialize a Git repository with strict governance.
 
 **Architecture:** 
 1. Initialize Git and create remote repository using `gh`.
-2. Apply global renaming from `LateXOS` to `Mark2TeX`.
+2. Apply global renaming from `Mark2TeX` to `Mark2TeX`.
 3. Reorganize files into a functional hierarchy (`bin/`, `examples/`, `docs/`).
 4. Create base distribution files (`README.md`, `.gitignore`).
 5. Establish GitFlow branching (`main` and `develop`).
@@ -32,7 +32,7 @@ Run: `gh repo create Mark2TeX --public --source=. --remote=origin`
 - [ ] **Step 3: Commit initial state (as a baseline)**
 ```bash
 git add .
-git commit -m "chore: commit inicial do projeto LateXOS antes da transição"
+git commit -m "chore: commit inicial do projeto Mark2TeX antes da transição"
 ```
 
 - [ ] **Step 4: Push to main**
@@ -41,25 +41,25 @@ git branch -M main
 git push -u origin main
 ```
 
-### Task 2: Global Renaming (LateXOS $\rightarrow$ Mark2TeX)
+### Task 2: Global Renaming (Mark2TeX $\rightarrow$ Mark2TeX)
 
 **Files:**
 - Modify: All files and directory names
 
 - [ ] **Step 1: Rename directory if applicable**
-(If the root folder is named LateXOS, rename it to Mark2TeX)
+(If the root folder is named Mark2TeX, rename it to Mark2TeX)
 
 - [ ] **Step 2: Replace text in all files**
-Run: `grep -rl "LateXOS" . | xargs sed -i 's/LateXOS/Mark2TeX/g'`
-Run: `grep -rl "latexos" . | xargs sed -i 's/latexos/mark2tex/g'`
+Run: `grep -rl "Mark2TeX" . | xargs sed -i 's/Mark2TeX/Mark2TeX/g'`
+Run: `grep -rl "mark2tex" . | xargs sed -i 's/mark2tex/mark2tex/g'`
 
-- [ ] **Step 3: Rename files containing LateXOS**
-Run: `find . -name "*LateXOS*" -exec bash -c 'mv "$1" "${1//LateXOS/Mark2TeX}"' _ {} \;`
+- [ ] **Step 3: Rename files containing Mark2TeX**
+Run: `find . -name "*Mark2TeX*" -exec bash -c 'mv "$1" "${1//Mark2TeX/Mark2TeX}"' _ {} \;`
 
 - [ ] **Step 4: Commit renaming**
 ```bash
 git add .
-git commit -m "style: renomeia LateXOS para Mark2TeX em todo o projeto"
+git commit -m "style: renomeia Mark2TeX para Mark2TeX em todo o projeto"
 ```
 
 ### Task 3: Professional Restructuring (Option A)
@@ -69,7 +69,7 @@ git commit -m "style: renomeia LateXOS para Mark2TeX em todo o projeto"
 - Move: `scripts/build.sh` $\rightarrow$ `bin/build.sh`
 - Move: `watch.sh` $\rightarrow$ `bin/watch.sh`
 - Move: `template_*.md` $\rightarrow$ `examples/*.md`
-- Move: `LateXOS_Manual_Teste.md` (now `Mark2TeX_Manual_Teste.md`) $\rightarrow$ `docs/manual.md`
+- Move: `Mark2TeX_Manual_Teste.md` (now `Mark2TeX_Manual_Teste.md`) $\rightarrow$ `docs/manual.md`
 
 - [ ] **Step 1: Create new directory structure**
 ```bash

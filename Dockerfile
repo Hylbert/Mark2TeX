@@ -27,13 +27,13 @@ RUN curl -LO https://github.com/jgm/pandoc/releases/download/3.1.11/pandoc-3.1.1
     rm pandoc-3.1.11-1-amd64.deb
 
 # Create a non-root user for security and file permission management
-RUN useradd -m latexos
-USER latexos
+RUN useradd -m mark2tex
+USER mark2tex
 WORKDIR /app
 
 # Copy scripts and templates into the image
-COPY --chown=latexos:latexos scripts/ /app/scripts/
-COPY --chown=latexos:latexos templates/ /app/templates/
+COPY --chown=mark2tex:mark2tex scripts/ /app/scripts/
+COPY --chown=mark2tex:mark2tex templates/ /app/templates/
 
 # Default command
 CMD ["/bin/bash"]
