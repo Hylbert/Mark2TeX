@@ -18,7 +18,7 @@ compile:
 		--user $(shell id -u):$(shell id -g) \
 		-v $(PWD):/app \
 		mark2tex \
-		bash /app/scripts/build.sh $(INPUT) $(TEMPLATE)
+		bash /app/bin/build.sh $(INPUT) $(TEMPLATE)
 
 clean:
 	rm -f *.aux *.log *.out *.toc *.lot *.lof *.bbl *.blg *.synctex.gz *.tex output.pdf
