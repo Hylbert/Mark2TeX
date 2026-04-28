@@ -1,0 +1,12 @@
+*.aux
+*.log
+*.out
+*.toc
+*.lot
+*.lof
+*.bbl
+*.blg
+*.synctex.gz
+*.tex
+output.pdf
+.DS_Store
