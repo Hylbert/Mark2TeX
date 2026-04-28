@@ -1,0 +1,21 @@
+---
+title: "Título do Trabalho"
+author: "Nome do Autor"
+institution: "Nome da Instituição"
+campus: "Nome do Campus"
+department: "Departamento ou Programa"
+course: "Nome do Curso"
+advisor: "Nome do Orientador"
+coadvisor: "Nome do Coorientador"
+city: "Cidade - UF"
+year: "2025"
+acknowledgments: "Escreva aqui seus agradecimentos."
+abstract-pt: "Escreva aqui o seu resumo em português."
+abstract-en: "Write here your abstract in English."
+siglas: "$\\\\begin{description} \\\\item[IA] Inteligência Artificial \\\\end{description}$"
+simbolos: "$\\\\begin{description} \\\\item[$\\alpha$] Coeficiente \\\\end{description}$"
+bibliography: "referencias.bib"
+---
+
+# Introdução
+Comece a escrever seu conteúdo aqui...
