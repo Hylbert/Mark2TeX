@@ -3,6 +3,7 @@ from textual.app import App, ComposeResult
 from textual.widgets import Header, Footer, ListView, ListItem, Label, Button, Static
 from textual.containers import Horizontal, Vertical
 from .docker_manager import DockerManager
+from .log_translator import LogTranslator
 
 class Mark2TeXApp(App):
     CSS_PATH = "src/styles.tcss"
@@ -62,6 +63,7 @@ class Mark2TeXApp(App):
         # In a real Textual app, this should be run in a worker to avoid blocking the UI
         # For the base implementation, we stream the lines
         for line in self.docker_manager.compile(selected_file, selected_template):
-            console.update(console.renderable + "\n" + line)
+            translated_line = LogTranslator.translate(line)
+            console.update(console.renderable + "\n" + translated_line)
     app = Mark2TeXApp()
     app.run()
