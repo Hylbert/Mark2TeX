@@ -1,0 +1,2730 @@
+[
+  {
+    "char": "\u2588",
+    "color": "rgb(3,101,108)"
+  },
+  {
+    "char": "\u2588\u2588",
+    "color": "rgb(3,101,107)"
+  },
+  {
+    "char": "\u2588\u2588\u2588",
+    "color": "rgb(3,103,109)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(2,102,108)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,103,110)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,102,108)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,100,106)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(2,108,115)"
+  },
+  {
+    "char": "\u2584",
+    "color": "rgb(3,101,109)"
+  },
+  {
+    "char": "\u2584",
+    "color": "rgb(2,101,108)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(2,108,115)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,101,107)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,102,108)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,103,109)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,100,107)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,107,114)"
+  },
+  {
+    "char": "\u2584",
+    "color": "rgb(2,101,106)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,106,113)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,100,106)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,102,107)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,103,109)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,101,107)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,106,112)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(2,101,106)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,102,108)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,107,113)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(2,101,108)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(2,101,107)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,106,113)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,101,107)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\n",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,100,106)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,104,110)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(2,100,106)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(2,101,107)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,106,112)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,103,110)"
+  },
+  {
+    "char": "\u2580",
+    "color": "rgb(2,100,108)"
+  },
+  {
+    "char": "\u2580",
+    "color": "rgb(4,102,107)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,105,111)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,108,115)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,100,108)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(2,102,108)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,108,115)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,106,112)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(2,100,106)"
+  },
+  {
+    "char": "\u2580",
+    "color": "rgb(2,102,107)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,102,108)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,106,112)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(2,99,106)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,105,112)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,106,113)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,101,107)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,101,107)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,106,112)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,101,107)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,101,107)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,106,112)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(2,102,108)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(2,101,107)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,105,112)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,101,107)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\n",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,100,106)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,104,110)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,101,107)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,101,106)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,107,113)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,105,112)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,106,112)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,108,115)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,100,108)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(2,102,108)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,108,115)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,108,114)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(2,101,105)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,103,109)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,107,113)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(2,100,107)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,105,112)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,107,114)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,101,107)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,102,107)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,107,113)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,101,107)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,101,107)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,106,112)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(2,102,108)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(2,101,107)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,105,112)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,101,107)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\n",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,100,106)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,104,110)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,101,107)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,102,107)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,107,113)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,105,112)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,106,112)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,108,115)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,100,108)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(2,102,108)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,108,115)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,107,113)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(2,102,106)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,103,109)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,107,113)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(2,100,107)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,105,112)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,106,113)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,100,108)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,102,107)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,106,113)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,101,107)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,101,107)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,106,112)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(2,102,108)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(2,102,108)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,104,111)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,102,108)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\n",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,100,106)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,104,110)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,101,107)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,102,107)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,107,113)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,105,112)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,106,112)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,108,115)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,100,108)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(2,102,108)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,110,116)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,100,106)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,102,108)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,103,109)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,100,106)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,107,113)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(2,101,106)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,107,113)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,100,107)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,102,108)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,104,109)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,100,106)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,106,113)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(2,102,106)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,103,110)"
+  },
+  {
+    "char": "\u2588\u2588",
+    "color": "rgb(3,101,107)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,104,109)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,100,107)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,105,111)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(2,101,107)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\n",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,100,106)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,104,110)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,101,107)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,102,107)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,107,113)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,105,112)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,106,112)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,108,115)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,100,108)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(2,102,108)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,108,115)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,106,112)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(2,101,106)"
+  },
+  {
+    "char": "\u2580",
+    "color": "rgb(2,100,109)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,102,108)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,107,113)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(2,100,107)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,105,112)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,106,113)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,102,108)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,101,107)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,106,112)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,100,107)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,101,107)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,106,112)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(2,101,107)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(2,101,106)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,105,111)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,101,107)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2584",
+    "color": "rgb(255,255,255)"
+  },
+  {
+    "char": "\u2584",
+    "color": "rgb(252,253,253)"
+  },
+  {
+    "char": "\u2584",
+    "color": "rgb(250,250,250)"
+  },
+  {
+    "char": "\n",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,100,106)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,104,110)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,101,107)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,102,107)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,107,113)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,105,112)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,106,112)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,108,115)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,100,108)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(2,102,108)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,108,115)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,108,114)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(2,102,106)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,103,109)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,107,113)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(2,100,107)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,105,112)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,107,114)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,102,109)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,102,107)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,107,113)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,101,107)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,101,107)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,106,112)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(2,101,107)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(2,101,107)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(6,108,115)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(0,92,98)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(151,191,195)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(255,255,255)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(248,249,249)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(255,255,255)"
+  },
+  {
+    "char": "\n",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,97,104)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,99,106)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,94,100)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(4,92,98)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,103,109)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,101,108)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,101,107)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,103,110)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(5,87,94)"
+  },
+  {
+    "char": "\u2580",
+    "color": "rgb(10,107,114)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(2,106,113)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,108,114)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(2,100,105)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,103,109)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,109,115)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(2,100,106)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,105,112)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(2,105,112)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(4,90,97)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,96,102)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,103,110)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(4,96,101)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,101,107)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,107,114)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(2,101,107)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,94,100)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(3,101,108)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(2,98,104)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2584",
+    "color": "rgb(255,255,255)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(246,248,248)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(255,255,255)"
+  },
+  {
+    "char": "\n",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(223,234,235)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(218,233,235)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(231,239,239)"
+  },
+  {
+    "char": "\u2580",
+    "color": "rgb(249,249,249)"
+  },
+  {
+    "char": "\u2580",
+    "color": "rgb(225,235,236)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(215,230,231)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(219,233,233)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(250,251,251)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(248,248,248)"
+  },
+  {
+    "char": "\u2580",
+    "color": "rgb(185,210,211)"
+  },
+  {
+    "char": "\u2580",
+    "color": "rgb(177,207,209)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(243,245,246)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(252,253,253)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(197,219,222)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2580",
+    "color": "rgb(139,186,188)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(243,246,246)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(252,252,252)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(228,238,238)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(215,231,232)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(230,238,239)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(236,244,244)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(219,235,236)"
+  },
+  {
+    "char": "\u2580",
+    "color": "rgb(165,194,196)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2588\u2580",
+    "color": "rgb(255,255,255)"
+  },
+  {
+    "char": "\u2580",
+    "color": "rgb(248,248,248)"
+  },
+  {
+    "char": "\n",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(248,248,248)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(247,248,248)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(250,251,251)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(255,255,255)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(248,248,248)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2580",
+    "color": "rgb(247,247,247)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(247,248,248)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(250,250,250)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(252,252,252)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(247,248,248)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(252,252,252)"
+  },
+  {
+    "char": "\u2584",
+    "color": "rgb(248,248,248)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2584",
+    "color": "rgb(250,250,250)"
+  },
+  {
+    "char": "\u2580",
+    "color": "rgb(247,248,248)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(255,255,255)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\n",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(249,249,249)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(252,252,252)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(255,255,255)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(248,248,248)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2584",
+    "color": "rgb(249,249,249)"
+  },
+  {
+    "char": "\u2584",
+    "color": "rgb(252,252,252)"
+  },
+  {
+    "char": "\u2584",
+    "color": "rgb(251,251,251)"
+  },
+  {
+    "char": "\u2584\u2584",
+    "color": "rgb(252,252,252)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(250,250,250)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(252,252,252)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(249,249,249)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(252,252,252)"
+  },
+  {
+    "char": "\u2584",
+    "color": "rgb(249,249,249)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(250,250,250)"
+  },
+  {
+    "char": "\u2580",
+    "color": "rgb(248,248,248)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(253,253,253)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(250,250,250)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(248,248,248)"
+  },
+  {
+    "char": "\n",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(249,249,249)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(252,252,252)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(255,255,255)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(248,248,248)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2584",
+    "color": "rgb(250,250,250)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(252,252,252)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(254,254,254)"
+  },
+  {
+    "char": "\u2580",
+    "color": "rgb(250,250,250)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2580",
+    "color": "rgb(249,249,249)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(254,254,254)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(252,252,252)"
+  },
+  {
+    "char": "\u2584",
+    "color": "rgb(249,249,249)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(250,250,250)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(252,252,252)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(250,250,250)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(252,252,252)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(249,249,249)"
+  },
+  {
+    "char": "\u2580",
+    "color": "rgb(248,248,248)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\n",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(249,249,249)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(252,252,252)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(255,255,255)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(248,248,248)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(252,252,252)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(253,253,253)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(248,248,248)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(248,248,248)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(255,255,255)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(252,252,252)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2588\u2588",
+    "color": "rgb(251,251,251)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(250,250,250)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(252,252,252)"
+  },
+  {
+    "char": "\u2584",
+    "color": "rgb(248,248,248)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\n",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(249,249,249)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(252,252,252)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(255,255,255)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(248,248,248)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(248,248,248)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(255,255,255)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(250,250,250)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(248,248,248)"
+  },
+  {
+    "char": "\u2580\u2580\u2580\u2580\u2580",
+    "color": "rgb(249,249,249)"
+  },
+  {
+    "char": "\u2580",
+    "color": "rgb(255,255,255)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(249,249,249)"
+  },
+  {
+    "char": "\u2588\u2588",
+    "color": "rgb(252,252,252)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(250,250,250)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(252,252,252)"
+  },
+  {
+    "char": "\u2584",
+    "color": "rgb(249,249,249)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\n",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(249,249,249)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(252,252,252)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(255,255,255)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(248,248,248)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2580",
+    "color": "rgb(250,250,250)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(255,255,255)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(248,248,248)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(252,252,252)"
+  },
+  {
+    "char": "\u2584",
+    "color": "rgb(250,250,250)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2584",
+    "color": "rgb(249,249,249)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(250,250,250)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2588\u2588",
+    "color": "rgb(251,251,251)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(250,250,250)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(252,252,252)"
+  },
+  {
+    "char": "\u2584",
+    "color": "rgb(249,249,249)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\n",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(249,249,249)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(251,251,251)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(255,255,255)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(248,248,248)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(248,248,248)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(253,253,253)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(249,249,249)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(252,252,252)"
+  },
+  {
+    "char": "\u2584",
+    "color": "rgb(250,250,250)"
+  },
+  {
+    "char": "\u2584",
+    "color": "rgb(249,249,249)"
+  },
+  {
+    "char": "\u2584",
+    "color": "rgb(248,248,248)"
+  },
+  {
+    "char": "\u2584",
+    "color": "rgb(253,253,253)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(250,250,250)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2584",
+    "color": "rgb(251,251,251)"
+  },
+  {
+    "char": "\u2580",
+    "color": "rgb(250,250,250)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2580",
+    "color": "rgb(249,249,249)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(252,252,252)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(250,250,250)"
+  },
+  {
+    "char": "\u2588\u2588",
+    "color": "rgb(251,251,251)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\n",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2584",
+    "color": "rgb(250,250,250)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(252,252,252)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(251,251,251)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(253,253,253)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(250,250,250)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2580",
+    "color": "rgb(249,249,249)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(252,252,252)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(251,251,251)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(252,252,252)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(253,253,253)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(254,254,254)"
+  },
+  {
+    "char": "\u2580",
+    "color": "rgb(251,251,251)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2584",
+    "color": "rgb(249,249,249)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(251,251,251)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(250,250,250)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(250,250,250)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(253,253,253)"
+  },
+  {
+    "char": "\u2588",
+    "color": "rgb(250,250,250)"
+  },
+  {
+    "char": "\u2588\u2588",
+    "color": "rgb(251,251,251)"
+  },
+  {
+    "char": "\u2584",
+    "color": "rgb(248,248,248)"
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": " ",
+    "color": null
+  },
+  {
+    "char": "\n",
+    "color": null
+  }
+]

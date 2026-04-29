@@ -7,7 +7,7 @@ from textual.screen import ModalScreen
 from docker_manager import DockerManager
 from log_translator import LogTranslator
 from watcher import WatcherManager
-from utils.logo_renderer import render_logo, render_icon
+from utils.visuals import render_logo, render_icon
 
 class HelpScreen(ModalScreen):
     def compose(self) -> ComposeResult:
