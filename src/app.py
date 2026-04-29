@@ -4,6 +4,7 @@ from textual.widgets import Header, Footer, ListView, ListItem, Label, Button, S
 from textual.containers import Horizontal, Vertical
 from .docker_manager import DockerManager
 from .log_translator import LogTranslator
+from .watcher import WatcherManager
 
 class Mark2TeXApp(App):
     CSS_PATH = "src/styles.tcss"
@@ -26,11 +27,14 @@ class Mark2TeXApp(App):
                     id="template-list"
                 )
                 yield Button("🚀 Compile Now", id="compile-btn")
+                yield Button("👀 Watch Mode: OFF", id="watch-btn")
         yield Static("Console output will appear here...", id="console-panel")
         yield Footer()
 
     def on_mount(self) -> None:
         self.docker_manager = DockerManager()
+        self.watcher_manager = WatcherManager()
+        self.is_watching = False
         # Populate file list with .md files in current directory
         files = [f for f in os.listdir('.') if f.endswith('.md')]
         file_list = self.query_one("#file-list", ListView)
@@ -40,6 +44,42 @@ class Mark2TeXApp(App):
     def on_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id == "compile-btn":
             self.compile_document()
+        elif event.button.id == "watch-btn":
+            self.toggle_watch_mode()
+
+    def toggle_watch_mode(self) -> None:
+        btn = self.query_one("#watch-btn", Button)
+        file_list = self.query_one("#file-list", ListView)
+        template_list = self.query_one("#template-list", ListView)
+
+        if not self.is_watching:
+            # Enable watch mode
+            selected_file = None
+            if file_list.highlighted_child:
+                selected_file = file_list.highlighted_child.query_one(Label).renderable
+
+            selected_template = None
+            if template_list.highlighted_child:
+                selected_template = template_list.highlighted_child.query_one(Label).renderable
+
+            if not selected_file or not selected_template:
+                self.query_one("#console-panel", Static).update("❌ Select file and template first to enable Watch Mode.")
+                return
+
+            self.watcher_manager.start_watching(
+                selected_file,
+                selected_template,
+                self.compile_document
+            )
+            self.is_watching = True
+            btn.label = "👀 Watch Mode: ON"
+            self.query_one("#console-panel", Static).update(f"🔭 Watch Mode enabled for {selected_file}...")
+        else:
+            # Disable watch mode
+            self.watcher_manager.stop_watching()
+            self.is_watching = False
+            btn.label = "👀 Watch Mode: OFF"
+            self.query_one("#console-panel", Static).update("💤 Watch Mode disabled.")
 
     def compile_document(self) -> None:
         file_list = self.query_one("#file-list", ListView)
