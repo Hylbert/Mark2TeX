@@ -65,8 +65,13 @@
 
 ![platform](https://img.shields.io/static/v1.svg?label=Platform&message=Docker%20(Linux%20|%20macOS%20|%20Windows)&style=for-the-badge)
 
-### 📋 Pré-requisitos
-Você só precisa ter o **Docker** instalado em sua máquina.
+### 🛠️ Configuração do Ambiente
+Se você ainda não tem o Docker ou Python instalados, utilize nossos scripts de configuração rápida:
+- **Linux:** `bash scripts/setup/setup_linux.sh`
+- **macOS:** `bash scripts/setup/setup_macos.sh`
+- **Windows:** `powershell .\scripts\setup\setup_windows.ps1`
+
+*Esses scripts detectam automaticamente o que está faltando e instalam as dependências necessárias.*
 
 ### 🛠️ Instalação e Uso
 
