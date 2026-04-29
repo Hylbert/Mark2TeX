@@ -16,6 +16,10 @@ Header {
     text-style: bold;
 }
 
+#main-layout {
+    height: 1fr;
+}
+
 #file-explorer {
     width: 30;
     background: #272c31;
@@ -24,7 +28,8 @@ Header {
 }
 
 #config-panel {
-    width: auto;
+    width: 1fr;
+    min-width: 40;
     background: #272c31;
     border: solid #03656b;
     color: white;
@@ -37,6 +42,67 @@ Header {
     color: #00ff00;
     border: solid #03656b;
     padding: 1;
+}
+
+#welcome-panel {
+    background: #272c31;
+    color: white;
+    border: none;
+    padding: 1 2;
+    height: auto;
+    min-width: 40;
+}
+
+#welcome-logo {
+    color: #03656b;
+    text-style: bold;
+    min-width: 40;
+}
+
+#welcome-instructions {
+    min-width: 40;
+}
+
+.modal-screen {
+    background: rgba(0, 0, 0, 0.5);
+}
+
+#menu-header {
+    background: #03656b;
+    color: white;
+    text-style: bold;
+    text-align: center;
+    padding: 0;
+    width: 100%;
+}
+
+.menu-body {
+    padding: 0;
+    margin: 0;
+}
+
+.exit-menu-container, .help-menu-container {
+    background: #272c31;
+    border: thick #03656b;
+    padding: 0;
+    width: 30;
+    height: auto;
+    align: center middle;
+}
+
+.exit-menu-button, .help-menu-button {
+    background: transparent;
+    color: white;
+    border: none;
+    width: 100%;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+}
+
+.exit-menu-button:hover, .help-menu-button:hover {
+    background: #03656b;
+    color: white;
 }
 
 Button {
