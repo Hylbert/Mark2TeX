@@ -38,8 +38,8 @@ Header {
 
 #console-panel {
     height: 15;
-    background: black;
-    color: #00ff00;
+    background: #272c31 ;
+    color: #fafafa;
     border: solid #03656b;
     padding: 1;
 }
@@ -114,4 +114,59 @@ Button {
 Button:hover {
     background: white;
     color: #03656b;
+}
+
+/* In src/styles.tcss */
+.modal-center {
+    width: 100%;
+    height: 100%;
+    align: center middle;
+}
+
+.menu-window {
+    background: transparent;
+    width: 40;
+    height: auto;
+    padding: 0;
+}
+
+.menu-header {
+    background: #03656b;
+    color: white;
+    text-style: bold;
+    text-align: center;
+    width: 100%;
+    padding: 0 1;
+    content-align: center middle;
+}
+
+#global-menu-list {
+    background: transparent;
+    border: none;
+    height: auto;
+}
+
+#global-menu-list ListItem {
+    background: transparent;
+    color: white;
+    padding: 0 2;
+    width: 100%;
+    content-align: center middle;
+}
+
+#global-menu-list ListItem Label {
+    text-align: center;
+    width: 100%;
+}
+
+#global-menu-list ListItem.--highlight {
+    background: #03656b;
+    color: white;
+    text-style: bold;
+}
+
+#global-menu-logo {
+    width: auto;
+    height: auto;
+    content-align: center middle;
 }

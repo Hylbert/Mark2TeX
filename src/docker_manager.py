@@ -24,8 +24,9 @@ class DockerManager:
             "--user", f"{os.getuid()}:{os.getgid()}",
             "-v", f"{cwd}:/app",
             "-v", f"{self.installation_dir}/templates:/app/templates",
+            "-v", f"{self.installation_dir}/bin:/app/bin",
             "mark2tex",
-            "bash", "/opt/mark2tex/bin/build.sh", input_file, template
+            "bash", "/app/bin/build.sh", input_file, template
         ]
 
         process = subprocess.Popen(

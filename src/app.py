@@ -7,52 +7,59 @@ from textual.screen import ModalScreen
 from docker_manager import DockerManager
 from log_translator import LogTranslator
 from watcher import WatcherManager
-from logo_renderer import render_logo_to_text
+from utils.logo_renderer import render_logo, render_icon
 
-# No more LOGO constant here
-
-class ExitMenu(ModalScreen):
+class HelpScreen(ModalScreen):
     def compose(self) -> ComposeResult:
-        with Vertical(classes="exit-menu-container"):
-            yield Label(" MENU ", id="menu-header")
-            with Vertical(classes="menu-body"):
-                yield Button(" Quit ", id="exit-btn", classes="exit-menu-button")
-                yield Button(" Clear Console ", id="clear-btn", classes="exit-menu-button")
-                yield Button(" Cancel ", id="cancel-btn", classes="exit-menu-button")
-
-    def on_button_pressed(self, event: Button.Pressed) -> None:
-        if event.button.id == "exit-btn":
-            self.app.exit()
-        elif event.button.id == "clear-btn":
-            console = self.app.query_one("#console-panel", Static)
-            console.update("")
-            self.app.pop_screen()
-        elif event.button.id == "cancel-btn":
-            self.app.pop_screen()
-
-class HelpMenu(ModalScreen):
-    def compose(self) -> ComposeResult:
-        with Vertical(classes="help-menu-container"):
-            yield Label(" 📖 HELP & SHORTCUTS ", id="menu-header")
-            with Vertical(classes="menu-body"):
+        with Vertical(classes="menu-window"):
+            yield Label(" 📖 AJUDA & ATALHOS ", id="menu-header", classes="menu-header")
+            with Vertical(id="help-content"):
                 yield Label("\nKey Bindings:", id="help-bindings-title")
-                yield Label("ESC / q  - Open Exit Menu")
-                yield Label("F1 / h / ? - Open Help Menu")
+                yield Label("ESC / q  - Menu Global")
+                yield Label("F1 / h / ? - Abrir Ajuda")
                 yield Label("\nCommands:", id="help-commands-title")
-                yield Label("c / Compile - Compiles selected file")
-                yield Label("w / Watch   - Auto-compiles on change")
-                yield Button(" Close ", id="close-help-btn", classes="help-menu-button")
+                yield Label("c / Compile - Compila arquivo selecionado")
+                yield Label("w / Watch   - Auto-compilação")
+                yield Label("\n")
+                yield Label("Pressione ESC para voltar", id="help-footer")
 
-    def on_button_pressed(self, event: Button.Pressed) -> None:
-        if event.button.id == "close-help-btn":
+    def on_key(self, event) -> None:
+        if event.key == "escape":
+            self.app.pop_screen()
+
+class GlobalMenu(ModalScreen):
+    def compose(self) -> ComposeResult:
+        with Vertical(classes="modal-center"):
+            with Vertical(classes="menu-window"):
+                logo_text = render_icon()
+                yield Static(logo_text, id="global-menu-logo")
+
+                yield ListView(
+                    ListItem(Label("AJUDA"), id="opt-help"),
+                    ListItem(Label("SAIR"), id="opt-exit"),
+                    id="global-menu-list"
+                )
+
+    def on_mount(self) -> None:
+        self.query_one("#global-menu-list", ListView).focus()
+
+    def on_list_view_selected(self, event: ListView.Selected) -> None:
+        selected_item = event.item
+        if selected_item.id == "opt-help":
+            self.app.push_screen(HelpScreen())
+        elif selected_item.id == "opt-exit":
+            self.app.exit()
+
+    def on_key(self, event) -> None:
+        if event.key == "escape":
             self.app.pop_screen()
 
 class Mark2TeXApp(App):
     CSS_PATH = "styles.tcss"
     TITLE = "Mark2TeX Dashboard"
     BINDINGS = [
-        ("escape", "show_exit_menu", "Exit Menu"),
-        ("f1", "show_help_menu", "Help"),
+        ("escape", "show_global_menu", "Menu Global"),
+        ("f1", "show_help_menu", "Ajuda"),
     ]
 
     def compose(self) -> ComposeResult:
@@ -62,23 +69,18 @@ class Mark2TeXApp(App):
                 yield Label("📁 Markdown Files", id="explorer-title")
                 yield ListView(id="file-list")
             with Vertical(id="config-panel"):
-                # Welcome Panel
                 with Vertical(id="welcome-panel"):
-                    logo_text = render_logo_to_text("M2T/M2T_2.png", width=40)
+                    logo_text = render_logo()
                     yield Static(logo_text, id="welcome-logo", expand=True)
                     yield Label(
                         "📖 Guia Rápido:\n"
                         "1. Use as setas (← → ↑ ↓) ou (h j k l) para navegar\n"
-                        "2. Selecione o arquivo .md\n"
-                        "3. Selecione o template de saída\n"
-                        "4. Pressione 'c' para Compilar ou 'w' para Watch\n\n"
                         "⌨️ Atalhos:\n"
                         "q / ESC - Menu de Saída\n"
                         "h / ? / F1 - Ajuda",
                         id="welcome-instructions"
                     )
 
-                yield Label("⚙️ Build Configuration", id="config-title")
                 yield Label("Select Template:")
                 yield ListView(
                     ListItem(Label("tcc")),
@@ -86,8 +88,8 @@ class Mark2TeXApp(App):
                     ListItem(Label("projeto")),
                     id="template-list"
                 )
-                yield Button("🚀 Compile Now", id="compile-btn")
-                yield Button("👀 Watch Mode: OFF", id="watch-btn")
+                yield Button("🚀 COMPILAR (c)", id="compile-btn")
+                yield Button("👀 MODO ASSISTIDO: OFF (w)", id="watch-btn")
 
         yield ProgressBar(id="progress-bar")
         yield Static("Console output will appear here...", id="console-panel")
@@ -96,12 +98,11 @@ class Mark2TeXApp(App):
     def on_key(self, event) -> None:
         key = event.key.lower() if hasattr(event.key, 'lower') else event.key
 
-        # --- Global Quick Actions (btop style) ---
         if key == "q":
-            self.action_show_exit_menu()
+            self.action_show_global_menu()
             return
         elif key in ("h", "?"):
-            self.action_show_help_menu()
+            self.action_show_global_menu()
             return
         elif key == "c":
             self.compile_document()
@@ -110,7 +111,6 @@ class Mark2TeXApp(App):
             self.toggle_watch_mode()
             return
 
-        # --- Navigation (Arrows & Vim-style) ---
         if key == "right" or key == "l":
             focused = self.screen.focused
             if focused and focused.id == "file-list":
@@ -140,11 +140,11 @@ class Mark2TeXApp(App):
             elif focused and focused.id == "watch-btn":
                 self.query_one("#compile-btn").focus()
 
-    def action_show_exit_menu(self) -> None:
-        self.push_screen(ExitMenu())
+    def action_show_global_menu(self) -> None:
+        self.push_screen(GlobalMenu())
 
     def action_show_help_menu(self) -> None:
-        self.push_screen(HelpMenu())
+        self.push_screen(HelpScreen())
 
     def on_mount(self) -> None:
         self.docker_manager = DockerManager()
@@ -216,12 +216,11 @@ class Mark2TeXApp(App):
         console.update(f"🚀 Compiling {selected_file} with {selected_template}...\n")
 
         for line in self.docker_manager.compile(selected_file, selected_template):
-            # Parse progress markers
             progress_match = re.search(r"PROGRESS:(\d+)%", line)
             if progress_match:
                 percent = int(progress_match.group(1))
                 progress_bar.progress = percent / 100
-                continue # Do not print progress markers to console
+                continue
 
             translated_line = LogTranslator.translate(line)
             console.update(console.renderable + "\n" + translated_line)
