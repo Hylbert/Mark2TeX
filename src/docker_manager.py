@@ -25,7 +25,7 @@ class DockerManager:
             "-v", f"{cwd}:/app",
             "-v", f"{self.installation_dir}/templates:/app/templates",
             "mark2tex",
-            "bash", "/app/bin/build.sh", input_file, template
+            "bash", "/opt/mark2tex/bin/build.sh", input_file, template
         ]
 
         process = subprocess.Popen(

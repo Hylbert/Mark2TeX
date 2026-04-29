@@ -3,7 +3,7 @@ import time
 import threading
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
-from .docker_manager import DockerManager
+from docker_manager import DockerManager
 
 class Mark2TeXWatcher(FileSystemEventHandler):
     def __init__(self, file_to_watch, callback):
