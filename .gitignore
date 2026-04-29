@@ -11,4 +11,4 @@
 output.pdf
 .DS_Store
 docs/superpowers/
-.openclaude
+.openclaude.worktrees/
