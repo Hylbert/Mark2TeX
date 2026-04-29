@@ -1,0 +1,51 @@
+/*
+* Mark2TeX TUI Styles
+* Palette:
+* Background: #272c31
+* Primary: #03656b
+* Text: white
+*/
+
+Screen {
+    background: #272c31;
+}
+
+Header {
+    background: #03656b;
+    color: white;
+    text-style: bold;
+}
+
+#file-explorer {
+    width: 30;
+    background: #272c31;
+    border: solid #03656b;
+    color: white;
+}
+
+#config-panel {
+    width: auto;
+    background: #272c31;
+    border: solid #03656b;
+    color: white;
+    padding: 1 2;
+}
+
+#console-panel {
+    height: 15;
+    background: black;
+    color: #00ff00;
+    border: solid #03656b;
+    padding: 1;
+}
+
+Button {
+    background: #03656b;
+    color: white;
+    border: none;
+}
+
+Button:hover {
+    background: white;
+    color: #03656b;
+}
