@@ -6,7 +6,7 @@ export PYTHONUNBUFFERED=1
 # Inputs from arguments
 INPUT_FILE="$1"
 TEMPLATE_TYPE="$2"
-OUTPUT_NAME="output"
+OUTPUT_NAME="${INPUT_FILE%.*}"
 
 # --- SECURITY VALIDATION ---
 
