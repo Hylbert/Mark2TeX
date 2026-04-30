@@ -1,5 +1,7 @@
 #!/bin/bash
-set -e
+export PYTHONUNBUFFERED=1
+# set -e  # Removed to allow compilation to continue despite LaTeX warnings
+# set -x # Removed to clean up console output
 
 # Inputs from arguments
 INPUT_FILE="$1"
@@ -43,13 +45,13 @@ fi
 
 # --- END SECURITY VALIDATION ---
 echo "PROGRESS:10%"
+sync
 
 # Define cleanup function to be called on exit
 cleanup() {
     echo "🧹 Cleaning up auxiliary files..."
-    # Using '|| true' to ensure cleanup continues even if some files (like root-owned folders) cannot be removed
-    rm -rf templates || true
-    rm -f *.aux *.log *.out *.toc *.lot *.lof *.bbl *.blg *.synctex.gz *.fls *.fdb_latexmk *.xdv "$OUTPUT_NAME.tex" || true
+    # Only remove logs and aux files related to the output name to avoid deleting tui_debug.log
+    rm -f "$OUTPUT_NAME".aux "$OUTPUT_NAME".log "$OUTPUT_NAME".out "$OUTPUT_NAME".toc "$OUTPUT_NAME".lot "$OUTPUT_NAME".lof "$OUTPUT_NAME".bbl "$OUTPUT_NAME".blg "$OUTPUT_NAME".synctex.gz "$OUTPUT_NAME".fls "$OUTPUT_NAME".fdb_latexmk "$OUTPUT_NAME".xdv "$OUTPUT_NAME".tex || true
 }
 
 # The trap ensures cleanup() runs regardless of whether the script succeeds or fails
@@ -63,8 +65,7 @@ if [[ -f "referencias.bib" ]]; then
     BIB_ARGS="--bibliography=referencias.bib --citeproc"
 fi
 
-# Use absolute path for templates from the image to prevent creation of local 'templates' folder
-TEMPLATE_PATH="/opt/mark2tex/templates/$TEMPLATE_TYPE/template.tex"
+TEMPLATE_PATH="/app/templates/$TEMPLATE_TYPE/template.tex"
 
 pandoc "$INPUT_FILE" \
     --template="$TEMPLATE_PATH" \
@@ -76,15 +77,18 @@ pandoc "$INPUT_FILE" \
 
 echo "✅ Markdown converted to LaTeX."
 echo "PROGRESS:40%"
+sync
 
 # 2. LaTeX Compilation
 echo "🔨 Compiling PDF with latexmk..."
 echo "PROGRESS:50%"
+sync
 latexmk -pdfxe -f -interaction=nonstopmode -shell-escape -bibtex "$OUTPUT_NAME.tex"
 
 if [[ -f "$OUTPUT_NAME.pdf" ]]; then
     echo "✅ PDF generated successfully: $OUTPUT_NAME.pdf"
     echo "PROGRESS:100%"
+    sync
 else
     echo "❌ Error: PDF was not generated."
     exit 1
