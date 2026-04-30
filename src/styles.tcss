@@ -16,6 +16,10 @@ Header {
     text-style: bold;
 }
 
+#app-container {
+    height: 1fr;
+}
+
 #main-layout {
     height: 1fr;
 }
