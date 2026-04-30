@@ -4,6 +4,7 @@ from textual.app import App, ComposeResult
 from textual.widgets import Header, Footer, ListView, ListItem, Label, Button, Static, ProgressBar, RichLog
 from textual.containers import Horizontal, Vertical
 from textual.screen import ModalScreen
+from rich.text import Text
 from docker_manager import DockerManager
 from log_translator import LogTranslator
 from watcher import WatcherManager
@@ -281,20 +282,15 @@ class Mark2TeXApp(App):
                         bar.progress = min(bar.progress + 0.005, 0.99)
                         bar.refresh()
             elif action == "console":
-                # DEBUG: Verifica se o widget existe
-                with open("tui_console_debug.log", "a", encoding="utf-8") as f:
-                    f.write(f"WIDGET CHECK - Searching for #console-panel...\n")
-
-                console = self.query_one("#console-panel", RichLog)
-
-                with open("tui_console_debug.log", "a", encoding="utf-8") as f:
-                    f.write(f"WIDGET FOUND - writing value: {value}\n")
-
-                colored_value = f"[white]{value}[/white]"
-                console.write(colored_value)
-                console.scroll_end(flush=True)
-
-                self.refresh()
+                try:
+                    console = self.query_one("#console-panel", RichLog)
+                    text = Text(str(value), style="white")
+                    console.write(text)
+                    console.scroll_end()
+                    self.refresh()
+                except Exception as e:
+                    with open("tui_console_debug.log", "a", encoding="utf-8") as f:
+                        f.write(f"WIDGET ERROR - {str(e)}\n")
         except Exception as e:
             # Logamos o erro no terminal do sistema para depuração, mas não crashamos o app
             print(f"UI Update Error ({action}): {e}")
