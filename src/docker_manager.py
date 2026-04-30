@@ -21,12 +21,13 @@ class DockerManager:
         # We use subprocess.Popen to stream output in real-time
         command = [
             "docker", "run", "--rm",
+            "-i",
             "--user", f"{os.getuid()}:{os.getgid()}",
             "-v", f"{cwd}:/app",
-            "-v", f"{self.installation_dir}/templates:/app/templates",
             "-v", f"{self.installation_dir}/bin:/app/bin",
+            "-v", f"{self.installation_dir}/templates:/app/templates",
             "mark2tex",
-            "bash", "/app/bin/build.sh", input_file, template
+            "stdbuf", "-oL", "bash", "/app/bin/build.sh", f"/app/{input_file}", template
         ]
 
         process = subprocess.Popen(
@@ -34,7 +35,7 @@ class DockerManager:
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             text=True,
-            bufsize=1,
+            bufsize=0,
             universal_newlines=True
         )
 
