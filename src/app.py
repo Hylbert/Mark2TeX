@@ -1,12 +1,11 @@
 import os
-import re
 from textual.app import App, ComposeResult
 from textual.widgets import Header, Footer, ListView, ListItem, Label, Button, Static, ProgressBar, RichLog
 from textual.containers import Horizontal, Vertical
 from textual.screen import ModalScreen
 from rich.text import Text
 from docker_manager import DockerManager
-from log_translator import LogTranslator
+from log_translator import log_translator
 from watcher import WatcherManager
 from utils.visuals import render_logo, render_icon
 
@@ -94,7 +93,7 @@ class Mark2TeXApp(App):
                     yield Button("👀 MODO ASSISTIDO: OFF (w)", id="watch-btn")
 
             yield ProgressBar(id="progress-bar")
-            yield RichLog(id="console-panel", highlight=False, markup=True)
+            yield RichLog(id="console-panel", highlight=False, markup=False, wrap=True)
         yield Footer()
 
     def on_key(self, event) -> None:
@@ -104,7 +103,7 @@ class Mark2TeXApp(App):
             self.action_show_global_menu()
             return
         elif key in ("h", "?"):
-            self.action_show_global_menu()
+            self.action_show_help_menu()
             return
         elif key == "c":
             self.compile_document()
@@ -119,7 +118,7 @@ class Mark2TeXApp(App):
                 self.query_one("#template-list").focus()
             elif focused and focused.id == "template-list":
                 self.query_one("#compile-btn").focus()
-        elif key == "left" or key == "h":
+        elif key == "left":
             focused = self.screen.focused
             if focused and focused.id == "template-list":
                 self.query_one("#file-list").focus()
@@ -152,7 +151,6 @@ class Mark2TeXApp(App):
         self.docker_manager = DockerManager()
         self.watcher_manager = WatcherManager()
         self.is_watching = False
-        self._console_history = ""
         files = [f for f in os.listdir('.') if f.endswith('.md')]
         file_list = self.query_one("#file-list", ListView)
         for f in files:
@@ -179,7 +177,9 @@ class Mark2TeXApp(App):
                 selected_template = str(template_list.highlighted_child.query_one(Label).renderable)
 
             if not selected_file or not selected_template:
-                self.query_one("#console-panel", RichLog).update("❌ Select file and template first to enable Watch Mode.")
+                self.query_one("#console-panel", RichLog).write(
+                    Text("❌ Select file and template first to enable Watch Mode.", style="white")
+                )
                 return
 
             self.watcher_manager.start_watching(
@@ -219,47 +219,41 @@ class Mark2TeXApp(App):
         self.run_worker(lambda: self._run_compilation(selected_file, selected_template), thread=True)
 
     def _run_compilation(self, selected_file: str, selected_template: str) -> None:
-        """Lógica de compilação que roda em background."""
-        with open("tui_debug.log", "a", encoding="utf-8") as f:
-            f.write(f"DEBUG: Starting compilation for {selected_file}...\n")
-
         def update_ui(action, value):
-            """Helper para atualizar a UI com segurança a partir de qualquer thread."""
             with open("tui_console_debug.log", "a", encoding="utf-8") as f:
                 f.write(f"UI REQUEST - {action}: {value}\n")
-
             self.call_from_thread(self._apply_ui_update, action, value)
 
         update_ui("progress", 0)
         update_ui("console", f"🚀 Compiling {selected_file} with {selected_template}...\n")
 
-
-
         try:
             for line in self.docker_manager.compile(selected_file, selected_template):
-                # Sanitização: ignoramos linhas vazias ou apenas com espaços para evitar inundação de eventos
                 clean_line = line.strip()
                 if not clean_line:
                     continue
 
-                # Log RAW para depuração total
                 with open("tui_console_debug.log", "a", encoding="utf-8") as f:
                     f.write(f"RAW LINE: {line}")
 
-                # 1. Verificação de Progresso Real
-                progress_match = re.search(r"PROGRESS:(\d+)%", clean_line)
-                if progress_match:
-                    percent = int(progress_match.group(1))
-                    update_ui("progress", percent / 100)
+                result = log_translator(clean_line)
 
-                # 2. Simulação de Atividade
-                if "latexmk" in clean_line or "Warning" in clean_line or "Page" in clean_line:
+                if result is None:
+                    continue
+
+                if result.startswith("__PROGRESS__"):
+                    percent = int(result.removeprefix("__PROGRESS__"))
+                    update_ui("progress", percent)
+                    update_ui("console", f"⏳ Processing... {percent}%")
+                    continue
+
+                # ⚠️ / ❌ / 🔄 → ativa o efeito de atividade no progress bar
+                _ACTIVITY_PREFIXES = ("⚠️", "⚠", "❌", "🔄")
+                if result.startswith(_ACTIVITY_PREFIXES):
                     update_ui("progress_activity", True)
 
-                # 3. Tradução e Filtragem
-                translated_line = LogTranslator.translate(clean_line)
-                if translated_line:
-                    update_ui("console", translated_line)
+                update_ui("console", result)
+
         except Exception as e:
             update_ui("console", f"❌ Unexpected error: {str(e)}")
 
@@ -269,18 +263,12 @@ class Mark2TeXApp(App):
             f.write(f"UI APPLY - {action}: {value}\n")
         try:
             if action == "progress":
-                widgets = self.query("#progress-bar", ProgressBar)
-                if widgets:
-                    bar = widgets.first()
-                    bar.progress = value
-                    bar.refresh()
+                bar = self.query_one("#progress-bar", ProgressBar)
+                bar.update(total=100, progress=value)
             elif action == "progress_activity":
-                widgets = self.query("#progress-bar", ProgressBar)
-                if widgets:
-                    bar = widgets.first()
-                    if bar.progress < 1.0:
-                        bar.progress = min(bar.progress + 0.005, 0.99)
-                        bar.refresh()
+                bar = self.query_one("#progress-bar", ProgressBar)
+                if bar.progress < 100:
+                    bar.update(total=100, progress=min(bar.progress + 0.5, 99))
             elif action == "console":
                 try:
                     console = self.query_one("#console-panel", RichLog)
