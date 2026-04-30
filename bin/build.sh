@@ -1,16 +1,11 @@
 #!/bin/bash
 export PYTHONUNBUFFERED=1
-# set -e  # Removed to allow compilation to continue despite LaTeX warnings
-# set -x # Removed to clean up console output
 
-# Inputs from arguments
 INPUT_FILE="$1"
 TEMPLATE_TYPE="$2"
 OUTPUT_NAME="${INPUT_FILE%.*}"
+TEMPLATE_BASE="${MARK2TEX_TEMPLATE_DIR:-/app/templates}"
 
-# --- SECURITY VALIDATION ---
-
-# 1. Validate INPUT_FILE
 if [[ -z "$INPUT_FILE" ]]; then
     echo "❌ Error: Input file is required."
     echo "Usage: $0 <file.md> <template>"
@@ -27,7 +22,6 @@ if [[ ! -f "$INPUT_FILE" ]]; then
     exit 1
 fi
 
-# 2. Validate TEMPLATE_TYPE
 ALLOWED_TEMPLATES=("tcc" "artigo" "projeto")
 IS_VALID=false
 for t in "${ALLOWED_TEMPLATES[@]}"; do
@@ -43,29 +37,26 @@ if [[ "$IS_VALID" == "false" ]]; then
     exit 1
 fi
 
-# --- END SECURITY VALIDATION ---
 echo "PROGRESS:10%"
 sync
 
-# Define cleanup function to be called on exit
 cleanup() {
     echo "🧹 Cleaning up auxiliary files..."
-    # Only remove logs and aux files related to the output name to avoid deleting tui_debug.log
-    rm -f "$OUTPUT_NAME".aux "$OUTPUT_NAME".log "$OUTPUT_NAME".out "$OUTPUT_NAME".toc "$OUTPUT_NAME".lot "$OUTPUT_NAME".lof "$OUTPUT_NAME".bbl "$OUTPUT_NAME".blg "$OUTPUT_NAME".synctex.gz "$OUTPUT_NAME".fls "$OUTPUT_NAME".fdb_latexmk "$OUTPUT_NAME".xdv "$OUTPUT_NAME".tex || true
+    rm -f "$OUTPUT_NAME".aux "$OUTPUT_NAME".log "$OUTPUT_NAME".out "$OUTPUT_NAME".toc \
+          "$OUTPUT_NAME".lot "$OUTPUT_NAME".lof "$OUTPUT_NAME".bbl "$OUTPUT_NAME".blg \
+          "$OUTPUT_NAME".synctex.gz "$OUTPUT_NAME".fls "$OUTPUT_NAME".fdb_latexmk \
+          "$OUTPUT_NAME".xdv "$OUTPUT_NAME".tex || true
 }
-
-# The trap ensures cleanup() runs regardless of whether the script succeeds or fails
 trap cleanup EXIT
 
 echo "🚀 Starting build for $INPUT_FILE using template $TEMPLATE_TYPE..."
 
-# 1. Pandoc Conversion to LaTeX
 BIB_ARGS=""
 if [[ -f "referencias.bib" ]]; then
     BIB_ARGS="--bibliography=referencias.bib --citeproc"
 fi
 
-TEMPLATE_PATH="/app/templates/$TEMPLATE_TYPE/template.tex"
+TEMPLATE_PATH="$TEMPLATE_BASE/$TEMPLATE_TYPE/template.tex"
 
 pandoc "$INPUT_FILE" \
     --template="$TEMPLATE_PATH" \
@@ -79,7 +70,6 @@ echo "✅ Markdown converted to LaTeX."
 echo "PROGRESS:40%"
 sync
 
-# 2. LaTeX Compilation
 echo "🔨 Compiling PDF with latexmk..."
 echo "PROGRESS:50%"
 sync
