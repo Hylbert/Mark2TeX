@@ -9,10 +9,15 @@ from textual.widgets import (
     ListItem, ListView, ProgressBar, RichLog, Static,
 )
 
-from docker_manager import DockerManager
-from log_translator import log_translator
-from watcher import WatcherManager
-from utils.visuals import render_logo, render_icon
+from .docker_manager import DockerManager
+from .log_translator import log_translator
+from .watcher import WatcherManager
+from .utils.visuals import render_logo, render_icon
+
+class OptionItem(ListItem):
+    def __init__(self, label_text: str, item_id: str | None = None) -> None:
+        super().__init__(Label(label_text), id=item_id)
+        self.label_text = label_text
 
 
 class HelpScreen(ModalScreen):
@@ -47,8 +52,8 @@ class GlobalMenu(ModalScreen):
             with Vertical(classes="menu-window"):
                 yield Static(render_icon(), id="global-menu-logo")
                 yield ListView(
-                    ListItem(Label("AJUDA"), id="opt-help"),
-                    ListItem(Label("SAIR"),  id="opt-exit"),
+                    OptionItem("AJUDA", item_id="opt-help"),
+                    OptionItem("SAIR", item_id="opt-exit"),
                     id="global-menu-list",
                 )
 
@@ -92,9 +97,9 @@ class Mark2TeXApp(App):
 
                     yield Label("📄 Template", id="template-title")
                     yield ListView(
-                        ListItem(Label("tcc")),
-                        ListItem(Label("artigo")),
-                        ListItem(Label("projeto")),
+                        OptionItem("tcc"),
+                        OptionItem("artigo"),
+                        OptionItem("projeto"),
                         id="template-list",
                     )
 
@@ -108,26 +113,49 @@ class Mark2TeXApp(App):
         yield Footer()
 
     def on_mount(self) -> None:
-        self.docker_manager  = DockerManager()
+        self.docker_manager = DockerManager()
         self.watcher_manager = WatcherManager()
-        self.is_watching     = False
+        self.is_watching = False
+        
+        # Estado interno para evitar depender de highlighted_child
+        self.selected_file: str | None = None
+        self.selected_template: str | None = None
 
         md_files = sorted(f for f in os.listdir(".") if f.endswith(".md"))
         file_list = self.query_one("#file-list", ListView)
         for f in md_files:
-            file_list.append(ListItem(Label(f)))
+            file_list.append(OptionItem(f))
 
-        self.query_one("#explorer-title", Label).update(
-            f"📁 Markdown Files ({len(md_files)})"
-        )
+    def on_list_view_selected(self, event: ListView.Selected) -> None:
+        item = event.item
+        if not isinstance(item, OptionItem):
+            return
+
+        if event.list_view.id == "file-list":
+            self.selected_file = item.label_text
+            self.query_one("#status-file", Label).update(f"Arquivo  : {self.selected_file}")
+        elif event.list_view.id == "template-list":
+            self.selected_template = item.label_text
+            self.query_one("#status-template", Label).update(f"Template : {self.selected_template}")
+
+    def _get_selection(self) -> tuple[str | None, str | None]:
+        # Agora retorna o estado interno atualizado pelos eventos de seleção
+        return self.selected_file, self.selected_template
 
     def on_list_view_highlighted(self, event: ListView.Highlighted) -> None:
+        item = event.item
+        if not isinstance(item, OptionItem):
+            return
+
+        label = item.query_one(Label)
+        
         if event.list_view.id == "file-list":
-            name = str(event.item.query_one(Label).renderable) if event.item else "—"
-            self.query_one("#status-file", Label).update(f"Arquivo  : {name}")
+            self.selected_file = item.label_text
+            self.query_one("#status-file", Label).update(f"Arquivo  : {self.selected_file}")
         elif event.list_view.id == "template-list":
-            name = str(event.item.query_one(Label).renderable) if event.item else "—"
-            self.query_one("#status-template", Label).update(f"Template : {name}")
+            self.selected_template = item.label_text
+            self.query_one("#status-template", Label).update(f"Template : {self.selected_template}")
+
 
     def action_show_global_menu(self) -> None:
         self.push_screen(GlobalMenu())
@@ -147,19 +175,6 @@ class Mark2TeXApp(App):
         elif event.button.id == "watch-btn":
             self.toggle_watch_mode()
 
-    def _get_selection(self) -> tuple[str | None, str | None]:
-        file_list     = self.query_one("#file-list",     ListView)
-        template_list = self.query_one("#template-list", ListView)
-
-        selected_file = (
-            str(file_list.highlighted_child.query_one(Label).renderable)
-            if file_list.highlighted_child else None
-        )
-        selected_template = (
-            str(template_list.highlighted_child.query_one(Label).renderable)
-            if template_list.highlighted_child else None
-        )
-        return selected_file, selected_template
 
     def _log(self, message: str, style: str = "white") -> None:
         console = self.query_one("#console-panel", RichLog)
