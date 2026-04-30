@@ -32,8 +32,9 @@ USER mark2tex
 WORKDIR /app
 
 # Copy scripts and templates into the image
-COPY --chown=mark2tex:mark2tex scripts/ /app/scripts/
-COPY --chown=mark2tex:mark2tex templates/ /app/templates/
+COPY --chown=mark2tex:mark2tex bin/ /opt/mark2tex/bin/
+COPY --chown=mark2tex:mark2tex templates/ /opt/mark2tex/templates/
+RUN chmod -R 755 /opt/mark2tex && chmod +x /opt/mark2tex/bin/*.sh
 
 # Default command
 CMD ["/bin/bash"]

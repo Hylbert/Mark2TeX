@@ -11,3 +11,8 @@
 output.pdf
 .DS_Store
 docs/superpowers/
+.openclaude.worktrees/
+.openclaude
+
+
+__pycache__/

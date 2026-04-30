@@ -1,0 +1,268 @@
+import os
+
+from rich.text import Text
+from textual.app import App, ComposeResult
+from textual.containers import Horizontal, Vertical
+from textual.screen import ModalScreen
+from textual.widgets import (
+    Button, Footer, Header, Label,
+    ListItem, ListView, ProgressBar, RichLog, Static,
+)
+
+from docker_manager import DockerManager
+from log_translator import log_translator
+from watcher import WatcherManager
+from utils.visuals import render_logo, render_icon
+
+
+class HelpScreen(ModalScreen):
+    BINDINGS = [("escape", "dismiss", "Fechar")]
+
+    def compose(self) -> ComposeResult:
+        with Vertical(classes="menu-window"):
+            yield Label("📖 AJUDA & ATALHOS", id="menu-header", classes="menu-header")
+            with Vertical(id="help-content"):
+                yield Label("Key Bindings:", id="help-bindings-title")
+                yield Label("ESC / q      — Menu Global")
+                yield Label("? / F1       — Abrir Ajuda")
+                yield Label("c            — Compilar documento")
+                yield Label("w            — Ativar/Desativar Watch Mode")
+                yield Label("Tab          — Navegar entre painéis")
+                yield Label("↑ ↓          — Navegar nas listas")
+                yield Label("")
+                yield Label("Fluxo:", id="help-commands-title")
+                yield Label("1. Selecione um arquivo .md no painel esquerdo")
+                yield Label("2. Escolha o template (tcc, artigo, projeto)")
+                yield Label("3. Pressione c ou clique em COMPILAR")
+                yield Label("4. Acompanhe o progresso no console abaixo")
+                yield Label("")
+                yield Label("Pressione ESC para voltar", id="help-footer")
+
+
+class GlobalMenu(ModalScreen):
+    BINDINGS = [("escape", "dismiss", "Fechar")]
+
+    def compose(self) -> ComposeResult:
+        with Vertical(classes="modal-center"):
+            with Vertical(classes="menu-window"):
+                yield Static(render_icon(), id="global-menu-logo")
+                yield ListView(
+                    ListItem(Label("AJUDA"), id="opt-help"),
+                    ListItem(Label("SAIR"),  id="opt-exit"),
+                    id="global-menu-list",
+                )
+
+    def on_mount(self) -> None:
+        self.query_one("#global-menu-list", ListView).focus()
+
+    def on_list_view_selected(self, event: ListView.Selected) -> None:
+        if event.item.id == "opt-help":
+            self.app.push_screen(HelpScreen())
+        elif event.item.id == "opt-exit":
+            self.app.exit()
+
+
+class Mark2TeXApp(App):
+    CSS_PATH = os.path.join(os.path.dirname(__file__), "styles.tcss")
+    TITLE    = "Mark2TeX Dashboard"
+
+    BINDINGS = [
+        ("escape",        "show_global_menu", "Menu Global"),
+        ("q",             "show_global_menu", "Menu Global"),
+        ("f1",            "show_help_menu",   "Ajuda"),
+        ("question_mark", "show_help_menu",   "Ajuda"),
+        ("c",             "compile_document", "Compilar"),
+        ("w",             "toggle_watch",     "Watch Mode"),
+    ]
+
+    def compose(self) -> ComposeResult:
+        yield Header()
+        with Vertical(id="app-container"):
+            with Horizontal(id="main-layout"):
+
+                with Vertical(id="file-explorer"):
+                    yield Label("📁 Markdown Files", id="explorer-title")
+                    yield ListView(id="file-list")
+
+                with Vertical(id="config-panel"):
+                    #yield Static(render_icon(), id="dashboard-logo")
+                    with Vertical(id="status-panel"):
+                        yield Label("Arquivo  : —", id="status-file")
+                        yield Label("Template : —", id="status-template")
+
+                    yield Label("📄 Template", id="template-title")
+                    yield ListView(
+                        ListItem(Label("tcc")),
+                        ListItem(Label("artigo")),
+                        ListItem(Label("projeto")),
+                        id="template-list",
+                    )
+
+                    with Horizontal(id="action-bar"):
+                        yield Button("🚀 COMPILAR",      id="compile-btn")
+                        yield Button("👀 WATCH: OFF",    id="watch-btn")
+
+            yield ProgressBar(id="progress-bar", total=100)
+            yield Label("🖥️  Console", id="console-title")
+            yield RichLog(id="console-panel", highlight=False, markup=False, wrap=True)
+        yield Footer()
+
+    def on_mount(self) -> None:
+        self.docker_manager  = DockerManager()
+        self.watcher_manager = WatcherManager()
+        self.is_watching     = False
+
+        md_files = sorted(f for f in os.listdir(".") if f.endswith(".md"))
+        file_list = self.query_one("#file-list", ListView)
+        for f in md_files:
+            file_list.append(ListItem(Label(f)))
+
+        self.query_one("#explorer-title", Label).update(
+            f"📁 Markdown Files ({len(md_files)})"
+        )
+
+    def on_list_view_highlighted(self, event: ListView.Highlighted) -> None:
+        if event.list_view.id == "file-list":
+            name = str(event.item.query_one(Label).renderable) if event.item else "—"
+            self.query_one("#status-file", Label).update(f"Arquivo  : {name}")
+        elif event.list_view.id == "template-list":
+            name = str(event.item.query_one(Label).renderable) if event.item else "—"
+            self.query_one("#status-template", Label).update(f"Template : {name}")
+
+    def action_show_global_menu(self) -> None:
+        self.push_screen(GlobalMenu())
+
+    def action_show_help_menu(self) -> None:
+        self.push_screen(HelpScreen())
+
+    def action_compile_document(self) -> None:
+        self.compile_document()
+
+    def action_toggle_watch(self) -> None:
+        self.toggle_watch_mode()
+
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        if event.button.id == "compile-btn":
+            self.compile_document()
+        elif event.button.id == "watch-btn":
+            self.toggle_watch_mode()
+
+    def _get_selection(self) -> tuple[str | None, str | None]:
+        file_list     = self.query_one("#file-list",     ListView)
+        template_list = self.query_one("#template-list", ListView)
+
+        selected_file = (
+            str(file_list.highlighted_child.query_one(Label).renderable)
+            if file_list.highlighted_child else None
+        )
+        selected_template = (
+            str(template_list.highlighted_child.query_one(Label).renderable)
+            if template_list.highlighted_child else None
+        )
+        return selected_file, selected_template
+
+    def _log(self, message: str, style: str = "white") -> None:
+        console = self.query_one("#console-panel", RichLog)
+        console.write(Text(message, style=style))
+        console.scroll_end()
+
+    def _set_progress(self, value: int) -> None:
+        self.query_one("#progress-bar", ProgressBar).update(progress=value)
+
+    def toggle_watch_mode(self) -> None:
+        btn = self.query_one("#watch-btn", Button)
+
+        if not self.is_watching:
+            selected_file, selected_template = self._get_selection()
+            if not selected_file or not selected_template:
+                self._log("❌ Selecione um arquivo e um template antes de ativar o Watch Mode.", style="#e05c5c")
+                return
+
+            self.watcher_manager.start_watching(
+                selected_file,
+                selected_template,
+                lambda: self.compile_specific_document(selected_file, selected_template),
+            )
+            self.is_watching = True
+            btn.label = "👀 WATCH: ON"
+            btn.add_class("watching")
+            self._log(f"🔭 Watch Mode ativado para {selected_file}...", style="#5ab4bc")
+        else:
+            self.watcher_manager.stop_watching()
+            self.is_watching = False
+            btn.label = "👀 WATCH: OFF"
+            btn.remove_class("watching")
+            self._log("💤 Watch Mode desativado.", style="#e0a24a")
+
+    def compile_document(self) -> None:
+        selected_file, selected_template = self._get_selection()
+        if not selected_file or not selected_template:
+            self._log("❌ Selecione um arquivo e um template para compilar.", style="#e05c5c")
+            return
+        self.compile_specific_document(selected_file, selected_template)
+
+    def compile_specific_document(self, selected_file: str, selected_template: str) -> None:
+        self.run_worker(
+            lambda: self._run_compilation(selected_file, selected_template),
+            thread=True,
+        )
+
+    def _run_compilation(self, selected_file: str, selected_template: str) -> None:
+        def ui(action: str, value=None) -> None:
+            with open("tui_console_debug.log", "a", encoding="utf-8") as f:
+                f.write(f"UI REQUEST - {action}: {value}\n")
+            self.call_from_thread(self._apply_ui_update, action, value)
+
+        ui("progress", 0)
+        ui("console", (f"🚀 Compilando {selected_file} com template '{selected_template}'...", "#5ab4bc"))
+
+        try:
+            for line in self.docker_manager.compile(selected_file, selected_template):
+                clean = line.strip()
+                if not clean:
+                    continue
+
+                with open("tui_console_debug.log", "a", encoding="utf-8") as f:
+                    f.write(f"RAW LINE: {line}")
+
+                result = log_translator(clean)
+                if result is None:
+                    continue
+
+                if result.startswith("__PROGRESS__"):
+                    percent = int(result.removeprefix("__PROGRESS__"))
+                    ui("progress", percent)
+                    ui("console", (f"⏳ Processing... {percent}%", "white"))
+                    continue
+
+                if result.startswith(("⚠️", "⚠", "❌", "🔄")):
+                    ui("progress_bump", None)
+
+                ui("console", (result, "white"))
+
+        except Exception as exc:
+            ui("console", (f"❌ Erro inesperado: {exc}", "#e05c5c"))
+
+    def _apply_ui_update(self, action: str, value=None) -> None:
+        with open("tui_console_debug.log", "a", encoding="utf-8") as f:
+            f.write(f"UI APPLY - {action}: {value}\n")
+        try:
+            if action == "progress":
+                self._set_progress(int(value))
+
+            elif action == "progress_bump":
+                bar     = self.query_one("#progress-bar", ProgressBar)
+                current = bar.progress or 0
+                if current < 99:
+                    self._set_progress(min(int(current) + 1, 99))
+
+            elif action == "console":
+                message, style = value
+                self._log(message, style=style)
+
+        except Exception as exc:
+            print(f"[UI Error] {action}: {exc}")
+
+
+if __name__ == "__main__":
+    Mark2TeXApp().run()
