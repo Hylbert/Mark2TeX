@@ -14,6 +14,7 @@ from log_translator import log_translator
 from watcher import WatcherManager
 from utils.visuals import render_logo, render_icon
 
+
 class HelpScreen(ModalScreen):
     BINDINGS = [("escape", "dismiss", "Fechar")]
 
@@ -22,12 +23,18 @@ class HelpScreen(ModalScreen):
             yield Label("📖 AJUDA & ATALHOS", id="menu-header", classes="menu-header")
             with Vertical(id="help-content"):
                 yield Label("Key Bindings:", id="help-bindings-title")
-                yield Label("ESC / q  — Menu Global")
-                yield Label("F1 / ?   — Abrir Ajuda")
+                yield Label("ESC / q      — Menu Global")
+                yield Label("? / F1       — Abrir Ajuda")
+                yield Label("c            — Compilar documento")
+                yield Label("w            — Ativar/Desativar Watch Mode")
+                yield Label("Tab          — Navegar entre painéis")
+                yield Label("↑ ↓          — Navegar nas listas")
                 yield Label("")
-                yield Label("Commands:", id="help-commands-title")
-                yield Label("c  — Compila arquivo selecionado")
-                yield Label("w  — Ativa/Desativa Watch Mode")
+                yield Label("Fluxo:", id="help-commands-title")
+                yield Label("1. Selecione um arquivo .md no painel esquerdo")
+                yield Label("2. Escolha o template (tcc, artigo, projeto)")
+                yield Label("3. Pressione c ou clique em COMPILAR")
+                yield Label("4. Acompanhe o progresso no console abaixo")
                 yield Label("")
                 yield Label("Pressione ESC para voltar", id="help-footer")
 
@@ -60,15 +67,13 @@ class Mark2TeXApp(App):
     TITLE    = "Mark2TeX Dashboard"
 
     BINDINGS = [
-        ("escape",         "show_global_menu", "Menu Global"),
-        ("q",              "show_global_menu", "Menu Global"),
-        ("f1",             "show_help_menu",   "Ajuda"),
-        ("question_mark",  "show_help_menu",   "Ajuda"),
-        ("c",              "compile_document", "Compilar"),
-        ("w",              "toggle_watch",     "Watch Mode"),
+        ("escape",        "show_global_menu", "Menu Global"),
+        ("q",             "show_global_menu", "Menu Global"),
+        ("f1",            "show_help_menu",   "Ajuda"),
+        ("question_mark", "show_help_menu",   "Ajuda"),
+        ("c",             "compile_document", "Compilar"),
+        ("w",             "toggle_watch",     "Watch Mode"),
     ]
-
-    # ── Layout ────────────────────────────────────────────────────────────────
 
     def compose(self) -> ComposeResult:
         yield Header()
@@ -80,46 +85,49 @@ class Mark2TeXApp(App):
                     yield ListView(id="file-list")
 
                 with Vertical(id="config-panel"):
-                    with Vertical(id="welcome-panel"):
-                        yield Static(render_logo(), id="welcome-logo", expand=True)
-                        yield Label(
-                            "📖 Guia Rápido:\n"
-                            "  Use Tab / Shift+Tab para navegar entre painéis\n"
-                            "  Use ↑ ↓ para navegar nas listas\n\n"
-                            "⌨️  Atalhos:\n"
-                            "  q / ESC  — Menu Global\n"
-                            "  ? / F1   — Ajuda\n"
-                            "  c        — Compilar\n"
-                            "  w        — Watch Mode",
-                            id="welcome-instructions",
-                        )
+                    #yield Static(render_icon(), id="dashboard-logo")
+                    with Vertical(id="status-panel"):
+                        yield Label("Arquivo  : —", id="status-file")
+                        yield Label("Template : —", id="status-template")
 
-                    yield Label("Select Template:")
+                    yield Label("📄 Template", id="template-title")
                     yield ListView(
                         ListItem(Label("tcc")),
                         ListItem(Label("artigo")),
                         ListItem(Label("projeto")),
                         id="template-list",
                     )
-                    yield Button("🚀 COMPILAR", id="compile-btn")
-                    yield Button("👀 MODO ASSISTIDO: OFF", id="watch-btn")
+
+                    with Horizontal(id="action-bar"):
+                        yield Button("🚀 COMPILAR",      id="compile-btn")
+                        yield Button("👀 WATCH: OFF",    id="watch-btn")
 
             yield ProgressBar(id="progress-bar", total=100)
+            yield Label("🖥️  Console", id="console-title")
             yield RichLog(id="console-panel", highlight=False, markup=False, wrap=True)
         yield Footer()
-
-    # ── Mount ─────────────────────────────────────────────────────────────────
 
     def on_mount(self) -> None:
         self.docker_manager  = DockerManager()
         self.watcher_manager = WatcherManager()
         self.is_watching     = False
 
+        md_files = sorted(f for f in os.listdir(".") if f.endswith(".md"))
         file_list = self.query_one("#file-list", ListView)
-        for f in sorted(f for f in os.listdir(".") if f.endswith(".md")):
+        for f in md_files:
             file_list.append(ListItem(Label(f)))
 
-    # ── Actions (BINDINGS) ────────────────────────────────────────────────────
+        self.query_one("#explorer-title", Label).update(
+            f"📁 Markdown Files ({len(md_files)})"
+        )
+
+    def on_list_view_highlighted(self, event: ListView.Highlighted) -> None:
+        if event.list_view.id == "file-list":
+            name = str(event.item.query_one(Label).renderable) if event.item else "—"
+            self.query_one("#status-file", Label).update(f"Arquivo  : {name}")
+        elif event.list_view.id == "template-list":
+            name = str(event.item.query_one(Label).renderable) if event.item else "—"
+            self.query_one("#status-template", Label).update(f"Template : {name}")
 
     def action_show_global_menu(self) -> None:
         self.push_screen(GlobalMenu())
@@ -133,18 +141,13 @@ class Mark2TeXApp(App):
     def action_toggle_watch(self) -> None:
         self.toggle_watch_mode()
 
-    # ── Botões ────────────────────────────────────────────────────────────────
-
     def on_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id == "compile-btn":
             self.compile_document()
         elif event.button.id == "watch-btn":
             self.toggle_watch_mode()
 
-    # ── Helpers de UI ─────────────────────────────────────────────────────────
-
     def _get_selection(self) -> tuple[str | None, str | None]:
-        """Retorna (arquivo_selecionado, template_selecionado)."""
         file_list     = self.query_one("#file-list",     ListView)
         template_list = self.query_one("#template-list", ListView)
 
@@ -159,16 +162,12 @@ class Mark2TeXApp(App):
         return selected_file, selected_template
 
     def _log(self, message: str, style: str = "white") -> None:
-        """Escreve uma linha no console com estilo Rich."""
         console = self.query_one("#console-panel", RichLog)
         console.write(Text(message, style=style))
         console.scroll_end()
 
     def _set_progress(self, value: int) -> None:
-        """Atualiza a barra de progresso (0–100)."""
         self.query_one("#progress-bar", ProgressBar).update(progress=value)
-
-    # ── Watch Mode ────────────────────────────────────────────────────────────
 
     def toggle_watch_mode(self) -> None:
         btn = self.query_one("#watch-btn", Button)
@@ -176,7 +175,7 @@ class Mark2TeXApp(App):
         if not self.is_watching:
             selected_file, selected_template = self._get_selection()
             if not selected_file or not selected_template:
-                self._log("❌ Selecione um arquivo e um template antes de ativar o Watch Mode.", style="red")
+                self._log("❌ Selecione um arquivo e um template antes de ativar o Watch Mode.", style="#e05c5c")
                 return
 
             self.watcher_manager.start_watching(
@@ -185,40 +184,37 @@ class Mark2TeXApp(App):
                 lambda: self.compile_specific_document(selected_file, selected_template),
             )
             self.is_watching = True
-            btn.label = "👀 MODO ASSISTIDO: ON"
-            self._log(f"🔭 Watch Mode ativado para {selected_file}...", style="cyan")
+            btn.label = "👀 WATCH: ON"
+            btn.add_class("watching")
+            self._log(f"🔭 Watch Mode ativado para {selected_file}...", style="#5ab4bc")
         else:
             self.watcher_manager.stop_watching()
             self.is_watching = False
-            btn.label = "👀 MODO ASSISTIDO: OFF"
-            self._log("💤 Watch Mode desativado.", style="yellow")
-
-    # ── Compilação ────────────────────────────────────────────────────────────
+            btn.label = "👀 WATCH: OFF"
+            btn.remove_class("watching")
+            self._log("💤 Watch Mode desativado.", style="#e0a24a")
 
     def compile_document(self) -> None:
         selected_file, selected_template = self._get_selection()
         if not selected_file or not selected_template:
-            self._log("❌ Selecione um arquivo e um template para compilar.", style="red")
+            self._log("❌ Selecione um arquivo e um template para compilar.", style="#e05c5c")
             return
         self.compile_specific_document(selected_file, selected_template)
 
     def compile_specific_document(self, selected_file: str, selected_template: str) -> None:
-        """Dispara a compilação em background thread."""
         self.run_worker(
             lambda: self._run_compilation(selected_file, selected_template),
             thread=True,
         )
 
     def _run_compilation(self, selected_file: str, selected_template: str) -> None:
-        """Roda em background thread — nunca acessa widgets diretamente."""
-
         def ui(action: str, value=None) -> None:
             with open("tui_console_debug.log", "a", encoding="utf-8") as f:
                 f.write(f"UI REQUEST - {action}: {value}\n")
             self.call_from_thread(self._apply_ui_update, action, value)
 
         ui("progress", 0)
-        ui("console", (f"🚀 Compilando {selected_file} com template \'{selected_template}\'...", "cyan"))
+        ui("console", (f"🚀 Compilando {selected_file} com template '{selected_template}'...", "#5ab4bc"))
 
         try:
             for line in self.docker_manager.compile(selected_file, selected_template):
@@ -245,12 +241,9 @@ class Mark2TeXApp(App):
                 ui("console", (result, "white"))
 
         except Exception as exc:
-            ui("console", (f"❌ Erro inesperado: {exc}", "red"))
-
-    # ── Aplicador de UI  ───────────────────────────────
+            ui("console", (f"❌ Erro inesperado: {exc}", "#e05c5c"))
 
     def _apply_ui_update(self, action: str, value=None) -> None:
-        """Executado sempre na Main Thread via call_from_thread."""
         with open("tui_console_debug.log", "a", encoding="utf-8") as f:
             f.write(f"UI APPLY - {action}: {value}\n")
         try:
@@ -270,8 +263,6 @@ class Mark2TeXApp(App):
         except Exception as exc:
             print(f"[UI Error] {action}: {exc}")
 
-
-# ─────────────────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
     Mark2TeXApp().run()

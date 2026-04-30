@@ -31,40 +31,69 @@ Header {
     color: white;
 }
 
+#explorer-title {
+    background: #03656b;
+    color: white;
+    text-style: bold;
+    padding: 0 1;
+    width: 100%;
+}
+
 #config-panel {
     width: 1fr;
     min-width: 40;
     background: #272c31;
     border: solid #03656b;
     color: white;
+    padding: 0;
+}
+
+#status-panel {
+    height: auto;
     padding: 1 2;
+    color: #888888;
+    border-bottom: solid #03656b 40%;
+}
+
+#template-title {
+    background: #1e2226;
+    color: #03656b;
+    text-style: bold;
+    padding: 0 2;
+    width: 100%;
+}
+
+#template-list {
+    height: auto;
+    background: #272c31;
+    border: none;
+}
+
+#action-bar {
+    height: auto;
+    padding: 1 2;
+    align: center middle;
+}
+
+#action-bar Button {
+    width: 1fr;
+    margin: 0 1;
 }
 
 #console-panel {
-    height: 15;
-    background: #272c31 ;
+    height: 1fr;
+    background: #272c31;
     color: #fafafa;
-    border: solid #03656b;
+    border: none;
     padding: 1;
 }
 
-#welcome-panel {
-    background: #272c31;
-    color: white;
-    border: none;
-    padding: 1 2;
-    height: auto;
-    min-width: 40;
-}
-
-#welcome-logo {
+#console-title {
+    background: #1e2226;
     color: #03656b;
     text-style: bold;
-    min-width: 40;
-}
-
-#welcome-instructions {
-    min-width: 40;
+    padding: 0 1;
+    width: 100%;
 }
 
 .modal-screen {
@@ -120,7 +149,17 @@ Button:hover {
     color: #03656b;
 }
 
-/* In src/styles.tcss */
+Button.watching {
+    background: #4caf87;
+    color: #272c31;
+    text-style: bold;
+}
+
+Button.watching:hover {
+    background: #3a9e76;
+    color: #272c31;
+}
+
 .modal-center {
     width: 100%;
     height: 100%;
@@ -173,4 +212,58 @@ Button:hover {
     width: auto;
     height: auto;
     content-align: center middle;
+}
+
+#dashboard-logo {
+    height: auto;
+    max-height: 8;
+    content-align: center middle;
+    color: #03656b;
+    text-style: bold;
+    padding: 0 2;
+}
+
+GlobalMenu {
+    align: center middle;
+    background: #272c31;
+}
+
+GlobalMenu > .menu-window {
+    background: #272c31;
+}
+
+HelpScreen {
+    align: center middle;
+    background: rgba(0, 0, 0, 0.65);
+}
+
+HelpScreen > .menu-window {
+    width: 52;
+    height: auto;
+    max-height: 18;
+    background: #272c31;
+    border: round #03656b;
+}
+
+#help-content {
+    padding: 1 2;
+}
+
+#help-bindings-title {
+    text-style: bold;
+    color: #03656b;
+}
+
+#help-commands-title {
+    text-style: bold;
+    color: #03656b;
+}
+
+#help-footer {
+    text-align: center;
+    color: #888888;
+    text-style: italic;
+    padding-top: 1;
+    border-top: solid #03656b 20%;
+    width: 100%;
 }
