@@ -38,14 +38,9 @@ Header {
     background: #272c31;
     border: solid #03656b;
     color: white;
-}
-
-#explorer-title {
-    background: #03656b;
-    color: white;
-    text-style: bold;
-    padding: 0 1;
-    width: 100%;
+    border-title-color: #fafafa;
+    border-title-style: bold;
+    border-title-align: left;
 }
 
 /* ── Painel central: configuração ── */
@@ -57,6 +52,9 @@ Header {
     border: solid #03656b;
     color: white;
     padding: 0;
+    border-title-color: #fafafa;
+    border-title-style: bold;
+    border-title-align: left;
 }
 
 #status-panel {
@@ -67,8 +65,8 @@ Header {
 }
 
 #template-title {
-    background: #1e2226;
-    color: #03656b;
+    background: #272c31;
+    color: #fafafa;
     text-style: bold;
     padding: 0 2;
     width: 100%;
@@ -96,18 +94,13 @@ Header {
 
 #console-panel {
     height: 1fr;
-    background: #272c31;
-    color: #fafafa;
-    border: none;
-    padding: 1;
-}
-
-#console-title {
     background: #1e2226;
-    color: #03656b;
-    text-style: bold;
-    padding: 0 1;
-    width: 100%;
+    color: #fafafa;
+    border: solid #03656b;
+    padding: 1;
+    border-title-color: #fafafa;
+    border-title-style: bold;
+    border-title-align: left;
 }
 
 /* ── Painel direito: preview .md (altura total) ── */
@@ -117,14 +110,9 @@ Header {
     height: 1fr;
     border: solid #03656b;
     background: #1e2226;
-}
-
-#preview-title {
-    background: #03656b;
-    color: white;
-    text-style: bold;
-    padding: 0 1;
-    width: 100%;
+    border-title-color: #fafafa;
+    border-title-style: bold;
+    border-title-align: left;
 }
 
 #preview-scroll {
@@ -161,11 +149,11 @@ Button.watching:hover {
     color: #272c31;
 }
 
-/* ── Modais ── */
+/* ── GlobalMenu ── */
 
 GlobalMenu {
     align: center middle;
-    background:  rgba(30, 34, 38, 0.15);
+    background: rgba(30, 34, 38, 0.15);
 }
 
 .modal-center {
@@ -241,7 +229,7 @@ M2TBannerWidget {
     content-align: center middle;
 }
 
-/* ── HelpScreen ────────────────────────────────────────────────────────── */
+/* ── HelpScreen ── */
 
 HelpScreen {
     align: center middle;
