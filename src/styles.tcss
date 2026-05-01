@@ -23,7 +23,7 @@ Header {
 }
 
 #left-column {
-    width: 1fr;
+    width: 2fr;
     height: 1fr;
 }
 
@@ -34,7 +34,7 @@ Header {
 /* ── Painel esquerdo: lista de arquivos ── */
 
 #file-explorer {
-    width: 26;
+    width: 30;
     background: #272c31;
     border: solid #03656b;
     color: white;
@@ -114,9 +114,9 @@ Header {
 
 #preview-panel {
     width: 45%;
-    background: #1e2226;
+    height: 1fr;
     border: solid #03656b;
-    color: white;
+    background: #1e2226;
 }
 
 #preview-title {
@@ -163,8 +163,9 @@ Button.watching:hover {
 
 /* ── Modais ── */
 
-.modal-screen {
-    background: rgba(0, 0, 0, 0.5);
+GlobalMenu {
+    align: center middle;
+    background:  rgba(30, 34, 38, 0.15);
 }
 
 .modal-center {
@@ -174,108 +175,73 @@ Button.watching:hover {
 }
 
 .menu-window {
-    background: transparent;
-    width: 40;
+    width: 80;
     height: auto;
     padding: 0;
 }
 
-.menu-header {
-    background: #03656b;
-    color: white;
-    text-style: bold;
-    text-align: center;
+M2TBannerWidget {
     width: 100%;
-    padding: 0 1;
+    height: auto;
+    padding: 1 2 0 2;
     content-align: center middle;
-}
-
-#menu-header {
-    background: #03656b;
-    color: white;
-    text-style: bold;
     text-align: center;
-    padding: 0;
-    width: 100%;
-}
-
-.menu-body {
-    padding: 0;
-    margin: 0;
-}
-
-.exit-menu-container, .help-menu-container {
-    background: #272c31;
-    border: thick #03656b;
-    padding: 0;
-    width: 30;
-    height: auto;
     align: center middle;
 }
 
-.exit-menu-button, .help-menu-button {
-    background: transparent;
-    color: white;
-    border: none;
+#menu-divider {
+    color: #03656b;
     width: 100%;
-    text-align: center;
-    margin: 0;
-    padding: 0;
-}
-
-.exit-menu-button:hover, .help-menu-button:hover {
-    background: #03656b;
-    color: white;
+    padding: 0 2;
+    text-style: dim;
+    content-align: center middle;
 }
 
 #global-menu-list {
     background: transparent;
     border: none;
     height: auto;
+    padding: 0;
+    width: 100%;
+    align: center middle;
 }
 
 #global-menu-list ListItem {
     background: transparent;
-    color: white;
-    padding: 0 2;
+    padding: 1 4;
     width: 100%;
+    align: center middle;
     content-align: center middle;
-}
-
-#global-menu-list ListItem Label {
-    text-align: center;
-    width: 100%;
 }
 
 #global-menu-list ListItem.--highlight {
-    background: #03656b;
-    color: white;
-    text-style: bold;
-}
-
-#global-menu-logo {
-    width: auto;
-    height: auto;
-    content-align: center middle;
-}
-
-#dashboard-logo {
-    height: auto;
-    max-height: 8;
-    content-align: center middle;
-    color: #03656b;
-    text-style: bold;
-    padding: 0 2;
-}
-
-GlobalMenu {
-    align: center middle;
     background: #272c31;
 }
 
-GlobalMenu > .menu-window {
-    background: #272c31;
+.menu-art-normal {
+    color: rgb(239, 239, 239);
+    width: 100%;
+    content-align: center middle;
+    text-align: center;
 }
+
+.menu-art-selected {
+    color: #038288;
+    text-style: bold;
+    width: 100%;
+    content-align: center middle;
+    text-align: center;
+}
+
+#menu-footer-hint {
+    color: #555555;
+    text-align: center;
+    padding: 0 0 1 0;
+    width: 100%;
+    content-align: center middle;
+}
+
+/* ── HelpScreen ────────────────────────────────────────────────────────── */
 
 HelpScreen {
     align: center middle;
@@ -288,6 +254,25 @@ HelpScreen > .menu-window {
     max-height: 18;
     background: #272c31;
     border: round #03656b;
+}
+
+#menu-header {
+    background: #03656b;
+    color: white;
+    text-style: bold;
+    text-align: center;
+    padding: 0 1;
+    width: 100%;
+}
+
+.menu-header {
+    background: #03656b;
+    color: white;
+    text-style: bold;
+    text-align: center;
+    width: 100%;
+    padding: 0 1;
+    content-align: center middle;
 }
 
 #help-content {
