@@ -12,7 +12,7 @@ from textual.widgets import (
 from .docker_manager import DockerManager
 from .log_translator import log_translator
 from .watcher import WatcherManager
-from .utils.visuals import render_logo, render_icon
+from .utils.visuals import render_logo, render_icon, M2TBannerWidget, M2TMenuOption
 
 class OptionItem(ListItem):
     def __init__(self, label_text: str, item_id: str | None = None) -> None:
@@ -50,12 +50,14 @@ class GlobalMenu(ModalScreen):
     def compose(self) -> ComposeResult:
         with Vertical(classes="modal-center"):
             with Vertical(classes="menu-window"):
-                yield Static(render_icon(), id="global-menu-logo")
+                yield M2TBannerWidget()
+                yield Label("─" * 46, id="menu-divider")
                 yield ListView(
-                    OptionItem("AJUDA", item_id="opt-help"),
-                    OptionItem("SAIR", item_id="opt-exit"),
+                    M2TMenuOption("AJUDA", item_id="opt-help"),
+                    M2TMenuOption("SAIR",  item_id="opt-exit"),
                     id="global-menu-list",
                 )
+                yield Label("ESC · fechar", id="menu-footer-hint")
 
     def on_mount(self) -> None:
         self.query_one("#global-menu-list", ListView).focus()
@@ -121,7 +123,7 @@ class Mark2TeXApp(App):
                     yield Markdown("", id="preview-content")
 
         yield Footer()
-
+    BORDER_TITLE = "Hello Widget"
     def on_mount(self) -> None:
         self.docker_manager = DockerManager()
         self.watcher_manager = WatcherManager()
@@ -176,7 +178,7 @@ class Mark2TeXApp(App):
         self.call_after_refresh(preview.update, content)
 
     # ------------------------------------------------------------------
-    # Helpers internos
+    # Actions / botões
     # ------------------------------------------------------------------
 
     def _get_selection(self) -> tuple[str | None, str | None]:
