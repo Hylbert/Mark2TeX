@@ -1,6 +1,6 @@
 ---
 title: Manual de Operação e Guia de Referência Mark2TeX
-author: Hylbert Rodrigues
+author: Fulano de Tal
 institution: Ecossistema de Automação Acadêmica
 campus: Virtual Campus
 department: Desenvolvimento de Ferramentas
@@ -29,26 +29,36 @@ Isso garante que qualquer pessoa com Docker instalado consiga gerar o mesmo PDF,
 
 # Guia de Operação (Comandos)
 
-Para operar a ferramenta, utilize os seguintes comandos no terminal dentro da pasta `Mark2TeX`:
+O Mark2TeX oferece duas formas de operação: através de um Dashboard Interativo (TUI) ou via linha de comando (CLI).
 
-## Preparando o Ambiente
+## 🖥️ Operação via Dashboard (Recomendado)
+
+O Dashboard é a forma mais intuitiva de utilizar a ferramenta. Para iniciá-lo, execute:
+`mark2tex`
+
+### Funcionalidades do Dashboard:
+1. **Explorador de Arquivos**: No painel esquerdo, navegue e selecione o arquivo `.md` que deseja compilar.
+2. **Seleção de Template**: No painel central, escolha entre os modelos disponíveis (`tcc`, `artigo` ou `projeto`).
+3. **Compilação**: Pressione a tecla `c` ou clique no botão **🚀 COMPILAR**. O progresso será exibido em tempo real na barra de status e no console inferior.
+4. **Watch Mode (Auto-compile)**: Pressione a tecla `w` ou clique em **👀 WATCH**. A ferramenta monitorará o arquivo selecionado e disparará a compilação automaticamente a cada salvamento.
+5. **Ajuda e Menus**: Pressione `F1` ou `?` para ver os atalhos, e `ESC` ou `q` para acessar o menu global.
+
+---
+
+## ⌨️ Operação via Terminal (CLI)
+
+Para usuários que preferem automação ou scripts, a interface de linha de comando continua disponível.
+
+### Preparando o Ambiente
 Se for a primeira vez utilizando a ferramenta ou se o `Dockerfile` foi alterado:
 `make build-image`
 
-*   **O que faz**: Baixa a imagem base, instala o Pandoc, as fontes da Microsoft, a distribuição TeX Live e as bibliotecas de idioma.
-
-## Gerando o PDF (Manual)
+### Gerando o PDF (Manual)
 Para compilar um arquivo específico:
 `make compile INPUT=nome_do_arquivo.md TEMPLATE=tcc`
 
 *   **INPUT**: O arquivo Markdown que contém seu texto.
 *   **TEMPLATE**: O modelo a ser usado (ex: `tcc`).
-
-## Modo Tempo Real (Auto-compile)
-Para não precisar digitar o comando a cada alteração:
-`./watch.sh nome_do_arquivo.md`
-
-*   **O que faz**: Monitora o arquivo. Sempre que você salvar no Obsidian, o PDF é atualizado automaticamente.
 
 # Anatomia do Arquivo Markdown
 
