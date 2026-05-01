@@ -25,7 +25,7 @@ class HelpScreen(ModalScreen):
 
     def compose(self) -> ComposeResult:
         with Vertical(classes="menu-window"):
-            yield Label("📖 AJUDA & ATALHOS", id="menu-header", classes="menu-header")
+            yield Label("AJUDA & ATALHOS", id="menu-header", classes="menu-header")
             with Vertical(id="help-content"):
                 yield Label("Key Bindings:", id="help-bindings-title")
                 yield Label("ESC / q      — Menu Global")
@@ -91,7 +91,6 @@ class Mark2TeXApp(App):
                 with Horizontal(id="main-layout"):
 
                     with Vertical(id="file-explorer"):
-                        yield Label("📁 Markdown Files", id="explorer-title")
                         yield ListView(id="file-list")
 
                     with Vertical(id="config-panel"):
@@ -99,7 +98,7 @@ class Mark2TeXApp(App):
                             yield Label("Arquivo  : —", id="status-file")
                             yield Label("Template : —", id="status-template")
 
-                        yield Label("📄 Template", id="template-title")
+                        yield Label("Defina o Template do Arquivo PDF", id="template-title")
                         yield ListView(
                             OptionItem("tcc"),
                             OptionItem("artigo"),
@@ -109,30 +108,33 @@ class Mark2TeXApp(App):
 
                         # Botões empilhados verticalmente para não sumirem
                         with Horizontal(id="action-bar"):
-                            yield Button("🚀 COMPILAR",   id="compile-btn")
-                            yield Button("👀 WATCH: OFF", id="watch-btn")
+                            yield Button("COMPILAR",   id="compile-btn")
+                            yield Button("WATCH: OFF", id="watch-btn")
 
                 yield ProgressBar(id="progress-bar", total=100)
-                yield Label("🖥️  Console", id="console-title")
                 yield RichLog(id="console-panel", highlight=False, markup=False, wrap=True)
 
-            # ── Coluna direita: preview ocupa altura total ──
             with Vertical(id="preview-panel"):
-                yield Label("👁️  Preview", id="preview-title")
                 with ScrollableContainer(id="preview-scroll"):
                     yield Markdown("", id="preview-content")
 
         yield Footer()
-    BORDER_TITLE = "Hello Widget"
+
     def on_mount(self) -> None:
-        self.docker_manager = DockerManager()
+        self.docker_manager  = DockerManager()
         self.watcher_manager = WatcherManager()
         self.is_watching = False
 
         self.selected_file: str | None = None
         self.selected_template: str | None = None
 
-        md_files = sorted(f for f in os.listdir(".") if f.endswith(".md"))
+        # ── Border titles ──
+        self.query_one("#file-explorer").border_title  = "• Arquivos"
+        self.query_one("#config-panel").border_title   = "• Configuração"
+        self.query_one("#preview-panel").border_title  = "• Preview"
+        self.query_one("#console-panel").border_title  = "• Console"
+
+        md_files  = sorted(f for f in os.listdir(".") if f.endswith(".md"))
         file_list = self.query_one("#file-list", ListView)
         for f in md_files:
             file_list.append(OptionItem(f))
@@ -229,13 +231,13 @@ class Mark2TeXApp(App):
                 lambda: self.compile_specific_document(selected_file, selected_template),
             )
             self.is_watching = True
-            btn.label = "👀 WATCH: ON"
+            btn.label = "WATCH: ON •"
             btn.add_class("watching")
             self._log(f"🔭 Watch Mode ativado para {selected_file}...", style="#5ab4bc")
         else:
             self.watcher_manager.stop_watching()
             self.is_watching = False
-            btn.label = "👀 WATCH: OFF"
+            btn.label = "WATCH: OFF"
             btn.remove_class("watching")
             self._log("💤 Watch Mode desativado.", style="#e0a24a")
 
