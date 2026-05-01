@@ -2,11 +2,11 @@ import os
 
 from rich.text import Text
 from textual.app import App, ComposeResult
-from textual.containers import Horizontal, Vertical
+from textual.containers import Horizontal, Vertical, ScrollableContainer
 from textual.screen import ModalScreen
 from textual.widgets import (
     Button, Footer, Header, Label,
-    ListItem, ListView, ProgressBar, RichLog, Static,
+    ListItem, ListView, Markdown, ProgressBar, RichLog, Static,
 )
 
 from .docker_manager import DockerManager
@@ -82,42 +82,51 @@ class Mark2TeXApp(App):
 
     def compose(self) -> ComposeResult:
         yield Header()
-        with Vertical(id="app-container"):
-            with Horizontal(id="main-layout"):
+        with Horizontal(id="outer-layout"):
 
-                with Vertical(id="file-explorer"):
-                    yield Label("📁 Markdown Files", id="explorer-title")
-                    yield ListView(id="file-list")
+            # ── Coluna esquerda: file explorer + config + console ──
+            with Vertical(id="left-column"):
+                with Horizontal(id="main-layout"):
 
-                with Vertical(id="config-panel"):
-                    #yield Static(render_icon(), id="dashboard-logo")
-                    with Vertical(id="status-panel"):
-                        yield Label("Arquivo  : —", id="status-file")
-                        yield Label("Template : —", id="status-template")
+                    with Vertical(id="file-explorer"):
+                        yield Label("📁 Markdown Files", id="explorer-title")
+                        yield ListView(id="file-list")
 
-                    yield Label("📄 Template", id="template-title")
-                    yield ListView(
-                        OptionItem("tcc"),
-                        OptionItem("artigo"),
-                        OptionItem("projeto"),
-                        id="template-list",
-                    )
+                    with Vertical(id="config-panel"):
+                        with Vertical(id="status-panel"):
+                            yield Label("Arquivo  : —", id="status-file")
+                            yield Label("Template : —", id="status-template")
 
-                    with Horizontal(id="action-bar"):
-                        yield Button("🚀 COMPILAR",      id="compile-btn")
-                        yield Button("👀 WATCH: OFF",    id="watch-btn")
+                        yield Label("📄 Template", id="template-title")
+                        yield ListView(
+                            OptionItem("tcc"),
+                            OptionItem("artigo"),
+                            OptionItem("projeto"),
+                            id="template-list",
+                        )
 
-            yield ProgressBar(id="progress-bar", total=100)
-            yield Label("🖥️  Console", id="console-title")
-            yield RichLog(id="console-panel", highlight=False, markup=False, wrap=True)
+                        # Botões empilhados verticalmente para não sumirem
+                        with Horizontal(id="action-bar"):
+                            yield Button("🚀 COMPILAR",   id="compile-btn")
+                            yield Button("👀 WATCH: OFF", id="watch-btn")
+
+                yield ProgressBar(id="progress-bar", total=100)
+                yield Label("🖥️  Console", id="console-title")
+                yield RichLog(id="console-panel", highlight=False, markup=False, wrap=True)
+
+            # ── Coluna direita: preview ocupa altura total ──
+            with Vertical(id="preview-panel"):
+                yield Label("👁️  Preview", id="preview-title")
+                with ScrollableContainer(id="preview-scroll"):
+                    yield Markdown("", id="preview-content")
+
         yield Footer()
 
     def on_mount(self) -> None:
         self.docker_manager = DockerManager()
         self.watcher_manager = WatcherManager()
         self.is_watching = False
-        
-        # Estado interno para evitar depender de highlighted_child
+
         self.selected_file: str | None = None
         self.selected_template: str | None = None
 
@@ -125,6 +134,10 @@ class Mark2TeXApp(App):
         file_list = self.query_one("#file-list", ListView)
         for f in md_files:
             file_list.append(OptionItem(f))
+
+    # ------------------------------------------------------------------
+    # Eventos de lista
+    # ------------------------------------------------------------------
 
     def on_list_view_selected(self, event: ListView.Selected) -> None:
         item = event.item
@@ -138,24 +151,36 @@ class Mark2TeXApp(App):
             self.selected_template = item.label_text
             self.query_one("#status-template", Label).update(f"Template : {self.selected_template}")
 
-    def _get_selection(self) -> tuple[str | None, str | None]:
-        # Agora retorna o estado interno atualizado pelos eventos de seleção
-        return self.selected_file, self.selected_template
-
     def on_list_view_highlighted(self, event: ListView.Highlighted) -> None:
         item = event.item
         if not isinstance(item, OptionItem):
             return
 
-        label = item.query_one(Label)
-        
         if event.list_view.id == "file-list":
             self.selected_file = item.label_text
             self.query_one("#status-file", Label).update(f"Arquivo  : {self.selected_file}")
+            self._update_preview(item.label_text)
         elif event.list_view.id == "template-list":
             self.selected_template = item.label_text
             self.query_one("#status-template", Label).update(f"Template : {self.selected_template}")
 
+    def _update_preview(self, filename: str) -> None:
+        """Lê o arquivo .md e atualiza o widget Markdown de preview."""
+        try:
+            with open(filename, "r", encoding="utf-8") as f:
+                content = f.read()
+        except (FileNotFoundError, PermissionError, OSError):
+            content = f"_Não foi possível ler o arquivo `{filename}`._"
+
+        preview = self.query_one("#preview-content", Markdown)
+        self.call_after_refresh(preview.update, content)
+
+    # ------------------------------------------------------------------
+    # Helpers internos
+    # ------------------------------------------------------------------
+
+    def _get_selection(self) -> tuple[str | None, str | None]:
+        return self.selected_file, self.selected_template
 
     def action_show_global_menu(self) -> None:
         self.push_screen(GlobalMenu())
@@ -175,7 +200,6 @@ class Mark2TeXApp(App):
         elif event.button.id == "watch-btn":
             self.toggle_watch_mode()
 
-
     def _log(self, message: str, style: str = "white") -> None:
         console = self.query_one("#console-panel", RichLog)
         console.write(Text(message, style=style))
@@ -183,6 +207,10 @@ class Mark2TeXApp(App):
 
     def _set_progress(self, value: int) -> None:
         self.query_one("#progress-bar", ProgressBar).update(progress=value)
+
+    # ------------------------------------------------------------------
+    # Watch Mode
+    # ------------------------------------------------------------------
 
     def toggle_watch_mode(self) -> None:
         btn = self.query_one("#watch-btn", Button)
@@ -208,6 +236,10 @@ class Mark2TeXApp(App):
             btn.label = "👀 WATCH: OFF"
             btn.remove_class("watching")
             self._log("💤 Watch Mode desativado.", style="#e0a24a")
+
+    # ------------------------------------------------------------------
+    # Compilação
+    # ------------------------------------------------------------------
 
     def compile_document(self) -> None:
         selected_file, selected_template = self._get_selection()

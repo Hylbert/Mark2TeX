@@ -16,7 +16,14 @@ Header {
     text-style: bold;
 }
 
-#app-container {
+/* ── Layout raiz ── */
+
+#outer-layout {
+    height: 1fr;
+}
+
+#left-column {
+    width: 1fr;
     height: 1fr;
 }
 
@@ -24,8 +31,10 @@ Header {
     height: 1fr;
 }
 
+/* ── Painel esquerdo: lista de arquivos ── */
+
 #file-explorer {
-    width: 30;
+    width: 26;
     background: #272c31;
     border: solid #03656b;
     color: white;
@@ -39,9 +48,11 @@ Header {
     width: 100%;
 }
 
+/* ── Painel central: configuração ── */
+
 #config-panel {
     width: 1fr;
-    min-width: 40;
+    min-width: 42;
     background: #272c31;
     border: solid #03656b;
     color: white;
@@ -69,6 +80,7 @@ Header {
     border: none;
 }
 
+/* Botões empilhados horizontalmente */
 #action-bar {
     height: auto;
     padding: 1 2;
@@ -79,6 +91,8 @@ Header {
     width: 1fr;
     margin: 0 1;
 }
+
+/* ── Console ── */
 
 #console-panel {
     height: 1fr;
@@ -96,8 +110,84 @@ Header {
     width: 100%;
 }
 
+/* ── Painel direito: preview .md (altura total) ── */
+
+#preview-panel {
+    width: 45%;
+    background: #1e2226;
+    border: solid #03656b;
+    color: white;
+}
+
+#preview-title {
+    background: #03656b;
+    color: white;
+    text-style: bold;
+    padding: 0 1;
+    width: 100%;
+}
+
+#preview-scroll {
+    height: 1fr;
+    padding: 1 2;
+    scrollbar-gutter: stable;
+}
+
+#preview-content {
+    background: transparent;
+}
+
+/* ── Botões ── */
+
+Button {
+    background: #03656b;
+    color: white;
+    border: none;
+}
+
+Button:hover {
+    background: white;
+    color: #03656b;
+}
+
+Button.watching {
+    background: #4caf87;
+    color: #272c31;
+    text-style: bold;
+}
+
+Button.watching:hover {
+    background: #3a9e76;
+    color: #272c31;
+}
+
+/* ── Modais ── */
+
 .modal-screen {
     background: rgba(0, 0, 0, 0.5);
+}
+
+.modal-center {
+    width: 100%;
+    height: 100%;
+    align: center middle;
+}
+
+.menu-window {
+    background: transparent;
+    width: 40;
+    height: auto;
+    padding: 0;
+}
+
+.menu-header {
+    background: #03656b;
+    color: white;
+    text-style: bold;
+    text-align: center;
+    width: 100%;
+    padding: 0 1;
+    content-align: center middle;
 }
 
 #menu-header {
@@ -136,51 +226,6 @@ Header {
 .exit-menu-button:hover, .help-menu-button:hover {
     background: #03656b;
     color: white;
-}
-
-Button {
-    background: #03656b;
-    color: white;
-    border: none;
-}
-
-Button:hover {
-    background: white;
-    color: #03656b;
-}
-
-Button.watching {
-    background: #4caf87;
-    color: #272c31;
-    text-style: bold;
-}
-
-Button.watching:hover {
-    background: #3a9e76;
-    color: #272c31;
-}
-
-.modal-center {
-    width: 100%;
-    height: 100%;
-    align: center middle;
-}
-
-.menu-window {
-    background: transparent;
-    width: 40;
-    height: auto;
-    padding: 0;
-}
-
-.menu-header {
-    background: #03656b;
-    color: white;
-    text-style: bold;
-    text-align: center;
-    width: 100%;
-    padding: 0 1;
-    content-align: center middle;
 }
 
 #global-menu-list {
