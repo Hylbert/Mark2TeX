@@ -2,7 +2,6 @@
 
 Estamos muito felizes com o seu interesse em contribuir para o Mark2TeX! 🚀 Antes de enviar sua contribuição, por favor, reserve um momento para ler as seguintes diretrizes.
 
-- [Código de Conduta](.github/CODE_OF_CONDUCT.md)
 - [Filosofia](#filosofia)
 - [Diretrizes para Reporte de Issues](#diretrizes-para-reporte-de-issues)
 - [Diretrizes para Pull Requests](#diretrizes-para-pull-requests)
