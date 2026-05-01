@@ -231,13 +231,19 @@ class Mark2TeXApp(App):
                 lambda: self.compile_specific_document(selected_file, selected_template),
             )
             self.is_watching = True
-            btn.label = "WATCH: ON •"
+            btn.label = Text.assemble(
+                ("● ", "bold rgb(76,175,135)"),
+                ("WATCH: ON", "white bold"),
+            )
             btn.add_class("watching")
             self._log(f"🔭 Watch Mode ativado para {selected_file}...", style="#5ab4bc")
         else:
             self.watcher_manager.stop_watching()
             self.is_watching = False
-            btn.label = "WATCH: OFF"
+            btn.label = Text.assemble(
+                ("● ", "rgb(120,120,120)"),
+                ("WATCH: OFF", "white"),
+            )
             btn.remove_class("watching")
             self._log("💤 Watch Mode desativado.", style="#e0a24a")
 
