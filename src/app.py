@@ -205,7 +205,7 @@ class Mark2TeXApp(App):
         elif event.button.id == "watch-btn":
             self.toggle_watch_mode()
 
-    def _log(self, message: str, style: str = "white") -> None:
+    def _log_console(self, message: str, style: str = "white") -> None:
         console = self.query_one("#console-panel", RichLog)
         console.write(Text(message, style=style))
         console.scroll_end()
@@ -223,7 +223,7 @@ class Mark2TeXApp(App):
         if not self.is_watching:
             selected_file, selected_template = self._get_selection()
             if not selected_file or not selected_template:
-                self._log("❌ Selecione um arquivo e um template antes de ativar o Watch Mode.", style="#e05c5c")
+                self._log_console("❌ Selecione um arquivo e um template antes de ativar o Watch Mode.", style="#e05c5c")
                 return
 
             self.watcher_manager.start_watching(
@@ -237,7 +237,7 @@ class Mark2TeXApp(App):
                 ("WATCH: ON", "white bold"),
             )
             btn.add_class("watching")
-            self._log(f"🔭 Watch Mode ativado para {selected_file}...", style="#5ab4bc")
+            self._log_console(f"🔭 Watch Mode ativado para {selected_file}...", style="#5ab4bc")
         else:
             self.watcher_manager.stop_watching()
             self.is_watching = False
@@ -246,7 +246,7 @@ class Mark2TeXApp(App):
                 ("WATCH: OFF", "white"),
             )
             btn.remove_class("watching")
-            self._log("💤 Watch Mode desativado.", style="#e0a24a")
+            self._log_console("💤 Watch Mode desativado.", style="#e0a24a")
 
     # ------------------------------------------------------------------
     # Compilação
@@ -255,7 +255,7 @@ class Mark2TeXApp(App):
     def compile_document(self) -> None:
         selected_file, selected_template = self._get_selection()
         if not selected_file or not selected_template:
-            self._log("❌ Selecione um arquivo e um template para compilar.", style="#e05c5c")
+            self._log_console("❌ Selecione um arquivo e um template para compilar.", style="#e05c5c")
             return
         self.compile_specific_document(selected_file, selected_template)
 
@@ -316,7 +316,7 @@ class Mark2TeXApp(App):
 
             elif action == "console":
                 message, style = value
-                self._log(message, style=style)
+                self._log_console(message, style=style)
 
         except Exception as exc:
             print(f"[UI Error] {action}: {exc}")
