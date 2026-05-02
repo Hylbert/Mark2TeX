@@ -12,7 +12,8 @@ from textual.widgets import (
 from .docker_manager import DockerManager
 from .log_translator import log_translator
 from .watcher import WatcherManager
-from .utils.visuals import render_logo, render_icon, M2TBannerWidget, M2TMenuOption
+from .utils.visuals import  M2TBannerWidget, M2TMenuOption
+
 
 class OptionItem(ListItem):
     def __init__(self, label_text: str, item_id: str | None = None) -> None:
