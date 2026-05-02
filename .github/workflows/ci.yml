@@ -20,8 +20,11 @@ jobs:
           python-version: "3.11"
           cache: "pip"
 
-      - name: Instalar dependências (com extras dev)
-        run: pip install -e ".[dev]"
+      - name: Instalar ferramentas de desenvolvimento
+        run: pip install ruff mypy pytest pytest-asyncio
+
+      - name: Instalar pacote em modo editável
+        run: pip install -e .
 
       - name: Lint — ruff
         run: ruff check src/
