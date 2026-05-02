@@ -46,7 +46,7 @@ def log_translator(line: str) -> Optional[str]:
     if not stripped:
         return None
 
-    # ── Diretiva PROGRESS ────────────────────────────────────────────────────────────
+    # ── Diretiva PROGRESS ────────────────────────────────────────────────────
     m = _RE_PROGRESS.match(stripped)
     if m:
         return f"__PROGRESS__{m.group(1)}"
@@ -68,11 +68,11 @@ def log_translator(line: str) -> Optional[str]:
     if _RE_ABNT_DIVIDER.match(stripped):
         return None
 
-    # ── Suprimir: números de página [1] [2] [3]... ──────────────────────
+    # ── Suprimir: números de página [1] [2] [3]... ────────────────────────
     if _RE_PAGE_NUMS.match(stripped):
         return None
 
-    # ── Suprimir: sequências de colchetes [][][]... ──────────────────────
+    # ── Suprimir: sequências de colchetes [][][]... ────────────────────────
     if _RE_BRACKET_JUNK.match(stripped) and '[' in stripped:
         return None
 
@@ -82,17 +82,17 @@ def log_translator(line: str) -> Optional[str]:
     if stripped.startswith('flt;mapping=tex-text;'):
         return None
 
-    # ── Suprimir: avisos deprecated de hooks ───────────────────────────
+    # ── Suprimir: avisos deprecated de hooks ──────────────────────────────
     if _RE_HOOKS_WARN.match(stripped):
         return None
     if stripped.startswith('(hooks)'):
         return None
 
-    # ── Suprimir: debug interno de fontes ─────────────────────────────
+    # ── Suprimir: debug interno de fontes ─────────────────────────────────
     if _RE_FONT_DEBUG.match(stripped):
         return None
 
-    # ── Suprimir: dimensões de layout de página ──────────────────────────
+    # ── Suprimir: dimensões de layout de página ───────────────────────────
     _LAYOUT_PREFIXES = (
         'Stock height', 'Top and edge', 'Page height', 'Text height',
         'Spine and edge', 'Upper and lower', 'Headheight', 'Footskip',
@@ -102,7 +102,7 @@ def log_translator(line: str) -> Optional[str]:
     if stripped.startswith(_LAYOUT_PREFIXES):
         return None
 
-    # ── Suprimir: ruído pontual ──────────────────────────────────────────
+    # ── Suprimir: ruído pontual ────────────────────────────────────────────
     _SUPPRESS_EXACT = {
         r'\write18 enabled.',
         'entering extended mode',
@@ -144,19 +144,19 @@ def log_translator(line: str) -> Optional[str]:
     if re.match(r'^\[\d+(\.\d+)?[a-z]*\]$', stripped):
         return None
 
-    # ── Rc files read ────────────────────────────────────────────────────────────
+    # ── Rc files read ──────────────────────────────────────────────────────
     if stripped == 'Rc files read:':
         return '⚙️ Config: lendo arquivos de configuração'
     if re.match(r'^/etc/[Ll]atex', stripped):
         return f'⚙️ Config: {stripped}'
 
-    # ── Output written ─────────────────────────────────────────────────────────
+    # ── Output written ─────────────────────────────────────────────────────
     m = _RE_OUTPUT_WRITTEN.match(stripped)
     if m:
         fmt, pages = m.group(1), m.group(2)
         return f'📄 Saída gerada: {fmt} ({pages} páginas)'
 
-    # ── Latexmk mensagens ──────────────────────────────────────────────────────
+    # ── Latexmk mensagens ──────────────────────────────────────────────────
     m = _RE_LATEXMK.match(stripped)
     if m:
         msg = m.group(1).strip()
@@ -188,7 +188,7 @@ def log_translator(line: str) -> Optional[str]:
         v = ver.group(1) if ver else ''
         return f'ℹ️ Motor: BibTeX {v}'
 
-    # ── Document Class ───────────────────────────────────────────────────────────
+    # ── Document Class ─────────────────────────────────────────────────────
     m = _RE_DOC_CLASS.match(stripped)
     if m:
         cls = m.group(1)
@@ -198,7 +198,7 @@ def log_translator(line: str) -> Optional[str]:
         v = f' {ver.group(0)}' if ver else ''
         return f'📄 Classe: {cls}{v}'
 
-    # ── Rule / Run ────────────────────────────────────────────────────────────
+    # ── Rule / Run ─────────────────────────────────────────────────────────
     if _RE_RULE_CHANGE.match(stripped):
         return None  # "Rule 'xelatex': File changes..." → suprimir
 
@@ -218,7 +218,7 @@ def log_translator(line: str) -> Optional[str]:
             return f'▶️ bibtex {arg}'
         return f'▶️ {cmd[:80]}'
 
-    # ── Erros LaTeX ────────────────────────────────────────────────────────────
+    # ── Erros LaTeX ────────────────────────────────────────────────────────
     m = _RE_LATEX_ERROR.match(stripped)
     if m:
         return f'❌ Erro LaTeX: {m.group(1)}'
@@ -227,24 +227,22 @@ def log_translator(line: str) -> Optional[str]:
     if m:
         return f'❌ {m.group(1)}'
 
-    # ── Localização do erro: l.XX ─────────────────────────────────────────────
+    # ── Localização do erro: l.XX ──────────────────────────────────────────
     m = _RE_LINE_REF.match(stripped)
     if m:
         lineno, ctx = m.group(1), m.group(2).strip()
-        # Limpar contexto de debug de fonte TeX
-        ctx = re.sub(r'\\TU/\S+\s*', '', ctx).strip()
-        if ctx:
-            return f'   ↳ linha {lineno}: {ctx}'
+        # ctx_clean usa variável separada para o mypy inferir str corretamente
+        ctx_clean: str = re.sub(r'\\TU/\S+\s*', '', ctx).strip()
+        if ctx_clean:
+            return f'   ↳ linha {lineno}: {ctx_clean}'
         return f'   ↳ linha {lineno}'
 
     # ── Overfull / Underfull hbox ──────────────────────────────────────────
-    # CORREÇÃO: r'\\hbox' em vez de '\hbox' (evita "bad escape \h")
     m = _RE_OVERFULL.match(stripped)
     if m:
         kind, amount, l1, l2 = m.groups()
         if kind == 'Underfull':
             return None  # underfull é cosmético
-        # Só mostrar overfull significativo (> 5pt)
         pts_match = re.search(r'[\d.]+', amount)
         if pts_match:
             try:
@@ -254,7 +252,7 @@ def log_translator(line: str) -> Optional[str]:
                 pass
         return f'⚠️ Texto largo ({amount}) nas linhas {l1}–{l2}'
 
-    # ── Avisos de pacotes ──────────────────────────────────────────────────────
+    # ── Avisos de pacotes ──────────────────────────────────────────────────
     m = _RE_PKG_WARN.match(stripped)
     if m:
         pkg, msg = m.group(1), m.group(2)
@@ -273,7 +271,7 @@ def log_translator(line: str) -> Optional[str]:
             return None
         return f'⚠️ {msg}'
 
-    # ── BibTeX ─────────────────────────────────────────────────────────────────
+    # ── BibTeX ─────────────────────────────────────────────────────────────
     if stripped.startswith('The style file'):
         sty = stripped.replace('The style file', '').strip()
         return f'📝 Estilo bibliográfico: {sty}'
