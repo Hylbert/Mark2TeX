@@ -2,7 +2,6 @@
 Smoke tests básicos para garantir que os módulos importam corretamente
 e que as classes principais instanciam sem erros.
 """
-import pytest
 
 
 def test_import_app():
