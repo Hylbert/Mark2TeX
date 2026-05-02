@@ -1,0 +1,27 @@
+name: Docker Build
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-image:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Configurar Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build da imagem mark2tex:latest
+        run: docker build -t mark2tex:latest .
+
+      - name: Smoke test — verificar imagem
+        run: docker images mark2tex:latest
+
+      - name: Smoke test — checar pdflatex no container
+        run: docker run --rm mark2tex:latest bash -c "which pdflatex && pdflatex --version"
