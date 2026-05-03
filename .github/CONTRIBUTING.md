@@ -1,63 +1,71 @@
-# Guia de Contribuição do Mark2TeX
+# Contributing to Mark2TeX
 
-Estamos muito felizes com o seu interesse em contribuir para o Mark2TeX! 🚀 Antes de enviar sua contribuição, por favor, reserve um momento para ler as seguintes diretrizes.
+**⚠️ Project Status: BETA**
+Mark2TeX is currently in Beta. We are welcoming community contributions, but please be aware that the architecture and interface may undergo significant structural changes as we refine the tool.
 
-- [Filosofia](#filosofia)
-- [Diretrizes para Reporte de Issues](#diretrizes-para-reporte-de-issues)
-- [Diretrizes para Pull Requests](#diretrizes-para-pull-requests)
-- [Início Rápido](#início-rápido)
+We are thrilled that you are interested in contributing to Mark2TeX! 🚀 Before submitting your contribution, please take a moment to read these guidelines.
 
-## Filosofia
+- [Philosophy](#philosophy)
+- [Issue Reporting Guidelines](#issue-reporting-guidelines)
+- [Pull Request Guidelines](#pull-request-guidelines)
+- [Where to Start?](#where-to-start)
+- [Quick Start](#quick-start)
 
-🔑 Nossa filosofia é manter as coisas limpas, simples e minimalistas. 
-O Mark2TeX busca remover a fricção entre a ideia e o documento final. Queremos que as melhorias alinhem-se a essa simplicidade: a ferramenta deve ser poderosa nos bastidores, mas invisível e intuitiva para o usuário.
+## Philosophy
 
-## Diretrizes para Reporte de Issues
+🔑 Our philosophy is to keep things clean, simple, and minimalist.
+Mark2TeX aims to remove the friction between the idea and the final document. We want improvements to align with this simplicity: the tool should be powerful under the hood, but invisible and intuitive for the user.
 
-Por favor, pesquise por issues semelhantes antes de abrir uma nova e utilize sempre o template de issue disponível. Se encontrar um bug ou tiver uma sugestão de funcionalidade, descreva detalhadamente o cenário, a versão do Docker utilizada e, se possível, anexe um exemplo do arquivo Markdown que causou o problema.
+## Issue Reporting Guidelines
 
-## Diretrizes para Pull Requests
+Please search for similar issues before opening a new one and always use the available issue template. If you find a bug or have a feature suggestion, describe the scenario in detail, the Docker version used, and if possible, attach an example of the Markdown file that caused the problem.
 
-**Em *todos* os Pull Requests:** forneça uma descrição detalhada do problema resolvido ou da funcionalidade adicionada.
+## Pull Request Guidelines
 
-Antes de submeter seu PR, certifique-se de que:
+**For *all* Pull Requests**: provide a detailed description of the problem solved or the feature added.
 
-- O PR foi enviado diretamente para a branch `develop`.
-- O merge final deve ser realizado obrigatoriamente utilizando a flag `--no-ff` para preservar o histórico de branches.
-- Você referenciou a issue relacionada no comentário do PR.
-- A documentação em `docs/` ou no `README.md` foi atualizada para refletir a mudança.
-- Todos os testes de compilação passam (o PDF é gerado sem erros).
-- O código segue as boas práticas de programação e está limpo.
+Before submitting your PR, make sure that:
 
-### Se você adicionar uma nova funcionalidade:
+- The PR is submitted directly to the `develop` branch.
+- The final merge must be performed using the `--no-ff` flag to preserve the branch history.
+- **Language**: All commit messages and Pull Request descriptions must be written in **English**, following the [Conventional Commits](https://www.conventionalcommits.org/) standard.
+- You referenced the related issue in the PR comment.
+- The documentation in `docs/` or `README.md` has been updated to reflect the change.
+- All compilation tests pass (the PDF is generated without errors).
+- The code follows programming best practices and is clean.
 
-- Abra primeiro uma issue de sugestão para discutirmos a implementação.
-- Forneça a justificativa do porquê essa funcionalidade é útil para o usuário.
-- Submeta seu PR após a concordância dos mantenedores.
+### If you are adding a new feature:
 
-### Se você corrigir um bug:
+- Open an issue for suggestion first so we can discuss the implementation.
+- Provide the justification for why this feature is useful for the user.
+- Submit your PR after agreement from the maintainers.
 
-- Se estiver resolvendo uma issue específica, adicione `fix: #<número da issue> <mensagem curta>` no título do seu PR (ex: `fix: #12 corrige erro de codificação de caracteres`).
-- Forneça uma descrição detalhada do bug e como a correção o resolve.
+### If you are fixing a bug:
 
-### Por onde começar?
+- If you are resolving a specific issue, add `fix: #<issue-number> <short message>` to your PR title (e.g., `fix: #12 fixes character encoding error`).
+- Provide a detailed description of the bug and how the fix resolves it.
 
-Uma ótima maneira de começar é procurar issues com as etiquetas `bug`, `help wanted` ou `feature request`. Issues marcadas como `good first issue` são ideais para novos contribuidores. Para mudanças maiores, discuta a solução primeiro; para mudanças pequenas, você pode abrir o PR diretamente.
+## Where to Start?
 
-## Início Rápido
+A great way to start is by looking for issues with the `bug`, `help wanted`, or `feature request` labels. Issues marked as `good first issue` are ideal for new contributors.
 
-1. Faça um **Fork** do repositório.
-2. Clone seu fork: `git clone git@github.com:<seu-usuario>/Mark2TeX.git`
-3. Crie uma branch de feature: `git checkout -b feature/nome-da-feature`
-4. Implemente as mudanças e faça o push da sua branch.
-5. Crie um Pull Request contra a branch `develop` descrevendo suas alterações.
+For larger changes, discuss the solution first; for small changes, you can open the PR directly.
 
-**Sincronizando seu PR:**
+## Quick Start
 
-Se houver conflitos ou se quiser atualizar sua branch local:
+1. **Fork** the repository.
+2. Clone your fork: `git clone git@github.com:<your-username>/Mark2TeX.git`
+3. Create a feature branch: `git checkout -b feature/feature-name`
+4. Implement the changes and push your branch.
+5. Create a Pull Request against the `develop` branch describing your changes.
+
+**Syncing your PR:**
+
+If there are conflicts or if you want to update your local branch:
 1. `git fetch upstream`
 2. `git rebase upstream/develop`
-3. Resolva os conflitos e faça o force push: `git push -f`
+3. Resolve conflicts and force push: `git push -f`
 
 ---
-Agradecemos seu tempo e esforço para tornar o Mark2TeX melhor para todos!
+
+Thank you for your time and effort in making Mark2TeX better for everyone! 🎓

@@ -1,45 +1,43 @@
-# Código de Conduta do Contribuidor
+# Contributor Code of Conduct
 
-## Nosso Compromisso
+## Our Pledge
 
-No interesse de fomentar um ambiente aberto e acolhedor, nós, como contribuidores e mantenedores, nos comprometemos a tornar a participação em nosso projeto e em nossa comunidade uma experiência livre de assédio para todos, independentemente de idade, tamanho do corpo, deficiência, etnia, identidade e expressão de gênero, nível de experiência, educação, status socioeconômico, nacionalidade, aparência pessoal, raça, religião, ou identidade e orientação sexual.
+In order to foster an open and welcoming environment, we as contributors and maintainers commit to making participation in our project and our community a harassment-free experience for everyone, regardless of age, body size, disability, ethnicity, gender identity and expression, level of experience, education, socio-economic status, nationality, personal appearance, race, religion, or identity and sexual orientation.
 
-## Nossos Padrões
+## Our Standards
 
-Exemplos de comportamentos que contribuem para a criação de um ambiente positivo incluem:
+Examples of behavior that contributes to a positive environment include:
+* Using welcoming and inclusive language.
+* Being respectful of differing viewpoints and experiences.
+* Gracefully accepting constructive criticism.
+* Focusing on what is best for the community.
+* Showing empathy for other community members.
 
-* Utilizar linguagem acolhedora e inclusiva.
-* Ser respeitoso com pontos de vista e experiências divergentes.
-* Aceitar graciosamente críticas construtivas.
-* Focar no que é melhor para a comunidade.
-* Mostrar empatia pelos outros membros da comunidade.
+Examples of unacceptable behavior by participants include:
+* The use of sexualized language or imagery and unwelcome sexual attention.
+* Trolling, insulting/derogatory comments, and personal or political attacks.
+* Public or private harassment.
+* Publication of other people's private information, such as physical or electronic addresses, without explicit permission.
+* Other conduct that could reasonably be considered inappropriate in a professional setting.
 
-Exemplos de comportamentos inaceitáveis por participantes incluem:
+## Our Responsibilities
 
-* O uso de linguagem ou imagens sexualizadas ou atenção sexual indesejada.
-* Trolling, comentários insultuosos/depreciativos e ataques pessoais ou políticos.
-* Assédio público ou privado.
-* Publicação de informações privadas de terceiros, como endereço físico ou eletrônico, sem permissão explícita.
-* Outras condutas que possam ser razoavelmente consideradas inadequadas em um ambiente profissional.
+Project maintainers are responsible for clarifying the standards of acceptable behavior and it is expected that they will take appropriate and fair corrective action in response to any instance of unacceptable behavior.
 
-## Nossas Responsabilidades
+Project maintainers have the right and responsibility to remove, edit, or reject comments, commits, wiki edits, issues, and other contributions that are not aligned to this Code of Conduct, or to ban contributors temporarily or permanently who exhibit some of the behaviors described above.
 
-Os mantenedores do projeto são responsáveis por esclarecer os padrões de comportamento aceitável e espera-se que tomem medidas corretivas apropriadas e justas em resposta a qualquer instância de comportamento inaceitável.
+## Scope
 
-Os mantenedores do projeto têm o direito e a responsabilidade de remover, editar ou rejeitar comentários, commits, edições de wiki, issues e outras contribuições que não estejam alinhadas com este Código de Conduta, ou de banir temporariamente ou permanentemente qualquer contribuidor por outros comportamentos que considerem inadequados, ameaçadores, ofensivos ou prejudiciais.
+This Code of Conduct applies both to project spaces and public spaces when an individual is representing the project or its community. Examples of representing a project or community include using an official project e-mail address, posting via an official social media account, or acting as an appointed representative in an online or offline venue.
 
-## Escopo
+## Enforcement
 
-Este Código de Conduta aplica-se tanto aos espaços do projeto quanto a espaços públicos quando um indivíduo está representando o projeto ou sua comunidade. Exemplos de representação de um projeto ou comunidade incluem o uso de um e-mail oficial do projeto, postagens via conta oficial de rede social, ou atuar como representante nomeado em um evento online ou offline. A representação de um projeto pode ser definida e esclarecida posteriormente pelos mantenedores do projeto.
+Instances of abusive, harassing, or otherwise unacceptable behavior may be reported by contacting the project team via the repository. All complaints will be reviewed and investigated and will result in a response that is considered necessary and appropriate to the circumstances. Project team members are obligated to maintain confidentiality with regard to the reporter of an incident.
 
-## Execução
+Project maintainers who do not follow or enforce the Code of Conduct in good faith may face temporary or permanent repercussions, as determined by other members of the project leadership.
 
-Instâncias de comportamento abusivo, assediador ou outra conduta inaceitável podem ser reportadas entrando em contato com a equipe do projeto através do repositório. Todas as reclamações serão revisadas e investigadas e resultarão em uma resposta que seja considerada necessária e apropriada às circunstâncias. A equipe do projeto é obrigada a manter a confidencialidade em relação ao denunciante de um incidente.
+## Attribution
 
-Mantenedores do projeto que não seguirem ou não aplicarem o Código de Conduta de boa fé podem enfrentar repercussões temporárias ou permanentes, conforme determinado por outros membros da liderança do projeto.
-
-## Atribuição
-
-Este Código de Conduta é adaptado do [Contributor Covenant][homepage], versão 1.4, disponível em https://www.contributor-covenant.org/version/1/4/code-of-conduct.html
+This Code of Conduct is adapted from the [Contributor Covenant][homepage], version 1.4, available at https://www.contributor-covenant.org/version/1/4/code-of-conduct.html
 
 [homepage]: https://www.contributor-covenant.org
