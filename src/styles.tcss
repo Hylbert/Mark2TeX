@@ -1,13 +1,13 @@
 /*
 * Mark2TeX TUI Styles
 * Palette:
-* Background: #272c31
+* Background: transparent
 * Primary: #03656b
 * Text: white
 */
 
 Screen {
-    background: #272c31;
+    background: transparent;
 }
 
 Header {
@@ -23,7 +23,7 @@ Header {
 }
 
 #left-column {
-    width: 1fr;
+    width: 2fr;
     height: 1fr;
 }
 
@@ -34,18 +34,13 @@ Header {
 /* ── Painel esquerdo: lista de arquivos ── */
 
 #file-explorer {
-    width: 26;
-    background: #272c31;
+    width: 30;
+    background: transparent;
     border: solid #03656b;
     color: white;
-}
-
-#explorer-title {
-    background: #03656b;
-    color: white;
-    text-style: bold;
-    padding: 0 1;
-    width: 100%;
+    border-title-color: #fafafa;
+    border-title-style: bold;
+    border-title-align: left;
 }
 
 /* ── Painel central: configuração ── */
@@ -53,10 +48,13 @@ Header {
 #config-panel {
     width: 1fr;
     min-width: 42;
-    background: #272c31;
+    background: transparent;
     border: solid #03656b;
     color: white;
     padding: 0;
+    border-title-color: #fafafa;
+    border-title-style: bold;
+    border-title-align: left;
 }
 
 #status-panel {
@@ -67,8 +65,8 @@ Header {
 }
 
 #template-title {
-    background: #1e2226;
-    color: #03656b;
+    background: transparent;
+    color: #fafafa;
     text-style: bold;
     padding: 0 2;
     width: 100%;
@@ -76,7 +74,7 @@ Header {
 
 #template-list {
     height: auto;
-    background: #272c31;
+    background: transparent;
     border: none;
 }
 
@@ -96,35 +94,25 @@ Header {
 
 #console-panel {
     height: 1fr;
-    background: #272c31;
+    background: transparent;
     color: #fafafa;
-    border: none;
+    border: solid #03656b;
     padding: 1;
-}
-
-#console-title {
-    background: #1e2226;
-    color: #03656b;
-    text-style: bold;
-    padding: 0 1;
-    width: 100%;
+    border-title-color: #fafafa;
+    border-title-style: bold;
+    border-title-align: left;
 }
 
 /* ── Painel direito: preview .md (altura total) ── */
 
 #preview-panel {
     width: 45%;
-    background: #1e2226;
+    height: 1fr;
     border: solid #03656b;
-    color: white;
-}
-
-#preview-title {
-    background: #03656b;
-    color: white;
-    text-style: bold;
-    padding: 0 1;
-    width: 100%;
+    background: transparent;
+    border-title-color: #fafafa;
+    border-title-style: bold;
+    border-title-align: left;
 }
 
 #preview-scroll {
@@ -140,31 +128,50 @@ Header {
 /* ── Botões ── */
 
 Button {
-    background: #03656b;
-    color: white;
-    border: none;
+    background: transparent;
+    color: #03656b;
+    border: tall #03656b;
+    text-style: bold;
+    padding: 0 2;
 }
 
 Button:hover {
-    background: white;
-    color: #03656b;
+    background: #03656b;
+    color: white;
+    border: tall #03656b;
+}
+
+Button:focus {
+    border: tall #4caf87;
+    color: #4caf87;
+    background: transparent;
+    text-style: bold;
+}
+
+Button.-active {
+    background: #024d52;
+    color: white;
+    border: tall #024d52;
 }
 
 Button.watching {
-    background: #4caf87;
-    color: #272c31;
+    background: transparent;
+    color: #4caf87;
+    border: tall #4caf87;
     text-style: bold;
 }
 
 Button.watching:hover {
-    background: #3a9e76;
+    background: #4caf87;
     color: #272c31;
+    border: tall #4caf87;
 }
 
-/* ── Modais ── */
+/* ── GlobalMenu ── */
 
-.modal-screen {
-    background: rgba(0, 0, 0, 0.5);
+GlobalMenu {
+    align: center middle;
+    background: #272c31;
 }
 
 .modal-center {
@@ -174,108 +181,73 @@ Button.watching:hover {
 }
 
 .menu-window {
-    background: transparent;
-    width: 40;
+    width: 80;
     height: auto;
     padding: 0;
 }
 
-.menu-header {
-    background: #03656b;
-    color: white;
-    text-style: bold;
-    text-align: center;
+M2TBannerWidget {
     width: 100%;
-    padding: 0 1;
+    height: auto;
+    padding: 1 2 0 2;
     content-align: center middle;
-}
-
-#menu-header {
-    background: #03656b;
-    color: white;
-    text-style: bold;
     text-align: center;
-    padding: 0;
-    width: 100%;
-}
-
-.menu-body {
-    padding: 0;
-    margin: 0;
-}
-
-.exit-menu-container, .help-menu-container {
-    background: #272c31;
-    border: thick #03656b;
-    padding: 0;
-    width: 30;
-    height: auto;
     align: center middle;
 }
 
-.exit-menu-button, .help-menu-button {
-    background: transparent;
-    color: white;
-    border: none;
+#menu-divider {
+    color: #03656b;
     width: 100%;
-    text-align: center;
-    margin: 0;
-    padding: 0;
-}
-
-.exit-menu-button:hover, .help-menu-button:hover {
-    background: #03656b;
-    color: white;
+    padding: 0 2;
+    text-style: dim;
+    content-align: center middle;
 }
 
 #global-menu-list {
     background: transparent;
     border: none;
     height: auto;
+    padding: 0;
+    width: 100%;
+    align: center middle;
 }
 
 #global-menu-list ListItem {
     background: transparent;
-    color: white;
-    padding: 0 2;
+    padding: 1 4;
     width: 100%;
+    align: center middle;
     content-align: center middle;
-}
-
-#global-menu-list ListItem Label {
-    text-align: center;
-    width: 100%;
 }
 
 #global-menu-list ListItem.--highlight {
-    background: #03656b;
-    color: white;
-    text-style: bold;
+    background: rgba(39, 44, 49, 0.6);
 }
 
-#global-menu-logo {
-    width: auto;
-    height: auto;
+.menu-art-normal {
+    color: rgb(239, 239, 239);
+    width: 100%;
+    content-align: center middle;
+    text-align: center;
+}
+
+.menu-art-selected {
+    color: #038288;
+    text-style: bold;
+    width: 100%;
+    content-align: center middle;
+    text-align: center;
+}
+
+#menu-footer-hint {
+    color: #555555;
+    text-align: center;
+    padding: 0 0 1 0;
+    width: 100%;
     content-align: center middle;
 }
 
-#dashboard-logo {
-    height: auto;
-    max-height: 8;
-    content-align: center middle;
-    color: #03656b;
-    text-style: bold;
-    padding: 0 2;
-}
-
-GlobalMenu {
-    align: center middle;
-    background: #272c31;
-}
-
-GlobalMenu > .menu-window {
-    background: #272c31;
-}
+/* ── HelpScreen ── */
 
 HelpScreen {
     align: center middle;
@@ -286,8 +258,27 @@ HelpScreen > .menu-window {
     width: 52;
     height: auto;
     max-height: 18;
-    background: #272c31;
+    background: rgba(39, 44, 49, 0.85);
     border: round #03656b;
+}
+
+#menu-header {
+    background: #03656b;
+    color: white;
+    text-style: bold;
+    text-align: center;
+    padding: 0 1;
+    width: 100%;
+}
+
+.menu-header {
+    background: #03656b;
+    color: white;
+    text-style: bold;
+    text-align: center;
+    width: 100%;
+    padding: 0 1;
+    content-align: center middle;
 }
 
 #help-content {
