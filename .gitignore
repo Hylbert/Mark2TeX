@@ -13,6 +13,7 @@ output.pdf
 docs/superpowers/
 .openclaude.worktrees/
 .openclaude
-
+.worktrees
 
 __pycache__/
+*.egg-info

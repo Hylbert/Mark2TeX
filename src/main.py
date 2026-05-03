@@ -1,5 +1,6 @@
-from app import Mark2TeXApp
+from .app import Mark2TeXApp
 
-if __name__ == "__main__":
+
+def main() -> None:
     app = Mark2TeXApp()
     app.run()
