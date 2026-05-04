@@ -1,0 +1,96 @@
+% IEEEtran-compatible template for Mark2TeX
+% Uses IEEEtran class (available via texlive-publishers)
+\documentclass[conference, $if(lang)$\iflanguage{brazil}{}{}$endif$]{IEEEtran}
+\IEEEoverridecommandlockouts
+
+% --- CODIFICAÇÃO ---
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+% --- IDIOMA ---
+$if(lang)$
+\usepackage[$lang$]{babel}
+$else$
+\usepackage[english]{babel}
+$endif$
+
+% --- PACOTES IEEE PADRÃO ---
+\usepackage{cite}
+\usepackage{amsmath, amssymb, amsfonts}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{hyperref}
+\usepackage{array}
+\usepackage{microtype}
+
+% --- SUPORTE A CÓDIGO (Pandoc) ---
+\usepackage{fancyvrb}
+\usepackage{listings}
+\usepackage{upquote}
+\newcommand{\passthrough}[1]{#1}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+\newenvironment{Shaded}{}{}
+\newcommand{\KeywordTok}[1]{\textcolor{blue}{\textbf{#1}}}
+\newcommand{\StringTok}[1]{\textcolor{teal}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor{gray}{\textit{#1}}}
+\newcommand{\FunctionTok}[1]{\textcolor{cyan}{#1}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OtherTok}[1]{#1}
+\newcommand{\ErrorTok}[1]{\textcolor{red}{#1}}
+\newcommand{\DataTypeTok}[1]{\textcolor{purple}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor{red}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor{blue}{\textbf{#1}}}
+\newcommand{\BuiltInTok}[1]{\textcolor{purple}{#1}}
+\newcommand{\ImportTok}[1]{\textcolor{teal}{#1}}
+\newcommand{\AttributeTok}[1]{\textcolor{orange}{#1}}
+\newcommand{\OperatorTok}[1]{#1}
+\newcommand{\ExtensionTok}[1]{#1}
+
+% --- DEFINIÇÃO BIBTEX ---
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+\begin{document}
+
+\title{$title$$if(thanks)$\thanks{$thanks$}$endif$}
+
+\author{
+  \IEEEauthorblockN{$author$}
+  \IEEEauthorblockA{
+    $if(institution)$\textit{$institution$}\\$endif$
+    $if(city)$$city$$if(country)$, $country$$endif$\\$endif$
+    $if(email)$$email$$endif$
+  }
+}
+
+\maketitle
+
+$if(abstract-en)$
+\begin{abstract}
+$abstract-en$
+\end{abstract}
+$endif$
+
+$if(abstract-pt)$
+\begin{abstract}
+$abstract-pt$
+\end{abstract}
+$endif$
+
+$if(keywords-en)$
+\begin{IEEEkeywords}
+$keywords-en$
+\end{IEEEkeywords}
+$endif$
+
+$body$
+
+$if(bibliography)$
+\bibliographystyle{IEEEtran}
+\bibliography{$bibliography$}
+$endif$
+
+\end{document}

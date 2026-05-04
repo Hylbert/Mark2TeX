@@ -11,14 +11,24 @@ IMAGE_NAME = "mark2tex:latest"
 
 class DockerManager:
     def __init__(self) -> None:
-        self.project_root = Path(__file__).resolve().parents[1]
-        self.bin_dir = self.project_root / "bin"
+        self.project_root  = Path(__file__).resolve().parents[1]
+        self.bin_dir       = self.project_root / "bin"
         self.templates_dir = self.project_root / "templates"
 
+    def list_templates(self) -> list[str]:
+        """Return template names discovered from the local templates directory."""
+        if not self.templates_dir.is_dir():
+            return []
+        return sorted(
+            d.name
+            for d in self.templates_dir.iterdir()
+            if d.is_dir() and (d / "template.tex").exists()
+        )
+
     def compile(self, input_file: str, template: str):
-        cwd = Path.cwd().resolve()
+        cwd        = Path.cwd().resolve()
         input_path = cwd / input_file
-        build_sh = (self.bin_dir / "build.sh").resolve()
+        build_sh   = (self.bin_dir / "build.sh").resolve()
         templates_dir = self.templates_dir.resolve()
 
         if not input_path.exists():
@@ -26,21 +36,12 @@ class DockerManager:
             return
 
         command = [
-            "docker",
-            "run",
-            "--rm",
-            "-i",
-            "--mount",
-            f"type=bind,src={cwd},dst=/app",
-            "--mount",
-            f"type=bind,src={build_sh},dst=/opt/mark2tex/build.sh,readonly",
-            "--mount",
-            f"type=bind,src={templates_dir},dst=/app/templates,readonly",
+            "docker", "run", "--rm", "-i",
+            "--mount", f"type=bind,src={cwd},dst=/app",
+            "--mount", f"type=bind,src={build_sh},dst=/opt/mark2tex/build.sh,readonly",
+            "--mount", f"type=bind,src={templates_dir},dst=/app/templates,readonly",
             IMAGE_NAME,
-            "stdbuf",
-            "-oL",
-            "bash",
-            "/opt/mark2tex/build.sh",
+            "stdbuf", "-oL", "bash", "/opt/mark2tex/build.sh",
             f"/app/{Path(input_file).name}",
             template,
         ]
@@ -71,7 +72,7 @@ class DockerManager:
 def uninstall_docker_assets() -> None:
     try:
         client = docker.from_env()
-        image = client.images.get(IMAGE_NAME)
+        image  = client.images.get(IMAGE_NAME)
         client.images.remove(image.id, force=True)
         print(f"Imagem {IMAGE_NAME} removida com sucesso.")
     except ImageNotFound:

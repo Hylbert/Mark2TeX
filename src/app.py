@@ -60,27 +60,12 @@ class HelpScreen(ModalScreen):
             yield Label(t("help.title"), id="menu-header", classes="menu-header")
             with Vertical(id="help-content"):
                 yield Label(t("help.bindings_title"), id="help-bindings-title")
-                yield Label(
-                    "ESC / q      — "
-                    + t("menu.settings").capitalize()
-                    + " / "
-                    + t("menu.exit").lower()
-                )
+                yield Label("ESC / q      — " + t("menu.settings").capitalize() + " / " + t("menu.exit").lower())
                 yield Label("? / F1       — " + t("menu.help").capitalize())
                 yield Label("c            — " + t("btn.compile").capitalize())
                 yield Label("w            — " + t("btn.watch_on") + " / " + t("btn.watch_off"))
-                yield Label(
-                    "Tab          — "
-                    + (
-                        "Navegar entre painéis"
-                        if t("menu.exit") == "SAIR"
-                        else "Navigate between panels"
-                    )
-                )
-                yield Label(
-                    "↑ ↓          — "
-                    + ("Navegar nas listas" if t("menu.exit") == "SAIR" else "Navigate lists")
-                )
+                yield Label("Tab          — " + ("Navegar entre painéis" if t("menu.exit") == "SAIR" else "Navigate between panels"))
+                yield Label("↑ ↓          — " + ("Navegar nas listas" if t("menu.exit") == "SAIR" else "Navigate lists"))
                 yield Label("")
                 yield Label(t("help.flow_title"), id="help-commands-title")
                 yield Label(t("help.flow_1"))
@@ -101,8 +86,8 @@ class GlobalMenu(ModalScreen):
                 yield Label("─" * 46, id="menu-divider")
                 yield ListView(
                     M2TMenuOption(t("menu.settings"), item_id="opt-settings"),
-                    M2TMenuOption(t("menu.help"), item_id="opt-help"),
-                    M2TMenuOption(t("menu.exit"), item_id="opt-exit"),
+                    M2TMenuOption(t("menu.help"),     item_id="opt-help"),
+                    M2TMenuOption(t("menu.exit"),     item_id="opt-exit"),
                     id="global-menu-list",
                 )
                 yield Label("ESC · fechar", id="menu-footer-hint")
@@ -125,17 +110,16 @@ class Mark2TeXApp(App):
 
     BINDINGS = [
         ("escape", "show_global_menu", "Menu Global"),
-        ("q", "show_global_menu", "Menu Global"),
-        ("f1", "show_help_menu", "Ajuda"),
+        ("q",      "show_global_menu", "Menu Global"),
+        ("f1",     "show_help_menu",   "Ajuda"),
         ("question_mark", "show_help_menu", "Ajuda"),
-        ("c", "compile_document", "Compilar"),
-        ("w", "toggle_watch", "Watch Mode"),
+        ("c",      "compile_document", "Compilar"),
+        ("w",      "toggle_watch",     "Watch Mode"),
     ]
 
     def on_load(self) -> None:
         settings = cfg.load()
         set_language(settings.get("language", "pt_BR"))
-        # Aplica o tema salvo antes do compose
         saved_theme = settings.get("theme", "textual-dark")
         self.theme = saved_theme
 
@@ -148,17 +132,12 @@ class Mark2TeXApp(App):
                         yield ListView(id="file-list")
                     with Vertical(id="config-panel"):
                         with Vertical(id="status-panel"):
-                            yield Label(t("status.file"), id="status-file")
+                            yield Label(t("status.file"),     id="status-file")
                             yield Label(t("status.template"), id="status-template")
                         yield Label(t("panel.template_label"), id="template-title")
-                        yield ListView(
-                            OptionItem("tcc"),
-                            OptionItem("artigo"),
-                            OptionItem("projeto"),
-                            id="template-list",
-                        )
+                        yield ListView(id="template-list")
                         with Horizontal(id="action-bar"):
-                            yield Button(t("btn.compile"), id="compile-btn")
+                            yield Button(t("btn.compile"),   id="compile-btn")
                             yield Button(t("btn.watch_off"), id="watch-btn")
                 yield ProgressBar(id="progress-bar", total=100)
                 yield RichLog(id="console-panel", highlight=False, markup=False, wrap=True)
@@ -168,26 +147,37 @@ class Mark2TeXApp(App):
         yield Footer()
 
     def on_mount(self) -> None:
-        self.docker_manager = DockerManager()
+        self.docker_manager  = DockerManager()
         self.watcher_manager = WatcherManager()
-        self.is_watching = False
-        self.selected_file: str | None = None
+        self.is_watching     = False
+        self.selected_file:     str | None = None
         self.selected_template: str | None = None
         self._refresh_ui_labels()
+        self._populate_templates()
+        self._populate_files()
+
+    def _populate_templates(self) -> None:
+        """Populate the template list dynamically from the templates directory."""
+        template_list = self.query_one("#template-list", ListView)
+        template_list.clear()
+        for name in self.docker_manager.list_templates():
+            template_list.append(OptionItem(name))
+
+    def _populate_files(self) -> None:
         md_files = sorted(f for f in os.listdir(".") if f.endswith(".md"))
         file_list = self.query_one("#file-list", ListView)
         for f in md_files:
             file_list.append(OptionItem(f))
 
     def _refresh_ui_labels(self) -> None:
-        self.query_one("#file-explorer").border_title = t("panel.files")
-        self.query_one("#config-panel").border_title = t("panel.config")
-        self.query_one("#preview-panel").border_title = t("panel.preview")
-        self.query_one("#console-panel").border_title = t("panel.console")
-        self.query_one("#template-title", Label).update(t("panel.template_label"))
-        self.query_one("#status-file", Label).update(t("status.file"))
+        self.query_one("#file-explorer").border_title  = t("panel.files")
+        self.query_one("#config-panel").border_title   = t("panel.config")
+        self.query_one("#preview-panel").border_title  = t("panel.preview")
+        self.query_one("#console-panel").border_title  = t("panel.console")
+        self.query_one("#template-title",  Label).update(t("panel.template_label"))
+        self.query_one("#status-file",     Label).update(t("status.file"))
         self.query_one("#status-template", Label).update(t("status.template"))
-        self.query_one("#compile-btn", Button).label = t("btn.compile")
+        self.query_one("#compile-btn",     Button).label = t("btn.compile")
         if not self.is_watching:
             self.query_one("#watch-btn", Button).label = t("btn.watch_off")
 
@@ -268,9 +258,7 @@ class Mark2TeXApp(App):
                 lambda: self.compile_specific_document(selected_file, selected_template),
             )
             self.is_watching = True
-            btn.label = Text.assemble(
-                ("● ", "bold rgb(76,175,135)"), (t("btn.watch_on"), "white bold")
-            )
+            btn.label = Text.assemble(("● ", "bold rgb(76,175,135)"), (t("btn.watch_on"), "white bold"))
             btn.add_class("watching")
             self._log_console(f"{t('watch.on')} {selected_file}...", style="#5ab4bc")
         else:
@@ -299,13 +287,7 @@ class Mark2TeXApp(App):
             self.call_from_thread(self._apply_ui_update, action, value)
 
         ui("progress", 0)
-        ui(
-            "console",
-            (
-                f"{t('compile.start')} {selected_file} com template '{selected_template}'...",
-                "#5ab4bc",
-            ),
-        )
+        ui("console", (f"{t('compile.start')} {selected_file} com template '{selected_template}'...", "#5ab4bc"))
         try:
             for line in self.docker_manager.compile(selected_file, selected_template):
                 clean = line.strip()
