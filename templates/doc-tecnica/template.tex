@@ -5,29 +5,25 @@
 \usepackage[T1]{fontenc}
 
 % -------------------------------------------------------------------
-% FONTE  —  controlada pela variável $font$ do frontmatter
+% FONTE  —  controlada por flags booleanas geradas pelo build.sh
 %
-%   times        → Liberation Serif  (métricas idênticas à Times New Roman)
-%   arial        → Liberation Sans   (métricas pixel-a-pixel idênticas à Arial)
-%   helvetica    → Nimbus Sans       (Helvetica livre, URW)
-%   ubuntu-sans  → Ubuntu Sans       (fonte padrão da doc. técnica Mark2TeX)
+%   font-arial       → Liberation Sans   (métricas idênticas à Arial)
+%   font-helvetica   → Nimbus Sans       (Helvetica livre, URW)
+%   font-times       → Liberation Serif  (métricas idênticas à Times New Roman)
+%   font-ubuntu-sans → Ubuntu Sans
 %
-% Padrão (sem $font$): Ubuntu Sans
+% Padrão (nenhuma flag): Ubuntu Sans
 % -------------------------------------------------------------------
 \usepackage{fontspec}
-$if(font)$
-  $if(font == "arial")$
-    \setmainfont{Liberation Sans}
-  $elseif(font == "helvetica")$
-    \setmainfont{Nimbus Sans}
-  $elseif(font == "times")$
-    \setmainfont{Liberation Serif}
-  $else$
-    \setmainfont{Ubuntu Sans}
-  $endif$
+$if(font-arial)$
+  \setmainfont{Liberation Sans}
+$else$$if(font-helvetica)$
+  \setmainfont{Nimbus Sans}
+$else$$if(font-times)$
+  \setmainfont{Liberation Serif}
 $else$
   \setmainfont{Ubuntu Sans}
-$endif$
+$endif$$endif$$endif$
 
 % --- PACOTES ---
 \usepackage{geometry}

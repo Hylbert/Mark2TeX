@@ -12,33 +12,25 @@
 \usepackage[T1]{fontenc}
 
 % -------------------------------------------------------------------
-% FONTE  —  controlada pela variável $font$ do frontmatter
+% FONTE  —  controlada por flags booleanas geradas pelo build.sh
 %
-%   times        → Times New Roman  (URW Nimbus Roman, métricas idênticas)
-%   arial        → Liberation Sans  (métricas pixel-a-pixel idênticas à Arial)
-%   helvetica    → Helvetica        (URW Nimbus Sans, via fonts-urw-base35)
-%   ubuntu-sans  → Ubuntu Sans      (fonte da documentação Mark2TeX)
+%   font-arial       → Liberation Sans   (métricas idênticas à Arial)
+%   font-helvetica   → Nimbus Sans       (Helvetica livre, URW)
+%   font-ubuntu-sans → Ubuntu Sans
+%   font-times       → Liberation Serif  (métricas idênticas à Times New Roman)
 %
-% Padrão (sem $font$): Times New Roman  — ABNT NBR 14724 recomendada
+% Padrão (nenhuma flag): Liberation Serif  — ABNT NBR 14724 recomendada
 % -------------------------------------------------------------------
-$if(font)$
-$if(font)$\makeatletter\def\m@fontchoice{$font$}\makeatother$endif$
-$endif$
-
 \usepackage{fontspec}
-$if(font)$
-  $if(font == "arial")$
-    \setmainfont{Liberation Sans}
-  $elseif(font == "helvetica")$
-    \setmainfont{Nimbus Sans}
-  $elseif(font == "ubuntu-sans")$
-    \setmainfont{Ubuntu Sans}
-  $else$
-    \setmainfont{Liberation Serif}
-  $endif$
+$if(font-arial)$
+  \setmainfont{Liberation Sans}
+$else$$if(font-helvetica)$
+  \setmainfont{Nimbus Sans}
+$else$$if(font-ubuntu-sans)$
+  \setmainfont{Ubuntu Sans}
 $else$
   \setmainfont{Liberation Serif}
-$endif$
+$endif$$endif$$endif$
 
 % --- MARGENS (ABNT NBR 14724) ---
 \usepackage[a4paper,top=3cm,left=3cm,right=2cm,bottom=2cm]{geometry}
@@ -79,7 +71,7 @@ $endif$
 \newcommand{\OtherTok}[1]{#1}
 \newcommand{\ErrorTok}[1]{\textcolor{red}{#1}}
 \newcommand{\DataTypeTok}[1]{\textcolor{purple}{#1}}
-\newcommand{\DecValTok}[1]{\textcolor{red}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor{orange}{#1}}
 \newcommand{\AttributeTok}[1]{\textcolor{orange}{#1}}
 \newcommand{\BuiltInTok}[1]{\textcolor{purple}{#1}}
 \newcommand{\ImportTok}[1]{\textcolor{teal}{#1}}

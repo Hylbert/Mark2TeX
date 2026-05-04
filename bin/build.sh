@@ -79,10 +79,17 @@ if [[ -f "referencias.bib" ]]; then
     BIB_ARGS="--bibliography=referencias.bib --citeproc"
 fi
 
+# Convert --font value into a boolean Pandoc metadata flag.
+# Pandoc templates do NOT support string comparison ($if(var == "x")$),
+# so we pass one of: font-arial, font-helvetica, font-ubuntu-sans, font-times.
+# Any unrecognised value falls back to the template default.
 FONT_ARGS=""
-if [[ -n "$FONT_VALUE" ]]; then
-    FONT_ARGS="--metadata=font:$FONT_VALUE"
-fi
+case "$FONT_VALUE" in
+    arial)       FONT_ARGS="--metadata=font-arial:true" ;;
+    helvetica)   FONT_ARGS="--metadata=font-helvetica:true" ;;
+    ubuntu-sans) FONT_ARGS="--metadata=font-ubuntu-sans:true" ;;
+    times)       FONT_ARGS="--metadata=font-times:true" ;;
+esac
 
 TEMPLATE_PATH="$TEMPLATE_BASE/$TEMPLATE_TYPE/template.tex"
 
