@@ -1,6 +1,8 @@
+import os
+from typing import cast
+
 from PIL import Image
 from rich.text import Text
-import os
 
 # Paleta de cores "Sunset" do OpenClaude
 SUNSET_GRADIENT = [
@@ -12,10 +14,12 @@ SUNSET_GRADIENT = [
     (130, 60, 50),
 ]
 
-def lerp_rgb(a, b, t):
-    return tuple(int(a[i] + (b[i] - a[i]) * t) for i in range(3))
 
-def get_gradient_color(stops, t):
+def lerp_rgb(a: tuple[int, int, int], b: tuple[int, int, int], t: float) -> tuple[int, int, int]:
+    return tuple(int(a[i] + (b[i] - a[i]) * t) for i in range(3))  # type: ignore[return-value]
+
+
+def get_gradient_color(stops: list[tuple[int, int, int]], t: float) -> tuple[int, int, int]:
     t = max(0, min(1, t))
     s = t * (len(stops) - 1)
     i = int(s)
@@ -25,7 +29,10 @@ def get_gradient_color(stops, t):
     fraction = s - i
     return lerp_rgb(stops[i], stops[i + 1], fraction)
 
-def render_logo_to_text(path: str, width: int = 80, alpha_threshold: int = 30, use_gradient: bool = True) -> Text:
+
+def render_logo_to_text(
+    path: str, width: int = 80, alpha_threshold: int = 30, use_gradient: bool = True
+) -> Text:
     """
     Converte uma imagem para caracteres half-block do Rich.
     Se use_gradient=True, aplica o gradiente estilo OpenClaude.
@@ -37,17 +44,16 @@ def render_logo_to_text(path: str, width: int = 80, alpha_threshold: int = 30, u
         img = Image.open(path).convert("RGBA")
         aspect = img.height / img.width
         h = int(width * aspect * 0.5)
-        img = img.resize((width, h * 2), Image.LANCZOS)
+        img = img.resize((width, h * 2), Image.Resampling.LANCZOS)
 
         out = Text()
         for y in range(0, h * 2, 2):
-            # t_line para o gradiente vertical
             t_line = y / (h * 2 if h * 2 > 0 else 1)
 
             for x in range(width):
-                r1, g1, b1, a1 = img.getpixel((x, y))
+                r1, g1, b1, a1 = cast(tuple[int, int, int, int], img.getpixel((x, y)))
                 if y + 1 < img.height:
-                    r2, g2, b2, a2 = img.getpixel((x, y + 1))
+                    r2, g2, b2, a2 = cast(tuple[int, int, int, int], img.getpixel((x, y + 1)))
                 else:
                     r2, g2, b2, a2 = r1, g1, b1, a1
 
@@ -58,12 +64,9 @@ def render_logo_to_text(path: str, width: int = 80, alpha_threshold: int = 30, u
                     out.append(" ")
                     continue
 
-                # Determinar cores
                 if use_gradient:
-                    # t combina posição vertical e horizontal para um efeito dinâmico
                     t_char = t_line * 0.5 + (x / (width if width > 0 else 1)) * 0.5
                     color_top = get_gradient_color(SUNSET_GRADIENT, t_char)
-                    # Leve deslocamento para a cor de baixo para dar profundidade
                     color_bot = get_gradient_color(SUNSET_GRADIENT, t_char + 0.05)
 
                     c1 = f"rgb({color_top[0]},{color_top[1]},{color_top[2]})"

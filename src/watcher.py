@@ -1,8 +1,10 @@
 import os
-import time
 import threading
-from watchdog.observers import Observer
+import time
+
 from watchdog.events import FileSystemEventHandler
+from watchdog.observers import Observer
+
 
 class Mark2TeXWatcher(FileSystemEventHandler):
     def __init__(self, file_to_watch, callback, log_path="tui_console_debug.log"):
@@ -24,7 +26,7 @@ class Mark2TeXWatcher(FileSystemEventHandler):
 
     def _should_trigger(self, path: str) -> bool:
         normalized = self._normalize(path)
-        match = normalized == self.file_to_watch
+        match = bool(normalized == self.file_to_watch)
         self._log(f"event path={normalized} target={self.file_to_watch} match={match}")
         return match
 
