@@ -1,6 +1,8 @@
 import importlib
+from unittest.mock import MagicMock, patch
+
 import src
-from unittest.mock import patch, MagicMock
+
 
 def test_package_importable():
     assert importlib.import_module("src") is not None

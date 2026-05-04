@@ -1,7 +1,8 @@
-import pytest
 from pathlib import Path
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
+
 from src.docker_manager import DockerManager
+
 
 def test_manager_instantiates():
     dm = DockerManager()
@@ -23,7 +24,8 @@ def test_compile_builds_correct_command(mock_popen):
     mock_proc.returncode = 0
     mock_popen.return_value = mock_proc
 
-    import tempfile, os
+    import os
+    import tempfile
     with tempfile.NamedTemporaryFile(suffix=".md", delete=False) as f:
         f.write(b"# Test")
         tmpfile = f.name
@@ -43,6 +45,7 @@ def test_compile_builds_correct_command(mock_popen):
 @patch("src.docker_manager.docker.from_env")
 def test_uninstall_when_image_not_found(mock_docker):
     from docker.errors import ImageNotFound
+
     from src.docker_manager import uninstall_docker_assets
     mock_client = MagicMock()
     mock_client.images.get.side_effect = ImageNotFound("not found")

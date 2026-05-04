@@ -1,4 +1,3 @@
-import pytest
 from src.log_translator import log_translator
 
 # ── Supressões ────────────────────────────────────────────────────────────
@@ -31,13 +30,13 @@ def test_separator_suppressed():
 def test_latex_error_translated():
     result = log_translator("! LaTeX Error: File not found.")
     assert result is not None
-    assert "❌" in result
+    assert "✗" in result
     assert "Erro LaTeX" in result
 
 def test_generic_error_translated():
     result = log_translator("! Undefined control sequence.")
     assert result is not None
-    assert "❌" in result
+    assert "✗" in result
 
 def test_output_written_translated():
     result = log_translator("Output written on output.pdf (10 pages, 12345 bytes).")

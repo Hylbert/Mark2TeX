@@ -5,7 +5,7 @@ from pathlib import Path
 
 from platformdirs import user_config_dir
 
-CONFIG_DIR  = Path(user_config_dir("mark2tex", appauthor=False))
+CONFIG_DIR = Path(user_config_dir("mark2tex", appauthor=False))
 CONFIG_FILE = CONFIG_DIR / "config.json"
 
 SUPPORTED_LANGUAGES: dict[str, str] = {
@@ -15,7 +15,7 @@ SUPPORTED_LANGUAGES: dict[str, str] = {
 
 DEFAULTS: dict = {
     "language": "pt_BR",
-    "theme":    "textual-dark",
+    "theme": "textual-dark",
 }
 
 

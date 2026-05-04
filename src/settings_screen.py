@@ -14,10 +14,10 @@ from . import config as cfg
 from .config import SUPPORTED_LANGUAGES
 from .i18n import set_language, t
 
-
 # ---------------------------------------------------------------------------
 # Mensagens públicas
 # ---------------------------------------------------------------------------
+
 
 class LanguageChanged(Message):
     """Postada quando o idioma é alterado."""
@@ -27,11 +27,12 @@ class LanguageChanged(Message):
 # Definição de uma opção
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class _SettingDef:
-    key:       str
+    key: str
     value_key: str
-    choices:   list[str] = field(default_factory=list)
+    choices: list[str] = field(default_factory=list)
 
     @property
     def label(self) -> str:
@@ -61,10 +62,11 @@ def _make_defs(available_themes: list[str]) -> list[_SettingDef]:
 # Widget: linha de opção com controle ← valor →
 # ---------------------------------------------------------------------------
 
+
 class _OptionRow(ListItem):
     def __init__(self, definition: _SettingDef, current_label: str) -> None:
         super().__init__(id=f"opt-row-{definition.key}")
-        self._def   = definition
+        self._def = definition
         self._label = current_label
 
     def compose(self) -> ComposeResult:
@@ -81,9 +83,7 @@ class _OptionRow(ListItem):
     def update_value(self, new_label: str) -> None:
         self._label = new_label
         try:
-            self.query_one(f"#opt-ctrl-{self._def.key}", Static).update(
-                self._arrow_line(new_label)
-            )
+            self.query_one(f"#opt-ctrl-{self._def.key}", Static).update(self._arrow_line(new_label))
         except Exception:
             pass
 
@@ -111,12 +111,13 @@ class _OptionRow(ListItem):
 # SettingsScreen
 # ---------------------------------------------------------------------------
 
+
 class SettingsScreen(ModalScreen):
     BINDINGS = [
-        Binding("escape", "close",       "Fechar"),
-        Binding("left",   "prev_value",  "Valor anterior", show=False),
-        Binding("right",  "next_value",  "Próximo valor",  show=False),
-        Binding("1",      "tab_general", show=False),
+        Binding("escape", "close", "Fechar"),
+        Binding("left", "prev_value", "Valor anterior", show=False),
+        Binding("right", "next_value", "Próximo valor", show=False),
+        Binding("1", "tab_general", show=False),
     ]
 
     _TABS: list[tuple[str, str, str]] = [
@@ -125,8 +126,8 @@ class SettingsScreen(ModalScreen):
 
     def __init__(self) -> None:
         super().__init__()
-        self._config  = cfg.load()
-        self._active  = "general"
+        self._config = cfg.load()
+        self._active = "general"
         self._sel_idx = 0
         # Listagem dos temas nativos do Textual — resolvida após mount
         self._defs: list[_SettingDef] = []
@@ -155,9 +156,9 @@ class SettingsScreen(ModalScreen):
     def _raw_to_label(self, d: _SettingDef) -> str:
         raw = self._config.get(d.value_key, "")
         if d.value_key == "language":
-            return SUPPORTED_LANGUAGES.get(raw, raw)
+            return str(SUPPORTED_LANGUAGES.get(raw, raw))
         # tema: o nome interno é o próprio rótulo
-        return raw
+        return str(raw)
 
     def _label_to_raw(self, d: _SettingDef, label: str) -> str:
         if d.value_key == "language":
@@ -204,7 +205,10 @@ class SettingsScreen(ModalScreen):
     def on_list_view_highlighted(self, event: ListView.Highlighted) -> None:
         if event.list_view.id != "sw-option-list" or event.item is None:
             return
-        key = event.item.id.removeprefix("opt-row-")
+        item_id = event.item.id
+        if item_id is None:
+            return
+        key = item_id.removeprefix("opt-row-")
         idx = next((i for i, d in enumerate(self._defs) if d.key == key), 0)
         self._update_description(idx)
 
@@ -225,12 +229,12 @@ class SettingsScreen(ModalScreen):
     def _cycle(self, direction: int) -> None:
         if not self._defs:
             return
-        d       = self._defs[self._sel_idx]
+        d = self._defs[self._sel_idx]
         cur_lbl = self._raw_to_label(d)
         choices = d.choices
         if not choices:
             return
-        cur_i   = choices.index(cur_lbl) if cur_lbl in choices else 0
+        cur_i = choices.index(cur_lbl) if cur_lbl in choices else 0
         new_lbl = choices[(cur_i + direction) % len(choices)]
         new_raw = self._label_to_raw(d, new_lbl)
 
@@ -263,9 +267,7 @@ class SettingsScreen(ModalScreen):
             try:
                 lbl = self.query_one(f"#sw-tab-{key}", Label)
                 active = key == self._active
-                lbl.update(
-                    f" [{num}{t(i18n_key)}] " if active else f"  {num}{t(i18n_key)}  "
-                )
+                lbl.update(f" [{num}{t(i18n_key)}] " if active else f"  {num}{t(i18n_key)}  ")
             except Exception:
                 pass
 

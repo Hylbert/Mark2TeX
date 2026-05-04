@@ -181,7 +181,4 @@ def get_language() -> str:
 
 
 def t(key: str) -> str:
-    return (
-        _STRINGS.get(_current, {}).get(key)
-        or _STRINGS["pt_BR"].get(key, key)
-    )
+    return _STRINGS.get(_current, {}).get(key) or _STRINGS["pt_BR"].get(key, key)

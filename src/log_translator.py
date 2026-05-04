@@ -4,29 +4,29 @@ from .i18n import t
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Padrões compilados uma única vez (performance)
-_RE_PROGRESS      = re.compile(r"^PROGRESS:(\d+)%$")
-_RE_PAGE_NUMS     = re.compile(r"^(\[\d+\]\s*)+$")
-_RE_OVERFULL      = re.compile(
+_RE_PROGRESS = re.compile(r"^PROGRESS:(\d+)%$")
+_RE_PAGE_NUMS = re.compile(r"^(\[\d+\]\s*)+$")
+_RE_OVERFULL = re.compile(
     r"^(Overfull|Underfull) \\hbox \((.+?)\) in paragraph at lines (\d+)--(\d+)"
 )
-_RE_LATEX_ERROR   = re.compile(r"^! LaTeX Error: (.+)")
+_RE_LATEX_ERROR = re.compile(r"^! LaTeX Error: (.+)")
 _RE_GENERIC_ERROR = re.compile(r"^! (.+)")
-_RE_LINE_REF      = re.compile(r"^l\.(\d+)\s*(.*)")
-_RE_RUN_NUMBER    = re.compile(r"^Run number (\d+) of rule '(.+?)'")
-_RE_RUNNING       = re.compile(r"^Running '(.+?)'")
-_RE_RULE_CHANGE   = re.compile(r"^Rule '(.+?)': ")
-_RE_LATEXMK       = re.compile(r"^Latexmk: (.+)")
-_RE_DOC_CLASS     = re.compile(r"^Document Class: (\S+)")
+_RE_LINE_REF = re.compile(r"^l\.(\d+)\s*(.*)")
+_RE_RUN_NUMBER = re.compile(r"^Run number (\d+) of rule '(.+?)'")
+_RE_RUNNING = re.compile(r"^Running '(.+?)'")
+_RE_RULE_CHANGE = re.compile(r"^Rule '(.+?)': ")
+_RE_LATEXMK = re.compile(r"^Latexmk: (.+)")
+_RE_DOC_CLASS = re.compile(r"^Document Class: (\S+)")
 _RE_OUTPUT_WRITTEN = re.compile(r"^Output written on (\S+) \((\d+) pages,")
-_RE_PKG_WARN      = re.compile(r"^Package (\w+) Warning: (.+)")
-_RE_LATEX_WARN    = re.compile(r"^LaTeX Warning: (.+)")
-_RE_HOOKS_WARN    = re.compile(r"^LaTeX hooks Warning:")
-_RE_MISSING_CHAR  = re.compile(r"^Missing character: There is no")
-_RE_STY_PATH      = re.compile(r"^\(?/?(/usr/share/texlive|/etc/texmf|/usr/local/texlive)")
-_RE_FONT_DEBUG    = re.compile(r"^(\\TU/|\\OT1/|\\T1/|\\TS1/)")
-_RE_BRACKET_JUNK  = re.compile(r"^[\[\]\s]+$")
-_RE_ABNT_DIVIDER  = re.compile(r"^-{30,}$")
-_RE_PATH_ONLY     = re.compile(r"^\s*'?[\w./\\-]+\.(tex|aux|bbl|lof|lot|toc|log|xdv|pdf)'?\s*$")
+_RE_PKG_WARN = re.compile(r"^Package (\w+) Warning: (.+)")
+_RE_LATEX_WARN = re.compile(r"^LaTeX Warning: (.+)")
+_RE_HOOKS_WARN = re.compile(r"^LaTeX hooks Warning:")
+_RE_MISSING_CHAR = re.compile(r"^Missing character: There is no")
+_RE_STY_PATH = re.compile(r"^\(?/?(/usr/share/texlive|/etc/texmf|/usr/local/texlive)")
+_RE_FONT_DEBUG = re.compile(r"^(\\TU/|\\OT1/|\\T1/|\\TS1/)")
+_RE_BRACKET_JUNK = re.compile(r"^[\[\]\s]+$")
+_RE_ABNT_DIVIDER = re.compile(r"^-{30,}$")
+_RE_PATH_ONLY = re.compile(r"^\s*'?[\w./\\-]+\.(tex|aux|bbl|lof|lot|toc|log|xdv|pdf)'?\s*$")
 
 
 def log_translator(line: str) -> str | None:
@@ -77,32 +77,58 @@ def log_translator(line: str) -> str | None:
         return None
 
     _LAYOUT_PREFIXES = (
-        "Stock height", "Top and edge", "Page height", "Text height",
-        "Spine and edge", "Upper and lower", "Headheight", "Footskip",
-        "Columnsep", "Marginparsep", "Sidecapsep", "Sidebarhsep",
-        "Sidebarvsep", "Sidebarheight", "Sidefoothsep", "Sidefootvsep",
+        "Stock height",
+        "Top and edge",
+        "Page height",
+        "Text height",
+        "Spine and edge",
+        "Upper and lower",
+        "Headheight",
+        "Footskip",
+        "Columnsep",
+        "Marginparsep",
+        "Sidecapsep",
+        "Sidebarhsep",
+        "Sidebarvsep",
+        "Sidebarheight",
+        "Sidefoothsep",
+        "Sidefootvsep",
     )
     if stripped.startswith(_LAYOUT_PREFIXES):
         return None
 
     _SUPPRESS_EXACT = {
-        r"\write18 enabled.", "entering extended mode", "(./output.tex",
-        "Redoing nameref's sectioning", "Redoing nameref's label", "ment class",
+        r"\write18 enabled.",
+        "entering extended mode",
+        "(./output.tex",
+        "Redoing nameref's sectioning",
+        "Redoing nameref's label",
+        "ment class",
         "For additional information on amsmath, use the `?' option.",
         "see the transcript file for additional information",
-        "Transcript written on output.log.", "bibitemlist",
-        "output.aux", "output.lof", "output.lot", "output.toc", "TeX engine is XeTeX",
+        "Transcript written on output.log.",
+        "bibitemlist",
+        "output.aux",
+        "output.lof",
+        "output.lot",
+        "output.toc",
+        "TeX engine is XeTeX",
     }
     if stripped in _SUPPRESS_EXACT:
         return None
 
     _SUPPRESS_PREFIX = (
-        "L3 programming layer", "LaTeX2e <", "(|extractbb",
+        "L3 programming layer",
+        "LaTeX2e <",
+        "(|extractbb",
         "Package hyperref Warning: Rerun",
         "Package hyperref Warning: Suppressing empty link",
-        "Changed files, or newly in use", "The top-level auxiliary file",
-        "Em caso de dúvidas", "http://www.abntex",
-        "See the LaTeX manual", "Type  H <return>",
+        "Changed files, or newly in use",
+        "The top-level auxiliary file",
+        "Em caso de dúvidas",
+        "http://www.abntex",
+        "See the LaTeX manual",
+        "Type  H <return>",
     )
     if stripped.startswith(_SUPPRESS_PREFIX):
         return None
