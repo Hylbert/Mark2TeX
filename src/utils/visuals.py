@@ -92,7 +92,7 @@ _BANNER_TEX = [
 ]
 
 _GRAD_MARK2 = [
-    (3, 101, 107),  # #03656b — topo
+    (3, 101, 107),
     (3, 101, 107),
     (40, 122, 128),
     (40, 122, 128),
@@ -101,7 +101,7 @@ _GRAD_MARK2 = [
 ]
 
 _GRAD_TEX = [
-    (250, 250, 250),  # #fafafa — topo
+    (250, 250, 250),
     (250, 250, 250),
     (200, 220, 221),
     (200, 220, 221),
@@ -155,15 +155,31 @@ class M2TBannerWidget(Widget):
 # ---------------------------------------------------------------------------
 
 _MENU_ART: dict[str, tuple[str, str]] = {
+    # ── Português ──────────────────────────────────────────────────────────
     "AJUDA": (
         "┌─┐   ┬ ┬ ┬ ┌┬┐ ┌─┐\n├─┤   │ │ │  ││ ├─┤\n┴ ┴ └─┘ └─┘ ─┴┘ ┴ ┴",
-        # selected — double line
         "╔═╗   ╦ ╦ ╦ ╔╦╗ ╔═╗\n╠═╣   ║ ║ ║  ║║ ╠═╣\n╩ ╩ ╚═╝ ╚═╝ ═╩╝ ╩ ╩",
     ),
     "SAIR": (
         "┌─┐ ┌─┐ ┬ ┬─┐\n└─┐ ├─┤ │ │┬┘\n└─┘ ┴ ┴ ┴ ┴└─",
-        # selected — double line
         "╔═╗ ╔═╗ ╦ ╦═╗\n╚═╗ ╠═╣ ║ ║╔╝\n╚═╝ ╩ ╩ ╩ ╩╚═",
+    ),
+    "AJUSTES": (
+        "┌─┐   ┬ ┬  ┬  ┌─┐  ┌┬┐  ┌─┐  ┌─┐\n├─┤   ││  │ │└─┐   │   ├┤   └─┐\n┴ ┴ └─┘ └─┘ └─┘   ┴  └─┘ └─┘",
+        "╔═╗   ╦ ╦  ╦  ╔═╗  ╔╦╗  ╔═╗  ╔═╗\n╠═╣   ║ ║  ║ ║ ╚═╗   ║   ╠╣   ╚═╗\n╩ ╩ ╚═╝ ╚═╝ ╚═╝   ╩  ╚═╝ ╚═╝",
+    ),
+    # ── English ────────────────────────────────────────────────────────────
+    "SETTINGS": (
+        "┌─┐ ┌─┐ ┌┬┐ ┌┬┐ ┬ ┌┐┌ ┌─┐ ┌─┐\n└─┐ ├┤   │   │  │ │││ │ ┬ └─┐\n└─┘ └─┘  ┴   ┴  ┴ ┘└┘ └─┘ └─┘",
+        "╔═╗ ╔═╗ ╔╦╗ ╔╦╗ ╦ ╔╗╔ ╔═╗ ╔═╗\n╚═╗ ╠╣   ║   ║  ║ ║║║ ║ ╦ ╚═╗\n╚═╝ ╚═╝  ╩   ╩  ╩ ╝╚╝ ╚═╝ ╚═╝",
+    ),
+    "HELP": (
+        "┬ ┬ ┌─┐ ┬  ┌─┐\n├─┤ ├┤  │  ├─┘\n┴ ┴ └─┘ ┴─┘┴  ",
+        "╦ ╦ ╔═╗ ╦  ╔═╗\n╠═╣ ╠╣  ║  ╠═╝\n╩ ╩ ╚═╝ ╩═╝╩  ",
+    ),
+    "EXIT": (
+        "┌─┐ ─┐ ┬ ┬ ┌┬┐\n├┤   │  │ │  │ \n└─┘ └┘ └─┘  ┴ ",
+        "╔═╗ ═╗ ╦ ╦ ╔╦╗\n╠╣   ║  ║ ║  ║ \n╚═╝ ╚╝ ╚═╝  ╩ ",
     ),
 }
 
@@ -192,5 +208,38 @@ class M2TMenuOption(ListItem):
             else:
                 art.update(self._arts[0])
                 art.set_classes("menu-art-label menu-art-normal")
+        except Exception:
+            pass
+
+
+# ---------------------------------------------------------------------------
+# M2TSettingsOption — opção de seleção única (● / ○) para telas de settings
+# ---------------------------------------------------------------------------
+
+
+class M2TSettingsOption(ListItem):
+    """
+    ListItem para opções de settings.
+    Troca ○ → ● visualmente via mark_selected().
+    """
+
+    def __init__(self, label: str, value: str, selected: bool = False) -> None:
+        super().__init__(id=f"opt-{value}")
+        self._label = label
+        self._value = value
+        self._selected = selected
+
+    def compose(self):
+        prefix = "● " if self._selected else "○ "
+        yield Static(
+            prefix + self._label,
+            id=f"static-{self._value}",
+            classes="settings-option",
+        )
+
+    def mark_selected(self, yes: bool) -> None:
+        try:
+            s = self.query_one(f"#static-{self._value}", Static)
+            s.update(("● " if yes else "○ ") + self._label)
         except Exception:
             pass

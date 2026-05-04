@@ -303,3 +303,87 @@ HelpScreen > .menu-window {
     border-top: solid #03656b 20%;
     width: 100%;
 }
+
+/* ── SettingsScreen ── */
+
+SettingsScreen {
+    align: center middle;
+    background: rgba(0, 0, 0, 0.65);
+}
+
+SettingsScreen > .menu-window {
+    width: 90;
+    height: auto;
+    background: rgba(39, 44, 49, 0.95);
+    border: round #03656b;
+}
+
+#settings-body {
+    height: auto;
+    min-height: 12;
+}
+
+#settings-categories {
+    width: 28;
+    border-right: solid #03656b 40%;
+    padding: 1 2;
+    height: auto;
+}
+
+.settings-cat-active {
+    color: #4caf87;
+    text-style: bold;
+    padding: 0 1;
+}
+
+#settings-options {
+    width: 1fr;
+    padding: 1 2;
+    height: auto;
+}
+
+.settings-section-title {
+    color: #03656b;
+    text-style: bold;
+    padding-bottom: 1;
+}
+
+.settings-option {
+    color: white;
+    padding: 0 1;
+}
+
+#language-list {
+    height: auto;
+    background: transparent;
+    border: none;
+}
+
+#language-list ListItem {
+    background: transparent;
+    padding: 0 1;
+}
+
+#language-list ListItem.--highlight {
+    background: rgba(3, 101, 107, 0.3);
+}
+
+#settings-path-hint {
+    color: #555555;
+    text-style: italic;
+    padding-top: 1;
+    border-top: solid #03656b 20%;
+    width: 100%;
+    margin-top: 1;
+}
+
+#settings-actions {
+    height: auto;
+    padding: 1 2;
+    align: right middle;
+}
+
+#settings-actions Button {
+    margin: 0 1;
+    min-width: 14;
+}
