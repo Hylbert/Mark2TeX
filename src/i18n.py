@@ -8,10 +8,16 @@ _STRINGS: dict[str, dict[str, str]] = {
         "menu.settings": "AJUSTES",
         "menu.help": "AJUDA",
         "menu.exit": "SAIR",
-        # Tela de Settings
-        "settings.title": "AJUSTES",
-        "settings.tab_language": "Idioma",
-        "settings.language": "Idioma da interface",
+        # Abas de settings
+        "settings.tab_general": "geral",
+        # Opções de settings
+        "settings.opt_language": "Idioma",
+        "settings.desc_language": (
+            "Define o idioma da interface.\n\n"
+            "Use ← → para alternar entre\n"
+            "os idiomas disponíveis.\n\n"
+            "A alteração é aplicada\nimediatamente."
+        ),
         "settings.saved_at": "Config em:",
         # Console / compilação
         "compile.select_file": "❌ Selecione um arquivo e um template para compilar.",
@@ -42,10 +48,16 @@ _STRINGS: dict[str, dict[str, str]] = {
         "menu.settings": "SETTINGS",
         "menu.help": "HELP",
         "menu.exit": "EXIT",
-        # Tela de Settings
-        "settings.title": "SETTINGS",
-        "settings.tab_language": "Language",
-        "settings.language": "Interface language",
+        # Abas de settings
+        "settings.tab_general": "general",
+        # Opções de settings
+        "settings.opt_language": "Language",
+        "settings.desc_language": (
+            "Sets the interface language.\n\n"
+            "Use ← → to cycle through\n"
+            "available languages.\n\n"
+            "Change is applied\nimmediately."
+        ),
         "settings.saved_at": "Config at:",
         # Console / compilação
         "compile.select_file": "❌ Select a file and a template to compile.",
