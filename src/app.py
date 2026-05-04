@@ -33,9 +33,9 @@ from .watcher import WatcherManager
 # Fontes disponíveis: (id interno, rótulo exibido na TUI)
 # ---------------------------------------------------------------------------
 AVAILABLE_FONTS: list[tuple[str, str]] = [
-    ("times",       "Times New Roman  (Liberation Serif)"),
-    ("arial",       "Arial            (Liberation Sans)"),
-    ("helvetica",   "Helvetica        (Nimbus Sans)"),
+    ("times",       "Liberation Serif  (Times)"),
+    ("arial",       "Liberation Sans   (Arial)"),
+    ("helvetica",   "Nimbus Sans       (Helvetica)"),
     ("ubuntu-sans", "Ubuntu Sans"),
 ]
 
@@ -189,14 +189,19 @@ class Mark2TeXApp(App):
                     with Vertical(id="file-explorer"):
                         yield ListView(id="file-list")
                     with Vertical(id="config-panel"):
+                        # Status bar — arquivo, template e fonte selecionados
                         with Vertical(id="status-panel"):
                             yield Label(t("status.file"),     id="status-file")
                             yield Label(t("status.template"), id="status-template")
                             yield Label(t("status.font"),     id="status-font")
-                        yield Label(t("panel.template_label"), id="template-title")
-                        yield ListView(id="template-list")
-                        yield Label(t("panel.font_label"), id="font-title")
-                        yield ListView(id="font-list")
+                        # Seleção de template e fonte lado a lado
+                        with Horizontal(id="selector-row"):
+                            with Vertical(id="template-col"):
+                                yield Label(t("panel.template_label"), id="template-title")
+                                yield ListView(id="template-list")
+                            with Vertical(id="font-col"):
+                                yield Label(t("panel.font_label"), id="font-title")
+                                yield ListView(id="font-list")
                         with Horizontal(id="action-bar"):
                             yield Button(t("btn.compile"),   id="compile-btn")
                             yield Button(t("btn.watch_off"), id="watch-btn")

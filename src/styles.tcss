@@ -52,19 +52,61 @@ Header {
     border-bottom: solid #03656b 40%;
 }
 
+/* ── Linha de seletores (template | fonte) ── */
+
+#selector-row {
+    height: 1fr;
+    border-bottom: solid #03656b 40%;
+}
+
+/* Coluna de templates */
+#template-col {
+    width: 1fr;
+    height: 1fr;
+    border-right: solid #03656b 40%;
+    padding: 0;
+}
+
 #template-title {
-    background: transparent;
+    background: #03656b 20%;
     color: #fafafa;
     text-style: bold;
     padding: 0 2;
     width: 100%;
+    text-align: center;
+    border-bottom: solid #03656b 30%;
 }
 
 #template-list {
-    height: auto;
+    height: 1fr;
     background: transparent;
     border: none;
 }
+
+/* Coluna de fontes */
+#font-col {
+    width: 1fr;
+    height: 1fr;
+    padding: 0;
+}
+
+#font-title {
+    background: #03656b 20%;
+    color: #fafafa;
+    text-style: bold;
+    padding: 0 2;
+    width: 100%;
+    text-align: center;
+    border-bottom: solid #03656b 30%;
+}
+
+#font-list {
+    height: 1fr;
+    background: transparent;
+    border: none;
+}
+
+/* ── Barra de ações ── */
 
 #action-bar {
     height: auto;
