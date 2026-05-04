@@ -19,7 +19,7 @@ RUN apt-get update && apt-get install -y \
     ttf-mscorefonts-installer \
     fonts-liberation \
     fonts-urw-base35 \
-    ubuntu-font-family \
+    fonts-ubuntu \
     make \
     bash \
     && rm -rf /var/lib/apt/lists/*
