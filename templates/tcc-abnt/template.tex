@@ -10,7 +10,35 @@
 % --- CODIFICAÇÃO ---
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
-\usepackage{times}
+
+% -------------------------------------------------------------------
+% FONTE  —  controlada pela variável $font$ do frontmatter
+%
+%   times        → Times New Roman  (URW Nimbus Roman, métricas idênticas)
+%   arial        → Liberation Sans  (métricas pixel-a-pixel idênticas à Arial)
+%   helvetica    → Helvetica        (URW Nimbus Sans, via fonts-urw-base35)
+%   ubuntu-sans  → Ubuntu Sans      (fonte da documentação Mark2TeX)
+%
+% Padrão (sem $font$): Times New Roman  — ABNT NBR 14724 recomendada
+% -------------------------------------------------------------------
+$if(font)$
+$if(font)$\makeatletter\def\m@fontchoice{$font$}\makeatother$endif$
+$endif$
+
+\usepackage{fontspec}
+$if(font)$
+  $if(font == "arial")$
+    \setmainfont{Liberation Sans}
+  $elseif(font == "helvetica")$
+    \setmainfont{Nimbus Sans}
+  $elseif(font == "ubuntu-sans")$
+    \setmainfont{Ubuntu Sans}
+  $else$
+    \setmainfont{Liberation Serif}
+  $endif$
+$else$
+  \setmainfont{Liberation Serif}
+$endif$
 
 % --- MARGENS (ABNT NBR 14724) ---
 \usepackage[a4paper,top=3cm,left=3cm,right=2cm,bottom=2cm]{geometry}
@@ -85,8 +113,6 @@
 
 % -------------------------------------------------------------------
 % NORMALIZAÇÃO DOS TÍTULOS PRÉ/PÓS-TEXTUAIS
-% O abntex2 com chapter=TITLE usa fonte grande nesses ambientes.
-% Redefine para seguir ABNT: negrito, 12pt, maiúsculas, centralizado.
 % -------------------------------------------------------------------
 \renewcommand{\ABNTEXchapterfont}{\bfseries}
 \renewcommand{\ABNTEXchapterfontsize}{\normalsize}
