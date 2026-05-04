@@ -17,3 +17,5 @@ docs/superpowers/
 
 __pycache__/
 *.egg-info
+.coverage
+.pytest_cache/
