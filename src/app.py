@@ -152,9 +152,10 @@ class Mark2TeXApp(App):
     def on_mount(self) -> None:
         self.docker_manager  = DockerManager()
         self.watcher_manager = WatcherManager()
-        self.is_watching     = False
+        self.is_watching      = False
         self.selected_file:     str | None = None
         self.selected_template: str | None = None
+        self._console_lines:    list[str]  = []   # buffer para _copy_console
         self._refresh_ui_labels()
         self._populate_templates()
         self._populate_files()
@@ -242,15 +243,13 @@ class Mark2TeXApp(App):
             self._copy_console()
 
     def _copy_console(self) -> None:
-        console = self.query_one("#console-panel", RichLog)
-        lines = [segment.text for segment in console._lines]  # type: ignore[attr-defined]
-        text = "".join(lines).strip()
+        text = "\n".join(self._console_lines).strip()
         try:
             pyperclip.copy(text)
             btn = self.query_one("#copy-console-btn", Button)
             btn.label = "✓"
             btn.add_class("console-action-btn--copied")
-            self.set_timer(1.5, lambda: self._reset_copy_btn())
+            self.set_timer(1.5, self._reset_copy_btn)
         except Exception:
             self._log_console("❌ Não foi possível copiar para a área de transferência.", style="#e05c5c")
 
@@ -260,6 +259,7 @@ class Mark2TeXApp(App):
         btn.remove_class("console-action-btn--copied")
 
     def _log_console(self, message: str, style: str = "white") -> None:
+        self._console_lines.append(message)
         console = self.query_one("#console-panel", RichLog)
         console.write(Text(message, style=style))
         console.scroll_end()
