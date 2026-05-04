@@ -43,13 +43,13 @@ Mark2TeX is a command-line tool that converts Markdown files into publication-re
 pipx install -e .
 
 # 2 — build the Docker image (first run only)
-make build
+make build-image
 
 # 3 — open the TUI inside your project folder
 mark2tex
 ```
 
-> **Important:** `make build` must be run at least once before the first compilation. It builds the `mark2tex:latest` Docker image that contains XeLaTeX, Pandoc, and all required fonts. Subsequent runs reuse the cached image unless the `Dockerfile` changes.
+> **Important:** `make build-image` must be run at least once before the first compilation. It builds the `mark2tex:latest` Docker image that contains XeLaTeX, Pandoc, and all required fonts. Subsequent runs reuse the cached image unless the `Dockerfile` changes.
 
 ## TUI at a Glance
 

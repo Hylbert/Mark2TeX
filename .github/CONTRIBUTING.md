@@ -84,7 +84,7 @@ We use [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).
 ```
 feat(templates): add ABNT article template
 fix(build.sh): normalize CRLF line endings
-docs(readme): update quickstart with make build step
+docs(readme): update quickstart with make build-image step
 ```
 
 ---
@@ -119,10 +119,10 @@ docs(readme): update quickstart with make build step
 pipx install -e .
 
 # Build the Docker image (required before first compilation)
-make build
+make build-image
 ```
 
-> **Why `make build`?** The `make build` command constructs the `mark2tex:latest` Docker image containing XeLaTeX, Pandoc, and all required fonts. Without it, the compilation pipeline has nothing to run inside. After the initial build, Docker caches the image — you only need to rebuild when the `Dockerfile` changes.
+> **Why `make build-image`?** This command builds the `mark2tex:latest` Docker image containing XeLaTeX, Pandoc, and all required fonts. Without it, the compilation pipeline has nothing to run inside. After the initial build, Docker caches the image — you only need to rebuild when the `Dockerfile` changes.
 
 ### Running the TUI
 
@@ -165,6 +165,6 @@ Mark2TeX/
 ├── examples/             # Example .md files for each template
 ├── docs/                 # Extended documentation
 ├── Dockerfile            # Docker image definition
-├── Makefile              # Helper targets: build, compile, test
+├── Makefile              # Helper targets: build-image, compile, test
 └── pyproject.toml        # Python package metadata
 ```
