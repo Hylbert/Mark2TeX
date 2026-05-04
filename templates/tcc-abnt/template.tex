@@ -78,10 +78,18 @@
 % METADADOS
 % -------------------------------------------------------------------
 \titulo{$title$}
-\autor{$for(author)$$if(author.name)$$author.name$$else$$author$$endif$$sep$ \\ $endfor$}
+\autor{$for(author)$$if(author.name)$$author.name$$else$$author$$endif$$sep$\\$endfor$}
 \instituicao{$if(institution)$$institution$$else$Instituição de Ensino$endif$}
 \local{$if(city)$$city$$else$Cidade$endif$}
 \data{$if(year)$$year$$else$\the\year$endif$}
+
+% -------------------------------------------------------------------
+% NORMALIZAÇÃO DOS TÍTULOS PRÉ/PÓS-TEXTUAIS
+% O abntex2 com chapter=TITLE usa fonte grande nesses ambientes.
+% Redefine para seguir ABNT: negrito, 12pt, maiúsculas, centralizado.
+% -------------------------------------------------------------------
+\renewcommand{\ABNTEXchapterfont}{\bfseries}
+\renewcommand{\ABNTEXchapterfontsize}{\normalsize}
 
 % -------------------------------------------------------------------
 \begin{document}
@@ -89,8 +97,6 @@
 
 % =====================================================================
 % CAPA  (ABNT NBR 14724)
-% Ordem: logo · cabeçalho · autor · título · local/ano
-% Fonte 12, negrito, maiúsculas, centralizado, esp. 1,0
 % =====================================================================
 \begin{capa}
   \center
@@ -212,7 +218,7 @@ $endif$
 $if(acknowledgements)$
 \newpage
 \thispagestyle{empty}
-\begin{center}{\ABNTEXchapterfont\bfseries AGRADECIMENTOS}\end{center}
+\begin{center}{\ABNTEXchapterfont\bfseries\normalsize AGRADECIMENTOS}\end{center}
 \vspace{\onelineskip}
 $acknowledgements$
 $endif$
