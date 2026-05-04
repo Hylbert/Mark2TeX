@@ -7,12 +7,12 @@
 % -------------------------------------------------------------------
 % FONTE  —  controlada por flags booleanas geradas pelo build.sh
 %
-%   font-arial       → Liberation Sans   (métricas idênticas à Arial)
-%   font-helvetica   → Nimbus Sans       (Helvetica livre, URW)
-%   font-times       → Liberation Serif  (métricas idênticas à Times New Roman)
-%   font-ubuntu-sans → Ubuntu Sans
+%   font-arial     → Liberation Sans   (métricas idênticas à Arial)
+%   font-helvetica → Nimbus Sans       (Helvetica livre, URW)
+%   font-times     → Liberation Serif  (métricas idênticas à Times New Roman)
+%   font-ubuntu    → Ubuntu            (família clássica, estáticas disponíveis)
 %
-% Padrão (nenhuma flag): Ubuntu Sans
+% Padrão (nenhuma flag): Ubuntu
 % -------------------------------------------------------------------
 \usepackage{fontspec}
 $if(font-arial)$
@@ -22,7 +22,7 @@ $else$$if(font-helvetica)$
 $else$$if(font-times)$
   \setmainfont{Liberation Serif}
 $else$
-  \setmainfont{Ubuntu Sans}
+  \setmainfont{Ubuntu}
 $endif$$endif$$endif$
 
 % --- PACOTES ---

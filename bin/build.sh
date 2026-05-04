@@ -37,7 +37,7 @@ if [[ ! -f "$INPUT_FILE" ]]; then
     exit 1
 fi
 
-# Discover valid templates dynamically from the templates directory
+# Discover valid templates dynamically
 ALLOWED_TEMPLATES=()
 while IFS= read -r -d '' dir; do
     name=$(basename "$dir")
@@ -79,16 +79,15 @@ if [[ -f "referencias.bib" ]]; then
     BIB_ARGS="--bibliography=referencias.bib --citeproc"
 fi
 
-# Convert --font value into a boolean Pandoc metadata flag.
-# Pandoc templates do NOT support string comparison ($if(var == "x")$),
-# so we pass one of: font-arial, font-helvetica, font-ubuntu-sans, font-times.
-# Any unrecognised value falls back to the template default.
+# Converte --font em flag booleana para o Pandoc.
+# Pandoc NÃO suporta comparação de strings em templates ($if(var == "x")$).
+# Valores aceitos: times | arial | helvetica | ubuntu
 FONT_ARGS=""
 case "$FONT_VALUE" in
-    arial)       FONT_ARGS="--metadata=font-arial:true" ;;
-    helvetica)   FONT_ARGS="--metadata=font-helvetica:true" ;;
-    ubuntu-sans) FONT_ARGS="--metadata=font-ubuntu-sans:true" ;;
-    times)       FONT_ARGS="--metadata=font-times:true" ;;
+    arial)     FONT_ARGS="--metadata=font-arial:true" ;;
+    helvetica) FONT_ARGS="--metadata=font-helvetica:true" ;;
+    ubuntu)    FONT_ARGS="--metadata=font-ubuntu:true" ;;
+    times)     FONT_ARGS="--metadata=font-times:true" ;;
 esac
 
 TEMPLATE_PATH="$TEMPLATE_BASE/$TEMPLATE_TYPE/template.tex"

@@ -33,10 +33,10 @@ from .watcher import WatcherManager
 # Fontes disponíveis: (id interno, rótulo exibido na TUI)
 # ---------------------------------------------------------------------------
 AVAILABLE_FONTS: list[tuple[str, str]] = [
-    ("times",       "Liberation Serif  (Times)"),
-    ("arial",       "Liberation Sans   (Arial)"),
-    ("helvetica",   "Nimbus Sans       (Helvetica)"),
-    ("ubuntu-sans", "Ubuntu Sans"),
+    ("times",     "Liberation Serif  (Times)"),
+    ("arial",     "Liberation Sans   (Arial)"),
+    ("helvetica", "Nimbus Sans       (Helvetica)"),
+    ("ubuntu",    "Ubuntu"),
 ]
 
 
@@ -59,16 +59,7 @@ _logger = _setup_logger()
 
 
 def _copy_to_clipboard(text: str) -> None:
-    """Copia texto para a área de transferência.
-
-    Tenta, em ordem:
-      1. pyperclip  (cross-platform, requer xclip/xsel/wl-clipboard no Linux)
-      2. wl-copy    (Wayland nativo)
-      3. xclip      (X11)
-      4. xsel       (X11 alternativo)
-    Lança RuntimeError se nenhum método funcionar.
-    """
-    # 1. pyperclip
+    """Copia texto para a área de transferência."""
     try:
         import pyperclip
         pyperclip.copy(text)
@@ -76,7 +67,6 @@ def _copy_to_clipboard(text: str) -> None:
     except Exception:
         pass
 
-    # 2-4. ferramentas de sistema
     for cmd in (
         ["wl-copy"],
         ["xclip", "-selection", "clipboard"],
@@ -189,12 +179,10 @@ class Mark2TeXApp(App):
                     with Vertical(id="file-explorer"):
                         yield ListView(id="file-list")
                     with Vertical(id="config-panel"):
-                        # Status bar — arquivo, template e fonte selecionados
                         with Vertical(id="status-panel"):
                             yield Label(t("status.file"),     id="status-file")
                             yield Label(t("status.template"), id="status-template")
                             yield Label(t("status.font"),     id="status-font")
-                        # Seleção de template e fonte lado a lado
                         with Horizontal(id="selector-row"):
                             with Vertical(id="template-col"):
                                 yield Label(t("panel.template_label"), id="template-title")
@@ -207,7 +195,7 @@ class Mark2TeXApp(App):
                             yield Button(t("btn.watch_off"), id="watch-btn")
                 yield ProgressBar(id="progress-bar", total=100)
                 with Horizontal(id="console-bar"):
-                    yield Button("⧉", id="copy-console-btn", classes="console-action-btn")
+                    yield Button("⊙", id="copy-console-btn", classes="console-action-btn")
                 yield RichLog(id="console-panel", highlight=False, markup=False, wrap=True)
             with Vertical(id="preview-panel"):
                 with ScrollableContainer(id="preview-scroll"):
@@ -332,7 +320,7 @@ class Mark2TeXApp(App):
 
     def _reset_copy_btn(self) -> None:
         btn = self.query_one("#copy-console-btn", Button)
-        btn.label = "⧉"
+        btn.label = "⊙"
         btn.remove_class("console-action-btn--copied")
 
     def _log_console(self, message: str, style: str = "white") -> None:

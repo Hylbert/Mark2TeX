@@ -14,10 +14,10 @@
 % -------------------------------------------------------------------
 % FONTE  —  controlada por flags booleanas geradas pelo build.sh
 %
-%   font-arial       → Liberation Sans   (métricas idênticas à Arial)
-%   font-helvetica   → Nimbus Sans       (Helvetica livre, URW)
-%   font-ubuntu-sans → Ubuntu Sans
-%   font-times       → Liberation Serif  (métricas idênticas à Times New Roman)
+%   font-arial     → Liberation Sans   (métricas idênticas à Arial)
+%   font-helvetica → Nimbus Sans       (Helvetica livre, URW)
+%   font-ubuntu    → Ubuntu            (família clássica, estáticas disponíveis)
+%   font-times     → Liberation Serif  (métricas idênticas à Times New Roman)
 %
 % Padrão (nenhuma flag): Liberation Serif  — ABNT NBR 14724 recomendada
 % -------------------------------------------------------------------
@@ -26,8 +26,8 @@ $if(font-arial)$
   \setmainfont{Liberation Sans}
 $else$$if(font-helvetica)$
   \setmainfont{Nimbus Sans}
-$else$$if(font-ubuntu-sans)$
-  \setmainfont{Ubuntu Sans}
+$else$$if(font-ubuntu)$
+  \setmainfont{Ubuntu}
 $else$
   \setmainfont{Liberation Serif}
 $endif$$endif$$endif$
@@ -239,6 +239,7 @@ $if(acknowledgements)$
 \begin{center}{\ABNTEXchapterfont\bfseries\normalsize AGRADECIMENTOS}\end{center}
 \vspace{\onelineskip}
 $acknowledgements$
+\clearpage
 $endif$
 
 $if(epigraph)$
@@ -252,6 +253,8 @@ $if(epigraph)$
 $endif$
 
 $if(abstract-pt)$
+\newpage
+\thispagestyle{empty}
 \begin{resumoumacoluna}
 \noindent\textbf{RESUMO:}\vspace{\onelineskip}
 
@@ -260,9 +263,12 @@ $abstract-pt$
 \vspace{\onelineskip}
 \noindent\textbf{Palavras-chave}: $if(keywords-pt)$$keywords-pt$$endif$.
 \end{resumoumacoluna}
+\clearpage
 $endif$
 
 $if(abstract-en)$
+\newpage
+\thispagestyle{empty}
 \renewcommand{\resumoname}{Abstract}
 \begin{resumoumacoluna}
 \noindent\textbf{ABSTRACT:}\vspace{\onelineskip}
@@ -272,6 +278,7 @@ $abstract-en$
 \vspace{\onelineskip}
 \noindent\textbf{Keywords}: $if(keywords-en)$$keywords-en$$endif$.
 \end{resumoumacoluna}
+\clearpage
 $endif$
 
 $if(list-of-figures)$
