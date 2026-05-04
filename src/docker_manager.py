@@ -26,14 +26,23 @@ class DockerManager:
             return
 
         command = [
-            "docker", "run", "--rm",
+            "docker",
+            "run",
+            "--rm",
             "-i",
-            "--mount", f"type=bind,src={cwd},dst=/app",
-            "--mount", f"type=bind,src={build_sh},dst=/opt/mark2tex/build.sh,readonly",
-            "--mount", f"type=bind,src={templates_dir},dst=/app/templates,readonly",
+            "--mount",
+            f"type=bind,src={cwd},dst=/app",
+            "--mount",
+            f"type=bind,src={build_sh},dst=/opt/mark2tex/build.sh,readonly",
+            "--mount",
+            f"type=bind,src={templates_dir},dst=/app/templates,readonly",
             IMAGE_NAME,
-            "stdbuf", "-oL", "bash", "/opt/mark2tex/build.sh",
-            f"/app/{Path(input_file).name}", template,
+            "stdbuf",
+            "-oL",
+            "bash",
+            "/opt/mark2tex/build.sh",
+            f"/app/{Path(input_file).name}",
+            template,
         ]
 
         if platform.system() != "Windows":
@@ -52,8 +61,7 @@ class DockerManager:
         )
 
         if process.stdout is not None:
-            for line in process.stdout:
-                yield line
+            yield from process.stdout
 
         process.wait()
         if process.returncode != 0:

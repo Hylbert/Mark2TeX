@@ -6,16 +6,16 @@ from textual.app import RenderResult
 from textual.widget import Widget
 from textual.widgets import ListItem, Static
 
-
 # ---------------------------------------------------------------------------
 # JSON-based assets (logo.json / icon.json)
 # ---------------------------------------------------------------------------
+
 
 def _render_art(asset_path: str) -> Text:
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     full_path = os.path.join(base_dir, "assets", asset_path)
     try:
-        with open(full_path, "r") as f:
+        with open(full_path) as f:
             data = json.load(f)
     except (FileNotFoundError, json.JSONDecodeError) as e:
         return Text(f"Error loading asset {asset_path}: {e}", style="red")
@@ -60,8 +60,8 @@ def _render_block(lines: list, palette: list, text: Text) -> None:
         width = len(line)
         t_v = row_idx / max(len(lines) - 1, 1)
         for col_idx, ch in enumerate(line):
-            t_h   = col_idx / max(width - 1, 1)
-            t     = t_v * 0.7 + t_h * 0.3
+            t_h = col_idx / max(width - 1, 1)
+            t = t_v * 0.7 + t_h * 0.3
             color = _grad_color_from(palette, t)
             style = f"bold {color}" if ch in _BOX_CHARS else "rgb(40,45,48)"
             text.append(ch, style=style)
@@ -79,7 +79,7 @@ _BANNER_MARK2 = [
     "██╔████╔██║███████║██████╔╝█████╔╝ ",
     "██║╚██╔╝██║██╔══██║██╔══██╗██╔═██╗ ",
     "██║ ╚═╝ ██║██║  ██║██║  ██║██║  ██╗",
-    "╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝",                               
+    "╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝",
 ]
 
 _BANNER_TEX = [
@@ -88,17 +88,16 @@ _BANNER_TEX = [
     " █████╔╝   ██║   █████╗   ╚███╔╝ ",
     "██╔═══╝    ██║   ██╔══╝   ██╔██╗ ",
     "███████╗   ██║   ███████╗██╔╝ ██╗",
-    "╚══════╝   ╚═╝   ╚══════╝╚═╝  ╚═╝",                 
-                                 
+    "╚══════╝   ╚═╝   ╚══════╝╚═╝  ╚═╝",
 ]
 
 _GRAD_MARK2 = [
-    (  3, 101, 107),  # #03656b — topo
-    (  3, 101, 107),
-    ( 40, 122, 128),
-    ( 40, 122, 128),
-    ( 90, 155, 160),
-    ( 90, 155, 160),
+    (3, 101, 107),  # #03656b — topo
+    (3, 101, 107),
+    (40, 122, 128),
+    (40, 122, 128),
+    (90, 155, 160),
+    (90, 155, 160),
 ]
 
 _GRAD_TEX = [
@@ -114,7 +113,7 @@ _GRAD_TEX = [
 def _read_version() -> str:
     try:
         base = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-        with open(os.path.join(base, "pyproject.toml"), "r") as f:
+        with open(os.path.join(base, "pyproject.toml")) as f:
             for line in f:
                 if line.strip().startswith("version"):
                     return line.split("=")[1].strip().strip('"')
@@ -127,7 +126,6 @@ _VERSION = _read_version()
 
 
 class M2TBannerWidget(Widget):
-
     DEFAULT_CSS = """
     M2TBannerWidget {
         height: auto;
@@ -145,7 +143,7 @@ class M2TBannerWidget(Widget):
         _render_block(_BANNER_TEX, _GRAD_TEX, text)
 
         version_str = f"v{_VERSION}"
-        subtitle    = "Markdown → LaTeX/PDF  ·  "
+        subtitle = "Markdown → LaTeX/PDF  ·  "
         text.append(f"\n\n{subtitle}  ", style="rgb(110,115,120) italic")
         text.append(version_str, style="bold rgb(255,255,255)")
 
@@ -158,22 +156,14 @@ class M2TBannerWidget(Widget):
 
 _MENU_ART: dict[str, tuple[str, str]] = {
     "AJUDA": (
-        "┌─┐   ┬ ┬ ┬ ┌┬┐ ┌─┐\n"
-        "├─┤   │ │ │  ││ ├─┤\n"
-        "┴ ┴ └─┘ └─┘ ─┴┘ ┴ ┴",
+        "┌─┐   ┬ ┬ ┬ ┌┬┐ ┌─┐\n├─┤   │ │ │  ││ ├─┤\n┴ ┴ └─┘ └─┘ ─┴┘ ┴ ┴",
         # selected — double line
-        "╔═╗   ╦ ╦ ╦ ╔╦╗ ╔═╗\n"
-        "╠═╣   ║ ║ ║  ║║ ╠═╣\n"
-        "╩ ╩ ╚═╝ ╚═╝ ═╩╝ ╩ ╩",
+        "╔═╗   ╦ ╦ ╦ ╔╦╗ ╔═╗\n╠═╣   ║ ║ ║  ║║ ╠═╣\n╩ ╩ ╚═╝ ╚═╝ ═╩╝ ╩ ╩",
     ),
     "SAIR": (
-        "┌─┐ ┌─┐ ┬ ┬─┐\n"
-        "└─┐ ├─┤ │ │┬┘\n"
-        "└─┘ ┴ ┴ ┴ ┴└─",
+        "┌─┐ ┌─┐ ┬ ┬─┐\n└─┐ ├─┤ │ │┬┘\n└─┘ ┴ ┴ ┴ ┴└─",
         # selected — double line
-        "╔═╗ ╔═╗ ╦ ╦═╗\n"
-        "╚═╗ ╠═╣ ║ ║╔╝\n"
-        "╚═╝ ╩ ╩ ╩ ╩╚═",
+        "╔═╗ ╔═╗ ╦ ╦═╗\n╚═╗ ╠═╣ ║ ║╔╝\n╚═╝ ╩ ╩ ╩ ╩╚═",
     ),
 }
 
@@ -187,7 +177,7 @@ class M2TMenuOption(ListItem):
 
     def __init__(self, label_key: str, item_id: str | None = None) -> None:
         super().__init__(id=item_id)
-        self._key  = label_key
+        self._key = label_key
         self._arts = _MENU_ART.get(label_key, (label_key, label_key))
 
     def compose(self):

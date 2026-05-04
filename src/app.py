@@ -2,17 +2,24 @@ import os
 
 from rich.text import Text
 from textual.app import App, ComposeResult
-from textual.containers import Horizontal, Vertical, ScrollableContainer
+from textual.containers import Horizontal, ScrollableContainer, Vertical
 from textual.screen import ModalScreen
 from textual.widgets import (
-    Button, Footer, Header, Label,
-    ListItem, ListView, Markdown, ProgressBar, RichLog, Static,
+    Button,
+    Footer,
+    Header,
+    Label,
+    ListItem,
+    ListView,
+    Markdown,
+    ProgressBar,
+    RichLog,
 )
 
 from .docker_manager import DockerManager
 from .log_translator import log_translator
+from .utils.visuals import M2TBannerWidget, M2TMenuOption
 from .watcher import WatcherManager
-from .utils.visuals import  M2TBannerWidget, M2TMenuOption
 
 
 class OptionItem(ListItem):
@@ -55,7 +62,7 @@ class GlobalMenu(ModalScreen):
                 yield Label("─" * 46, id="menu-divider")
                 yield ListView(
                     M2TMenuOption("AJUDA", item_id="opt-help"),
-                    M2TMenuOption("SAIR",  item_id="opt-exit"),
+                    M2TMenuOption("SAIR", item_id="opt-exit"),
                     id="global-menu-list",
                 )
                 yield Label("ESC · fechar", id="menu-footer-hint")
@@ -72,25 +79,23 @@ class GlobalMenu(ModalScreen):
 
 class Mark2TeXApp(App):
     CSS_PATH = os.path.join(os.path.dirname(__file__), "styles.tcss")
-    TITLE    = "Mark2TeX Dashboard"
+    TITLE = "Mark2TeX Dashboard"
 
     BINDINGS = [
-        ("escape",        "show_global_menu", "Menu Global"),
-        ("q",             "show_global_menu", "Menu Global"),
-        ("f1",            "show_help_menu",   "Ajuda"),
-        ("question_mark", "show_help_menu",   "Ajuda"),
-        ("c",             "compile_document", "Compilar"),
-        ("w",             "toggle_watch",     "Watch Mode"),
+        ("escape", "show_global_menu", "Menu Global"),
+        ("q", "show_global_menu", "Menu Global"),
+        ("f1", "show_help_menu", "Ajuda"),
+        ("question_mark", "show_help_menu", "Ajuda"),
+        ("c", "compile_document", "Compilar"),
+        ("w", "toggle_watch", "Watch Mode"),
     ]
 
     def compose(self) -> ComposeResult:
         yield Header()
         with Horizontal(id="outer-layout"):
-
             # ── Coluna esquerda: file explorer + config + console ──
             with Vertical(id="left-column"):
                 with Horizontal(id="main-layout"):
-
                     with Vertical(id="file-explorer"):
                         yield ListView(id="file-list")
 
@@ -109,7 +114,7 @@ class Mark2TeXApp(App):
 
                         # Botões empilhados verticalmente para não sumirem
                         with Horizontal(id="action-bar"):
-                            yield Button("COMPILAR",   id="compile-btn")
+                            yield Button("COMPILAR", id="compile-btn")
                             yield Button("WATCH: OFF", id="watch-btn")
 
                 yield ProgressBar(id="progress-bar", total=100)
@@ -122,7 +127,7 @@ class Mark2TeXApp(App):
         yield Footer()
 
     def on_mount(self) -> None:
-        self.docker_manager  = DockerManager()
+        self.docker_manager = DockerManager()
         self.watcher_manager = WatcherManager()
         self.is_watching = False
 
@@ -130,12 +135,12 @@ class Mark2TeXApp(App):
         self.selected_template: str | None = None
 
         # ── Border titles ──
-        self.query_one("#file-explorer").border_title  = "• Arquivos"
-        self.query_one("#config-panel").border_title   = "• Configuração"
-        self.query_one("#preview-panel").border_title  = "• Preview"
-        self.query_one("#console-panel").border_title  = "• Console"
+        self.query_one("#file-explorer").border_title = "• Arquivos"
+        self.query_one("#config-panel").border_title = "• Configuração"
+        self.query_one("#preview-panel").border_title = "• Preview"
+        self.query_one("#console-panel").border_title = "• Console"
 
-        md_files  = sorted(f for f in os.listdir(".") if f.endswith(".md"))
+        md_files = sorted(f for f in os.listdir(".") if f.endswith(".md"))
         file_list = self.query_one("#file-list", ListView)
         for f in md_files:
             file_list.append(OptionItem(f))
@@ -172,7 +177,7 @@ class Mark2TeXApp(App):
     def _update_preview(self, filename: str) -> None:
         """Lê o arquivo .md e atualiza o widget Markdown de preview."""
         try:
-            with open(filename, "r", encoding="utf-8") as f:
+            with open(filename, encoding="utf-8") as f:
                 content = f.read()
         except (FileNotFoundError, PermissionError, OSError):
             content = f"_Não foi possível ler o arquivo `{filename}`._"
@@ -223,7 +228,10 @@ class Mark2TeXApp(App):
         if not self.is_watching:
             selected_file, selected_template = self._get_selection()
             if not selected_file or not selected_template:
-                self._log_console("❌ Selecione um arquivo e um template antes de ativar o Watch Mode.", style="#e05c5c")
+                self._log_console(
+                    "❌ Selecione um arquivo e um template antes de ativar o Watch Mode.",
+                    style="#e05c5c",
+                )
                 return
 
             self.watcher_manager.start_watching(
@@ -255,7 +263,9 @@ class Mark2TeXApp(App):
     def compile_document(self) -> None:
         selected_file, selected_template = self._get_selection()
         if not selected_file or not selected_template:
-            self._log_console("❌ Selecione um arquivo e um template para compilar.", style="#e05c5c")
+            self._log_console(
+                "❌ Selecione um arquivo e um template para compilar.", style="#e05c5c"
+            )
             return
         self.compile_specific_document(selected_file, selected_template)
 
@@ -272,7 +282,10 @@ class Mark2TeXApp(App):
             self.call_from_thread(self._apply_ui_update, action, value)
 
         ui("progress", 0)
-        ui("console", (f"🚀 Compilando {selected_file} com template '{selected_template}'...", "#5ab4bc"))
+        ui(
+            "console",
+            (f"🚀 Compilando {selected_file} com template '{selected_template}'...", "#5ab4bc"),
+        )
 
         try:
             for line in self.docker_manager.compile(selected_file, selected_template):
@@ -309,7 +322,7 @@ class Mark2TeXApp(App):
                 self._set_progress(int(value))
 
             elif action == "progress_bump":
-                bar     = self.query_one("#progress-bar", ProgressBar)
+                bar = self.query_one("#progress-bar", ProgressBar)
                 current = bar.progress or 0
                 if current < 99:
                     self._set_progress(min(int(current) + 1, 99))

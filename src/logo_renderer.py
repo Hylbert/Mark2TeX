@@ -1,7 +1,8 @@
+import os
 from typing import cast
+
 from PIL import Image
 from rich.text import Text
-import os
 
 # Paleta de cores "Sunset" do OpenClaude
 SUNSET_GRADIENT = [
@@ -13,8 +14,10 @@ SUNSET_GRADIENT = [
     (130, 60, 50),
 ]
 
+
 def lerp_rgb(a: tuple[int, int, int], b: tuple[int, int, int], t: float) -> tuple[int, int, int]:
     return tuple(int(a[i] + (b[i] - a[i]) * t) for i in range(3))  # type: ignore[return-value]
+
 
 def get_gradient_color(stops: list[tuple[int, int, int]], t: float) -> tuple[int, int, int]:
     t = max(0, min(1, t))
@@ -26,7 +29,10 @@ def get_gradient_color(stops: list[tuple[int, int, int]], t: float) -> tuple[int
     fraction = s - i
     return lerp_rgb(stops[i], stops[i + 1], fraction)
 
-def render_logo_to_text(path: str, width: int = 80, alpha_threshold: int = 30, use_gradient: bool = True) -> Text:
+
+def render_logo_to_text(
+    path: str, width: int = 80, alpha_threshold: int = 30, use_gradient: bool = True
+) -> Text:
     """
     Converte uma imagem para caracteres half-block do Rich.
     Se use_gradient=True, aplica o gradiente estilo OpenClaude.

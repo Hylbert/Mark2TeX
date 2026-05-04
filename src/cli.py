@@ -1,8 +1,8 @@
 import argparse
 
-from .setup_env import ensure_environment
-from .main import main as run_app
 from .docker_manager import uninstall_docker_assets
+from .main import main as run_app
+from .setup_env import ensure_environment
 
 
 def build_parser() -> argparse.ArgumentParser:
