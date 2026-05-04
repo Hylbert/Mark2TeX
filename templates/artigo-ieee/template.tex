@@ -1,6 +1,4 @@
-% IEEEtran-compatible template for Mark2TeX
-% Uses IEEEtran class (available via texlive-publishers)
-\documentclass[conference, $if(lang)$\iflanguage{brazil}{}{}$endif$]{IEEEtran}
+\documentclass[conference]{IEEEtran}
 \IEEEoverridecommandlockouts
 
 % --- CODIFICAÇÃO ---
@@ -49,7 +47,6 @@ $endif$
 \newcommand{\OperatorTok}[1]{#1}
 \newcommand{\ExtensionTok}[1]{#1}
 
-% --- DEFINIÇÃO BIBTEX ---
 \def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
     T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
 
@@ -57,13 +54,21 @@ $endif$
 
 \title{$title$$if(thanks)$\thanks{$thanks$}$endif$}
 
+% Suporte a author como string simples ou lista de objetos {name, institution, city, email}
+% Caso string:  author: "Nome"
+% Caso lista:   author:\n  - name: "Nome"\n    institution: "..."\n    city: "..."\n    email: "..."
 \author{
-  \IEEEauthorblockN{$author$}
+$for(author)$
+  \IEEEauthorblockN{$if(author.name)$$author.name$$else$$author$$endif$}
+  $if(author.institution)$
   \IEEEauthorblockA{
-    $if(institution)$\textit{$institution$}\\$endif$
-    $if(city)$$city$$if(country)$, $country$$endif$\\$endif$
-    $if(email)$$email$$endif$
+    \textit{$author.institution$}\\
+    $if(author.city)$$author.city$$if(author.country)$, $author.country$$endif$\\$endif$
+    $if(author.email)$$author.email$$endif$
   }
+  $endif$
+  $sep$\and
+$endfor$
 }
 
 \maketitle
@@ -83,6 +88,12 @@ $endif$
 $if(keywords-en)$
 \begin{IEEEkeywords}
 $keywords-en$
+\end{IEEEkeywords}
+$endif$
+
+$if(keywords-pt)$
+\begin{IEEEkeywords}
+$keywords-pt$
 \end{IEEEkeywords}
 $endif$
 

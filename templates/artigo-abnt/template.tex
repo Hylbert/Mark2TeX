@@ -50,20 +50,21 @@
 \newcommand{\ExtensionTok}[1]{#1}
 
 % --- METADADOS ---
+% Suporte a author como string simples ou lista de objetos {name, institution, ...}
+% Caso string:  author: "Nome"
+% Caso lista:   author:\n  - name: "Nome"\n    institution: "..."
 \titulo{$title$}
-\autor{$author$}
+\autor{$for(author)$$if(author.name)$$author.name$$else$$author$$endif$$sep$ \and $endfor$}
 \data{$if(year)$$year$$else$\the\year$endif$}
 \local{$if(local)$$local$$else$Brasil$endif$}
 
-% --- CONFIGURAÇÃO DE MARGENS ABNTEX2 ---
+% --- MARGENS E ESPAÇAMENTO ABNTEX2 ---
 \setlrmarginsandblock{3cm}{2cm}{*}
 \setulmarginsandblock{3cm}{2cm}{*}
 \checkandfixthelayout
 \setlength{\parindent}{1.3cm}
 \setlength{\parskip}{0.2cm}
 \SingleSpacing
-
-% --- ESPAÇAMENTO DE CITAÇÃO (artigo) ---
 \setlength{\ABNTEXcitacaorecuo}{1.8cm}
 
 \begin{document}
@@ -76,7 +77,7 @@ $abstract-pt$
 
 \vspace{\onelineskip}
 \noindent
-\textbf{$if(lang)$$if(lang)$\iflanguage{brazil}{Palavras-chave}{Keywords}$endif$$else$Palavras-chave$endif$:} $if(keywords-pt)$$keywords-pt$$endif$
+\textbf{Palavras-chave:} $if(keywords-pt)$$keywords-pt$$endif$
 \end{resumoumacoluna}
 $endif$
 
