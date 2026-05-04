@@ -22,7 +22,15 @@ if [[ ! -f "$INPUT_FILE" ]]; then
     exit 1
 fi
 
-ALLOWED_TEMPLATES=("tcc" "artigo" "projeto")
+# Discover valid templates dynamically from the templates directory
+ALLOWED_TEMPLATES=()
+while IFS= read -r -d '' dir; do
+    name=$(basename "$dir")
+    if [[ -f "$dir/template.tex" ]]; then
+        ALLOWED_TEMPLATES+=("$name")
+    fi
+done < <(find "$TEMPLATE_BASE" -mindepth 1 -maxdepth 1 -type d -print0 | sort -z)
+
 IS_VALID=false
 for t in "${ALLOWED_TEMPLATES[@]}"; do
     if [[ "$TEMPLATE_TYPE" == "$t" ]]; then

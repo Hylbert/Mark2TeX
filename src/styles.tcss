@@ -74,6 +74,43 @@ Header {
 
 #action-bar Button { width: 1fr; margin: 0 1; }
 
+/* ── Barra do console ── */
+
+#console-bar {
+    height: 1;
+    align: right middle;
+    padding: 0 1;
+    background: transparent;
+}
+
+/* Botão de copiar — discreto, alinhado à direita sobre o console */
+.console-action-btn {
+    width: 3;
+    min-width: 3;
+    height: 1;
+    background: transparent;
+    color: #555555;
+    border: none;
+    padding: 0;
+    text-style: none;
+}
+
+.console-action-btn:hover {
+    background: transparent;
+    color: #03656b;
+    border: none;
+}
+
+.console-action-btn:focus {
+    background: transparent;
+    color: #03656b;
+    border: none;
+}
+
+.console-action-btn--copied {
+    color: #4caf89;
+}
+
 /* ── Console ── */
 
 #console-panel {
