@@ -21,7 +21,7 @@ jobs:
           cache: "pip"
 
       - name: Instalar ferramentas de desenvolvimento
-        run: pip install ruff mypy pytest pytest-asyncio
+        run: pip install ruff mypy pytest pytest-asyncio pytest-cov
 
       - name: Instalar pacote em modo editável
         run: pip install -e .
@@ -32,8 +32,14 @@ jobs:
       - name: Verificação de tipos — mypy
         run: mypy src/ --ignore-missing-imports
 
-      - name: Testes
-        run: pytest tests/ -v --tb=short
+      - name: Testes com cobertura
+        run: pytest tests/ -v --tb=short --cov=src --cov-report=term-missing --cov-fail-under=60
+
+      - name: Upload cobertura para Codecov
+        uses: codecov/codecov-action@v4
+        if: always()
+        with:
+          fail_ci_if_error: false
 
   build-package:
     needs: lint-and-test

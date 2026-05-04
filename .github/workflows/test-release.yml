@@ -1,12 +1,13 @@
-name: Release
+name: Test Release
 
 on:
+  workflow_dispatch: # Permite disparar manualmente pelo botão do GitHub Actions
   push:
     tags:
-      - "v*.*.*"
+      - "v*.*.*-test" # Tags que terminam em -test disparam a versão de teste
 
 jobs:
-  publish:
+  publish-test:
     runs-on: ubuntu-latest
     environment: release
     permissions:
@@ -25,11 +26,14 @@ jobs:
           pip install build
           python -m build
 
-      - name: Publicar no PyPI (Trusted Publishing)
+      - name: Publicar no TestPyPI (Trusted Publishing)
         uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
 
-      - name: Criar GitHub Release
+      - name: Criar GitHub Release de Teste
         uses: softprops/action-gh-release@v2
         with:
           files: dist/*
           generate_release_notes: true
+          tag_name: ${{ github.ref_name }}
