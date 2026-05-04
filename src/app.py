@@ -1,5 +1,6 @@
 import logging
 import os
+import pyperclip
 from pathlib import Path
 
 from platformdirs import user_log_dir
@@ -140,6 +141,8 @@ class Mark2TeXApp(App):
                             yield Button(t("btn.compile"),   id="compile-btn")
                             yield Button(t("btn.watch_off"), id="watch-btn")
                 yield ProgressBar(id="progress-bar", total=100)
+                with Horizontal(id="console-bar"):
+                    yield Button("⧉", id="copy-console-btn", classes="console-action-btn")
                 yield RichLog(id="console-panel", highlight=False, markup=False, wrap=True)
             with Vertical(id="preview-panel"):
                 with ScrollableContainer(id="preview-scroll"):
@@ -157,7 +160,6 @@ class Mark2TeXApp(App):
         self._populate_files()
 
     def _populate_templates(self) -> None:
-        """Populate the template list dynamically from the templates directory."""
         template_list = self.query_one("#template-list", ListView)
         template_list.clear()
         for name in self.docker_manager.list_templates():
@@ -236,6 +238,26 @@ class Mark2TeXApp(App):
             self.compile_document()
         elif event.button.id == "watch-btn":
             self.toggle_watch_mode()
+        elif event.button.id == "copy-console-btn":
+            self._copy_console()
+
+    def _copy_console(self) -> None:
+        console = self.query_one("#console-panel", RichLog)
+        lines = [segment.text for segment in console._lines]  # type: ignore[attr-defined]
+        text = "".join(lines).strip()
+        try:
+            pyperclip.copy(text)
+            btn = self.query_one("#copy-console-btn", Button)
+            btn.label = "✓"
+            btn.add_class("console-action-btn--copied")
+            self.set_timer(1.5, lambda: self._reset_copy_btn())
+        except Exception:
+            self._log_console("❌ Não foi possível copiar para a área de transferência.", style="#e05c5c")
+
+    def _reset_copy_btn(self) -> None:
+        btn = self.query_one("#copy-console-btn", Button)
+        btn.label = "⧉"
+        btn.remove_class("console-action-btn--copied")
 
     def _log_console(self, message: str, style: str = "white") -> None:
         console = self.query_one("#console-panel", RichLog)

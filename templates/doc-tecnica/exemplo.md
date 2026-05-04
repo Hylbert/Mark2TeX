@@ -1,16 +1,12 @@
 ---
-# =============================================================
-# METADADOS OBRIGATÓRIOS
-# =============================================================
 title: "Título da Documentação"
-subtitle: "Subtítulo ou versão do documento"  # opcional
+subtitle: "Subtítulo ou versão do documento"
 
 author:
   - name: "Nome do Autor"
-  # - name: "Nome do Segundo Autor"
 
-date: "Maio 2026"   # ou use year: "2026"
-version: "1.0.0"    # aparece na capa como v1.0.0
+date: "Maio 2026"
+version: "1.0.0"
 
 # =============================================================
 # ASSETS  —  mesma pasta que este .md (ou subpastas)
@@ -18,38 +14,33 @@ version: "1.0.0"    # aparece na capa como v1.0.0
 #
 #   meu-projeto/
 #   ├── documento.md
-#   ├── logo.png            ← logo: "logo.png"
+#   ├── logo.png            ← descomente logo: abaixo
 #   └── figuras/
 #       └── arquitetura.png  ← ![Legenda](figuras/arquitetura.png)
-#
-# logo na capa (opcional — remova para exibir "Mark2TeX" como texto)
-logo: "logo.png"
+
+# logo na capa (descomente se tiver o arquivo)
+# logo: "logo.png"
 
 # =============================================================
 # PÁGINAS ESPECIAIS (todas opcionais — remova para omitir)
 # =============================================================
 
-# Aviso legal / confidencialidade
 confidentiality: |
   Documento confidencial. Não é permitido copiar, reproduzir ou divulgar
   este documento sem autorização expressa.\\
   Cidade, UF — 2026.
 
-# Sobre (empresa/time)
 about-title: "Sobre o Projeto"
 about: |
   Breve descrição do contexto, equipe ou organização responsável pelo documento.
 
-# Introdução / préfacio
 preface-title: "Olá, seja bem-vindo(a)!"
 preface: |
   Este documento foi preparado para guiar o leitor no uso e compreensão
   do sistema descrito nas seções a seguir.
 
-# Título do índice
 toc-title: "Índice"
 
-# Página final
 closing-title: "Obrigado!"
 closing: |
   Este documento foi elaborado pela equipe responsável pelo projeto.
@@ -60,13 +51,6 @@ closing: |
 
 Descreva aqui o objetivo do sistema ou documento.
 
-::: infobox
-**Principais Funcionalidades**
-
-- **Funcionalidade A** --- descrição breve.
-- **Funcionalidade B** --- descrição breve.
-:::
-
 # Arquitetura
 
 ## Visão de Alto Nível
@@ -75,20 +59,6 @@ Descreva aqui o objetivo do sistema ou documento.
 |---|---|
 | **Serviço A** | Descrição |
 | **Serviço B** | Descrição |
-
-## Fluxo de Dados
-
-::: rulebox
-**Pipeline**
-
-1. Etapa 1
-2. Etapa 2
-3. Etapa 3
-:::
-
-## Diagrama
-
-![Arquitetura do sistema](figuras/arquitetura.png)
 
 # Instalação
 
@@ -111,23 +81,6 @@ docker-compose up -d
 |---|---|---|
 | `GET` | `/status` | Health check |
 | `POST` | `/recurso` | Cria recurso |
-
-# Troubleshooting
-
-::: dangerbox
-**"Erro X"**\
-Descrição e como resolver.
-:::
-
-::: warningbox
-**"Aviso Y"**\
-Descrição e como resolver.
-:::
-
-::: successbox
-**Tudo certo!**\
-Mensagem de sucesso ou dica positiva.
-:::
 
 # FAQ
 

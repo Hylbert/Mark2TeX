@@ -42,25 +42,24 @@ advisor: "Prof. Dr. Nome do Orientador"
 # Estrutura recomendada:
 #
 #   meu-tcc/
-#   ├── meu-tcc.md            ← este arquivo
+#   ├── meu-tcc.md
 #   ├── referencias.bib
-#   ├── logo.png              ← logo da instituição (capa)
+#   ├── logo.png              ← descomente logo: abaixo
 #   ├── ficha-catalografica.png
 #   └── figuras/
-#       ├── arquitetura.png   ← ![Legenda](figuras/arquitetura.png)
-#       └── resultado.png
+#       └── minha-figura.png  ← ![Legenda](figuras/minha-figura.png)
 #
 # Arquivos fora desta pasta NÃO são visíveis durante a compilação.
 
-# Logo na capa (opcional — remova as linhas para capa sem logo)
-logo: "logo.png"
-logo-width: "0.12"   # fração de \textwidth (0.12 ≈ 1,8 cm)
+# Logo na capa (descomente e ajuste o caminho se tiver o arquivo)
+# logo: "logo.png"
+# logo-width: "0.12"   # fração de \textwidth (0.12 ≈ 1,8 cm)
 
-# Ficha catalográfica — imagem gerada pela biblioteca (opcional)
+# Ficha catalográfica (descomente se tiver a imagem fornecida pela biblioteca)
 # catalog-image: "ficha-catalografica.png"
 
 # =============================================================
-# FOLHA DE APROVAÇÃO  (remova o bloco para omitir)
+# FOLHA DE APROVAÇÃO  (remova o bloco inteiro para omitir)
 # =============================================================
 approval-date: "DD de mês de 2026"
 committee:
@@ -111,9 +110,9 @@ symbols:
     value: "Taxa de erro"
 
 # =============================================================
-# REFERÊNCIAS
+# REFERÊNCIAS  (descomente se tiver o arquivo .bib na mesma pasta)
 # =============================================================
-bibliography: "referencias"
+# bibliography: "referencias"
 ---
 
 # Introdução
@@ -132,10 +131,6 @@ Descreva os materiais e métodos utilizados.
 # Resultados e Discussão
 
 Apresente e discuta os resultados obtidos.
-
-Exemplo de imagem:
-
-![Legenda da figura](figuras/exemplo.png)
 
 # Conclusão
 
