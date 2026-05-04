@@ -204,8 +204,9 @@ def log_translator(line: str) -> Optional[str]:
 
     m = _RE_RUN_NUMBER.match(stripped)
     if m:
-        n, rule = m.group(1), m.group(2)
-        return f'🔄 Compilação {n} — regra: {rule}'
+        run_n = str(m.group(1))
+        run_rule = str(m.group(2))
+        return f'🔄 Compilação {run_n} — regra: {run_rule}'
 
     m = _RE_RUNNING.match(stripped)
     if m:
