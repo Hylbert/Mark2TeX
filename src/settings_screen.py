@@ -1,72 +1,180 @@
 from __future__ import annotations
 
+from textual import on
 from textual.app import ComposeResult
+from textual.binding import Binding
 from textual.containers import Horizontal, Vertical
 from textual.screen import ModalScreen
-from textual.widgets import Button, Label, ListView
+from textual.widgets import Label, ListItem, ListView, Static
 
 from . import config as cfg
 from .config import SUPPORTED_LANGUAGES
 from .i18n import get_language, set_language, t
-from .utils.visuals import M2TBannerWidget, M2TSettingsOption
+from .utils.visuals import M2TSettingsOption
 
+
+# ---------------------------------------------------------------------------
+# Tab bar item
+# ---------------------------------------------------------------------------
+
+class _TabItem(ListItem):
+    def __init__(self, key: str, label: str) -> None:
+        super().__init__(id=f"tab-{key}")
+        self._key = key
+        self._label = label
+
+    def compose(self) -> ComposeResult:
+        yield Static(self._label, id=f"tab-label-{self._key}", classes="settings-tab-label")
+
+    def watch_highlighted(self, value: bool) -> None:
+        try:
+            s = self.query_one(f"#tab-label-{self._key}", Static)
+            s.set_classes("settings-tab-label settings-tab-active" if value else "settings-tab-label")
+        except Exception:
+            pass
+
+
+# ---------------------------------------------------------------------------
+# SettingsScreen — btop-style
+# ---------------------------------------------------------------------------
 
 class SettingsScreen(ModalScreen):
-    BINDINGS = [("escape", "dismiss", "Fechar")]
+    """
+    Tela de ajustes no estilo btop:
+    - Borda com título
+    - Abas no topo (Tab / Shift+Tab para navegar)
+    - Conteúdo à direita, opções aplicadas imediatamente ao selecionar
+    - ESC fecha e salva
+    """
+
+    BINDINGS = [
+        Binding("escape", "close", "Fechar & Salvar"),
+        Binding("tab", "next_tab", "Próxima aba", show=False),
+        Binding("shift+tab", "prev_tab", "Aba anterior", show=False),
+    ]
+
+    # Abas disponíveis: (chave, i18n_key)
+    _TABS = [
+        ("language", "settings.tab_language"),
+    ]
 
     def __init__(self) -> None:
         super().__init__()
         self._settings = cfg.load()
-        self._pending_lang = self._settings.get("language", get_language())
+        self._active_tab = "language"
+
+    # ------------------------------------------------------------------
+    # Compose
+    # ------------------------------------------------------------------
 
     def compose(self) -> ComposeResult:
-        with Vertical(classes="menu-window"):
-            yield M2TBannerWidget()
-            yield Label("─" * 46, id="menu-divider")
-            yield Label(t("settings.title"), id="menu-header", classes="menu-header")
+        with Vertical(id="settings-window"):
+            # ── Cabeçalho / aba bar ──
+            with Horizontal(id="settings-tab-bar"):
+                yield Label(f" {t('settings.title')} ", id="settings-title-label")
+                yield ListView(
+                    *[_TabItem(key, f" {t(i18n_key)} ") for key, i18n_key in self._TABS],
+                    id="settings-tabs",
+                )
+                yield Label(" ESC · fechar ", id="settings-esc-hint")
 
+            # ── Corpo ──
             with Horizontal(id="settings-body"):
-                # Coluna esquerda — categorias
-                with Vertical(id="settings-categories"):
-                    yield Label("🌐 " + t("settings.language"), classes="settings-cat-active")
+                # Painel de conteúdo da aba ativa
+                with Vertical(id="settings-content"):
+                    yield from self._build_tab(self._active_tab)
 
-                # Coluna direita — opções da categoria
-                with Vertical(id="settings-options"):
-                    yield Label(t("settings.language"), classes="settings-section-title")
-                    yield ListView(
-                        *[
-                            M2TSettingsOption(
-                                label=name,
-                                value=code,
-                                selected=(code == self._pending_lang),
-                            )
-                            for code, name in SUPPORTED_LANGUAGES.items()
-                        ],
-                        id="language-list",
+            # ── Rodapé ──
+            yield Label(
+                f" {t('settings.saved_at')} {cfg.CONFIG_FILE} ",
+                id="settings-footer",
+            )
+
+    def _build_tab(self, tab: str):
+        """Gera os widgets do conteúdo da aba selecionada."""
+        if tab == "language":
+            current = self._settings.get("language", get_language())
+            yield Label(f" {t('settings.language')} ", classes="settings-section-title")
+            yield ListView(
+                *[
+                    M2TSettingsOption(
+                        label=name,
+                        value=code,
+                        selected=(code == current),
                     )
-                    yield Label(
-                        f"{t('settings.saved_at')}\n{cfg.CONFIG_FILE}",
-                        id="settings-path-hint",
-                    )
+                    for code, name in SUPPORTED_LANGUAGES.items()
+                ],
+                id="language-list",
+            )
 
-            with Horizontal(id="settings-actions"):
-                yield Button(t("settings.save"),   id="btn-save",   variant="primary")
-                yield Button(t("settings.cancel"), id="btn-cancel")
+    # ------------------------------------------------------------------
+    # Tab navigation
+    # ------------------------------------------------------------------
 
-    def on_list_view_selected(self, event: ListView.Selected) -> None:
-        if event.list_view.id != "language-list":
-            return
+    def action_next_tab(self) -> None:
+        keys = [k for k, _ in self._TABS]
+        idx = keys.index(self._active_tab)
+        self._switch_tab(keys[(idx + 1) % len(keys)])
+
+    def action_prev_tab(self) -> None:
+        keys = [k for k, _ in self._TABS]
+        idx = keys.index(self._active_tab)
+        self._switch_tab(keys[(idx - 1) % len(keys)])
+
+    def _switch_tab(self, key: str) -> None:
+        self._active_tab = key
+        content = self.query_one("#settings-content", Vertical)
+        content.remove_children()
+        for w in self._build_tab(key):
+            content.mount(w)
+
+    # ------------------------------------------------------------------
+    # Opções aplicadas imediatamente (sem botão salvar)
+    # ------------------------------------------------------------------
+
+    @on(ListView.Selected, "#language-list")
+    def on_language_selected(self, event: ListView.Selected) -> None:
         new_lang = event.item.id.removeprefix("opt-")
-        for code in SUPPORTED_LANGUAGES:
-            item = self.query_one(f"#opt-{code}", M2TSettingsOption)
-            item.mark_selected(code == new_lang)
-        self._pending_lang = new_lang
+        if new_lang == self._settings.get("language"):
+            return
 
-    def on_button_pressed(self, event: Button.Pressed) -> None:
-        if event.button.id == "btn-save":
-            self._settings["language"] = self._pending_lang
-            cfg.save(self._settings)
-            set_language(self._pending_lang)
-            self.dismiss(True)
-        elif event.button.id == "btn-cancel":
-            self.dismiss(False)
+        # Atualiza visual dos itens
+        for code in SUPPORTED_LANGUAGES:
+            try:
+                item = self.query_one(f"#opt-{code}", M2TSettingsOption)
+                item.mark_selected(code == new_lang)
+            except Exception:
+                pass
+
+        # Salva e aplica imediatamente
+        self._settings["language"] = new_lang
+        cfg.save(self._settings)
+        set_language(new_lang)
+
+        # Recarrega a interface inteira
+        self.app.post_message(LanguageChanged())
+
+    # ------------------------------------------------------------------
+    # Fechar
+    # ------------------------------------------------------------------
+
+    def action_close(self) -> None:
+        self.dismiss()
+
+    def on_mount(self) -> None:
+        # Foca a lista de conteúdo ao abrir
+        try:
+            self.query_one("#language-list", ListView).focus()
+        except Exception:
+            pass
+
+
+# ---------------------------------------------------------------------------
+# Mensagem para o app recarregar a UI
+# ---------------------------------------------------------------------------
+
+from textual.message import Message  # noqa: E402
+
+
+class LanguageChanged(Message):
+    """Postada quando o idioma é alterado nas settings. O app escuta e recarrega a UI."""

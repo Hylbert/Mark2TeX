@@ -10,10 +10,9 @@ _STRINGS: dict[str, dict[str, str]] = {
         "menu.exit": "SAIR",
         # Tela de Settings
         "settings.title": "AJUSTES",
+        "settings.tab_language": "Idioma",
         "settings.language": "Idioma da interface",
-        "settings.save": "SALVAR",
-        "settings.cancel": "CANCELAR",
-        "settings.saved_at": "Configurações salvas em:",
+        "settings.saved_at": "Config em:",
         # Console / compilação
         "compile.select_file": "❌ Selecione um arquivo e um template para compilar.",
         "compile.select_watch": "❌ Selecione um arquivo e um template antes de ativar o Watch Mode.",
@@ -45,10 +44,9 @@ _STRINGS: dict[str, dict[str, str]] = {
         "menu.exit": "EXIT",
         # Tela de Settings
         "settings.title": "SETTINGS",
+        "settings.tab_language": "Language",
         "settings.language": "Interface language",
-        "settings.save": "SAVE",
-        "settings.cancel": "CANCEL",
-        "settings.saved_at": "Settings saved at:",
+        "settings.saved_at": "Config at:",
         # Console / compilação
         "compile.select_file": "❌ Select a file and a template to compile.",
         "compile.select_watch": "❌ Select a file and a template before enabling Watch Mode.",
@@ -79,19 +77,16 @@ _current: str = "pt_BR"
 
 
 def set_language(lang: str) -> None:
-    """Define o idioma ativo. Ignorado se o idioma não for suportado."""
     global _current
     if lang in SUPPORTED_LANGUAGES:
         _current = lang
 
 
 def get_language() -> str:
-    """Retorna o código do idioma atual."""
     return _current
 
 
 def t(key: str) -> str:
-    """Traduz uma chave. Fallback para pt_BR se não encontrar."""
     return (
         _STRINGS.get(_current, {}).get(key)
         or _STRINGS["pt_BR"].get(key, key)
