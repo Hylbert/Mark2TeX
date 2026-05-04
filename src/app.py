@@ -28,7 +28,6 @@ from .utils.visuals import M2TBannerWidget, M2TMenuOption
 from .watcher import WatcherManager
 
 
-# ── Logger ────────────────────────────────────────────────────────────
 def _setup_logger() -> logging.Logger:
     logger = logging.getLogger("mark2tex")
     if not (os.getenv("MARK2TEX_DEBUG") or os.getenv("DEBUG")):
@@ -60,19 +59,19 @@ class HelpScreen(ModalScreen):
         with Vertical(classes="menu-window"):
             yield Label(t("help.title"), id="menu-header", classes="menu-header")
             with Vertical(id="help-content"):
-                yield Label("Key Bindings:", id="help-bindings-title")
-                yield Label("ESC / q      — Menu Global")
-                yield Label("? / F1       — Abrir Ajuda")
-                yield Label("c            — Compilar documento")
-                yield Label("w            — Ativar/Desativar Watch Mode")
-                yield Label("Tab          — Navegar entre painéis")
-                yield Label("↑ ↓          — Navegar nas listas")
+                yield Label(t("help.bindings_title"), id="help-bindings-title")
+                yield Label("ESC / q      — " + t("menu.settings").capitalize() + " / " + t("menu.exit").lower())
+                yield Label("? / F1       — " + t("menu.help").capitalize())
+                yield Label("c            — " + t("btn.compile").capitalize())
+                yield Label("w            — " + t("btn.watch_on") + " / " + t("btn.watch_off"))
+                yield Label("Tab          — " + ("Navegar entre painéis" if t("menu.exit") == "SAIR" else "Navigate between panels"))
+                yield Label("↑ ↓          — " + ("Navegar nas listas" if t("menu.exit") == "SAIR" else "Navigate lists"))
                 yield Label("")
-                yield Label("Fluxo:", id="help-commands-title")
-                yield Label("1. Selecione um arquivo .md no painel esquerdo")
-                yield Label("2. Escolha o template (tcc, artigo, projeto)")
-                yield Label("3. Pressione c ou clique em COMPILAR")
-                yield Label("4. Acompanhe o progresso no console abaixo")
+                yield Label(t("help.flow_title"), id="help-commands-title")
+                yield Label(t("help.flow_1"))
+                yield Label(t("help.flow_2"))
+                yield Label(t("help.flow_3"))
+                yield Label(t("help.flow_4"))
                 yield Label("")
                 yield Label(t("help.footer"), id="help-footer")
 
@@ -119,7 +118,6 @@ class Mark2TeXApp(App):
     ]
 
     def on_load(self) -> None:
-        """Carrega idioma antes do compose()."""
         settings = cfg.load()
         set_language(settings.get("language", "pt_BR"))
 
@@ -164,7 +162,6 @@ class Mark2TeXApp(App):
             file_list.append(OptionItem(f))
 
     def _refresh_ui_labels(self) -> None:
-        """Atualiza todos os textos traduzíveis do dashboard sem recriar a UI."""
         self.query_one("#file-explorer").border_title  = t("panel.files")
         self.query_one("#config-panel").border_title   = t("panel.config")
         self.query_one("#preview-panel").border_title  = t("panel.preview")
@@ -173,21 +170,11 @@ class Mark2TeXApp(App):
         self.query_one("#status-file",     Label).update(t("status.file"))
         self.query_one("#status-template", Label).update(t("status.template"))
         self.query_one("#compile-btn",     Button).label = t("btn.compile")
-        watch_key = "btn.watch_on" if self.is_watching else "btn.watch_off"
         if not self.is_watching:
-            self.query_one("#watch-btn", Button).label = t(watch_key)
-
-    # ------------------------------------------------------------------
-    # Live language reload
-    # ------------------------------------------------------------------
+            self.query_one("#watch-btn", Button).label = t("btn.watch_off")
 
     def on_language_changed(self, _: LanguageChanged) -> None:
-        """Recebe a mensagem da SettingsScreen e recarrega todos os labels."""
         self._refresh_ui_labels()
-
-    # ------------------------------------------------------------------
-    # Eventos de lista
-    # ------------------------------------------------------------------
 
     def on_list_view_selected(self, event: ListView.Selected) -> None:
         item = event.item
@@ -221,10 +208,6 @@ class Mark2TeXApp(App):
         preview = self.query_one("#preview-content", Markdown)
         self.call_after_refresh(preview.update, content)
 
-    # ------------------------------------------------------------------
-    # Actions
-    # ------------------------------------------------------------------
-
     def _get_selection(self) -> tuple[str | None, str | None]:
         return self.selected_file, self.selected_template
 
@@ -254,10 +237,6 @@ class Mark2TeXApp(App):
     def _set_progress(self, value: int) -> None:
         self.query_one("#progress-bar", ProgressBar).update(progress=value)
 
-    # ------------------------------------------------------------------
-    # Watch Mode
-    # ------------------------------------------------------------------
-
     def toggle_watch_mode(self) -> None:
         btn = self.query_one("#watch-btn", Button)
         if not self.is_watching:
@@ -280,10 +259,6 @@ class Mark2TeXApp(App):
             btn.label = Text.assemble(("● ", "rgb(120,120,120)"), (t("btn.watch_off"), "white"))
             btn.remove_class("watching")
             self._log_console(t("watch.off"), style="#e0a24a")
-
-    # ------------------------------------------------------------------
-    # Compilação
-    # ------------------------------------------------------------------
 
     def compile_document(self) -> None:
         selected_file, selected_template = self._get_selection()
