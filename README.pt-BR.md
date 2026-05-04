@@ -5,12 +5,12 @@
 <h1 align="center">Mark2TeX</h1>
 
 <div align="center">
-  <strong><a href="README.md">English</a> | <span style="color: #03656b;">Português (Brasil)</span></strong>
+  <strong><a href="README.md">English</a> | <span>Português (Brasil)</span></strong>
 </div>
 
 <div align="center">
-  <strong>🚀 Markdown para PDF acadêmico com ABNT, Docker e TUI interativa 🎓</strong><br>
-  Uma ferramenta para escrever em Markdown e compilar documentos acadêmicos com templates LaTeX por meio de uma interface de terminal e um pipeline Dockerizado.
+  <strong>Escreva Markdown. Receba um PDF acadêmico impecável.</strong><br>
+  Pipeline Dockerizado com TUI interativa para documentos com qualidade LaTeX — sem instalar TeX.
 </div>
 
 <br>
@@ -18,157 +18,105 @@
 <div align="center">
   <img src="https://img.shields.io/badge/workflow-GitFlow-orange.svg" alt="GitFlow">
   <img src="https://img.shields.io/badge/version-SemVer-green.svg" alt="SemVer">
+  <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="Licença MIT">
 </div>
 
-<div align="center">
-  <h3>
-    <a href="#funcionalidades">
-      ✨ Funcionalidades
-    </a>
-    <span> | </span>
-    <a href="#instalação">
-      🚀 Instalação
-    </a>
-    <span> | </span>
-    <a href="#estrutura-do-projeto">
-      📂 Estrutura
-    </a>
-    <span> | </span>
-    <a href=".github/CONTRIBUTING.md">
-      🤝 Contribuição
-    </a>
-  </h3>
-</div>
+<br>
 
-<div align="center">
-  <sub>Construído com ❤︎ por <a href="https://github.com/Hylbert">Hylbert</a> e contribuidores.</sub>
-</div>
+## O que é o Mark2TeX?
 
-<br />
+Mark2TeX é uma ferramenta de linha de comando que converte arquivos Markdown em PDFs prontos para publicação, usando Pandoc, XeLaTeX e templates LaTeX pré-construídos — tudo dentro de um container Docker. Você escreve texto simples; o Mark2TeX cuida da tipografia.
 
-## ✨ Visão geral
+**Por que usar Mark2TeX em vez de escrever LaTeX diretamente?**
 
-O Mark2TeX separa escrita e formatação: o conteúdo fica em Markdown, enquanto a renderização final é feita por Pandoc, XeLaTeX e templates LaTeX dentro de um container Docker. A versão atual inclui uma TUI (Terminal User Interface) desenvolvida com Textual, oferecendo seleção de arquivos, escolha de templates, console de compilação em tempo real, watch mode e atalhos de teclado. 🖥️
+| | LaTeX | Mark2TeX |
+|---|---|---|
+| Curva de aprendizado | Íngreme | Markdown simples |
+| Configuração do ambiente | Distribuição TeX 4 GB+ | Apenas Docker |
+| Mensagens de erro | Logs crípticos | Tradução legível |
+| Feedback ao vivo | Recompilação manual | Watch mode automático |
 
-## 🚀 Funcionalidades
-
-- **🎓 Compilação ABNT**: Geração de PDFs com templates acadêmicos (`tcc`, `artigo`, `projeto`).
-- **📦 Execução Isolada**: Pipeline via Docker, eliminando a necessidade de instalar distribuições TeX gigantescas localmente.
-- **🎨 Interface TUI**: Dashboard interativo com lista de arquivos Markdown, barra de progresso e console de logs.
-- **🔭 Watch Mode Integrado**: Recompilação automática do arquivo selecionado assim que ele é salvo.
-- **🔍 Logs Inteligentes**: Tradução e filtragem de logs do LaTeX para tornar as mensagens de erro mais legíveis.
-- **📚 Bibliografia Automática**: Suporte a BibTeX via `Pandoc` e `XeLaTeX`.
-
-## 🛠️ Requisitos
-
-Antes de usar o Mark2TeX, certifique-se de ter instalado:
-
-- **🐍 Python 3.10** ou superior.
-- **🐳 Docker** instalado e com o daemon em execução.
-- **📦 pipx** (recomendado) para instalação do comando globalmente em ambiente isolado.
-
-## 🚀 Instalação
-
-### 🛠️ Instalação com pipx (Recomendado)
-
-![platform](https://img.shields.io/static/v1.svg?label=Platform&message=Docker%20(Linux%20|%20macOS%20|%20Windows)&style=for-the-badge)
-
-No diretório do projeto, execute:
+## Quickstart
 
 ```bash
+# 1 — instalar (requer Python 3.10+ e Docker)
 pipx install -e .
-```
 
-Este comando instala a aplicação em modo editável em um ambiente virtual isolado. A validação do Docker e a criação da imagem `mark2tex:latest` acontecem automaticamente ao iniciar o comando principal.
+# 2 — construir a imagem Docker (apenas na primeira vez)
+make build
 
-### 🛠️ Atualizando após mudanças no código
-
-Se você alterou dependências, entry points ou metadados do pacote, atualize a instalação com:
-
-```bash
-pipx reinstall -e .
-```
-
-## Primeiro uso
-
-Entre em uma pasta que contenha arquivos `.md` e execute:
-
-```bash
+# 3 — abrir a TUI dentro da pasta do seu projeto
 mark2tex
 ```
 
-Ao iniciar, a aplicação verifica a conectividade com o Docker e garante a disponibilidade da imagem de compilação. A TUI listará os arquivos Markdown do diretório atual para que você possa iniciar seu projeto.
+> **Importante:** `make build` deve ser executado ao menos uma vez antes da primeira compilação. Ele constrói a imagem `mark2tex:latest` no Docker, que contém XeLaTeX, Pandoc e todas as fontes necessárias. Execuções posteriores reutilizam a imagem em cache, a menos que o `Dockerfile` seja alterado.
 
-## 🎮 Uso da TUI
-
-### Fluxo básico
-
-1. Inicie o app com `mark2tex` dentro da pasta do seu projeto.
-2. Selecione o arquivo `.md` desejado na lista à esquerda.
-3. Escolha o template (`tcc`, `artigo` ou `projeto`).
-4. Pressione `c` ou clique no botão **COMPILAR**.
-5. Acompanhe o progresso e as mensagens no console inferior.
+## A TUI em destaque
 
 <p align="center">
-  <img src="assets/dashboard_v2_m2t.png" alt="Mark2TeX Dashboard" width="800">
+  <img src="assets/dashboard_v2_m2t.png" alt="Dashboard Mark2TeX" width="800">
 </p>
 
-### Atalhos de Teclado
+1. Selecione um arquivo `.md` no painel esquerdo.
+2. Escolha um template (`tcc`, `artigo-ieee`, `doc-tecnica`, `projeto`, `apresentacao`).
+3. Opcionalmente escolha uma fonte (`--font arial | helvetica | times | ubuntu`).
+4. Pressione **`c`** para compilar ou **`w`** para ativar o Watch Mode.
 
-- `c`: Compilar documento.
-- `w`: Ativar/Desativar Watch Mode.
-- `F1` ou `?`: Abrir menu de Ajuda.
-- `Esc` ou `q`: Abrir Menu Global.
+### Atalhos de teclado
 
-<p align="center">
-  <img src="assets/atalhos_v2_m2t.png" alt="Mark2TeX Keyboard Shortcuts" width="400">
-</p>
+| Tecla | Ação |
+|---|---|
+| `c` | Compilar |
+| `w` | Ativar/desativar Watch Mode |
+| `F1` / `?` | Ajuda |
+| `Esc` / `q` | Menu global |
 
-### Watch Mode
+## Funcionalidades
 
-O Watch Mode é controlado internamente pela TUI. Ao ser ativado, ele monitora o arquivo selecionado e dispara a recompilação automática via callback assim que detecta alterações no disco.
+- **Builds Dockerizados** — sem instalação local de LaTeX; resultado idêntico em qualquer máquina.
+- **TUI interativa** — navegador de arquivos, seletor de template, console de log em tempo real e barra de progresso criados com [Textual](https://github.com/Textualize/textual).
+- **Watch mode** — recompilação automática a cada salvamento do arquivo.
+- **Logs legíveis por humanos** — a saída bruta do XeLaTeX é analisada e traduzida para mensagens em linguagem simples.
+- **Seleção de fonte** — escolha entre Liberation Sans (compatível com Arial), Nimbus Sans (Helvetica), Liberation Serif (compatível com Times) e Ubuntu por documento.
+- **Suporte a bibliografia** — BibTeX via Pandoc + XeLaTeX; basta adicionar um `referencias.bib` ao lado do seu `.md`.
+- **Fluxo orientado à ABNT** — templates construídos segundo as normas acadêmicas brasileiras.
 
-<p align="center">
-  <img src="assets/modo_watch_v2_m2t.png" alt="Mark2TeX Watch Mode" width="800">
-</p>
+## Templates Disponíveis
 
-## Linha de comando e scripts legados
+| Template | Finalidade |
+|---|---|
+| `tcc` | Trabalho de Conclusão de Curso (ABNT) |
+| `artigo-ieee` | Artigo para conferência IEEE |
+| `doc-tecnica` | Documentação técnica |
+| `projeto` | Proposta de projeto |
+| `apresentacao` | Apresentação baseada em Beamer |
 
-Embora o fluxo principal seja agora centrado no comando `mark2tex` e na TUI, scripts legados e comandos `make` continuam disponíveis para compatibilidade e automações externas:
+## Roadmap
 
-```bash
-make compile INPUT=meu_trabalho.md TEMPLATE=tcc
-```
+- [ ] Templates ABNT adicionais (artigo, dissertação)
+- [ ] Prévia visual de fonte e template
+- [ ] Comando `mark2tex new <template>` para criar scaffolds
+- [ ] Instalador nativo para Windows
+- [ ] Integração com GitHub Actions para geração de PDF em CI
 
-Este modo é útil para testes rápidos ou integração com outras ferramentas de CI/CD.
+Acompanhe as [issues abertas](https://github.com/Hylbert/Mark2TeX/issues) ou sugira novas funcionalidades.
 
-## 📂 Estrutura do projeto
+## Como contribuir
 
-- `src/app.py`: Interface TUI em Textual.
-- `src/cli.py`: Ponto de entrada do comando `mark2tex`.
-- `src/setup_env.py`: Checagem de ambiente e gestão da imagem Docker.
-- `src/docker_manager.py`: Orquestração do pipeline de build no container.
-- `src/watcher.py`: Lógica do Watch Mode integrado.
-- `src/log_translator.py`: Tradução e limpeza de logs de compilação.
-- `bin/build.sh`: Script core de compilação executado dentro do container.
-- `templates/`: Modelos LaTeX parametrizados.
+O Mark2TeX cresce com a ajuda da comunidade. Todos os níveis de habilidade são bem-vindos — desde correção de typos até a criação de novos templates.
 
-## Desenvolvimento
+1. Leia o [Guia de Contribuição](.github/CONTRIBUTING.md).
+2. Leia o [Código de Conduta](.github/CODE_OF_CONDUCT.md).
+3. Abra uma issue antes de mudanças grandes para alinhar a direção.
+4. Faça fork, crie uma branch, implemente e abra um pull request.
 
-Para desenvolvimento local, utilize o fluxo:
+Somos gratos por cada contribuição. ✨
 
-```bash
-pipx install -e .
-mark2tex
-```
+## Licença
 
-Para remover a instalação: `pipx uninstall mark2tex`. O comando `mark2tex uninstall` também pode ser usado para limpar artefatos Docker do projeto.
-
-## 🤝 Contribuição
-
-O Mark2TeX é um projeto open-source e cresce com a ajuda da comunidade. Se você deseja adicionar novos templates ou melhorar o pipeline, por favor, leia nosso [Guia de Contribuição](.github/CONTRIBUTING.md) e nosso [Código de Conduta](.github/CODE_OF_CONDUCT.md).
+Mark2TeX é distribuído sob a [Licença MIT](LICENSE).
 
 ---
 <div align="center">
-  Desenvolvido para simplificar a vida de estudantes e pesquisadores. 🎓
+  Desenvolvido com ❤︎ por <a href="https://github.com/Hylbert">Hylbert</a> e <a href="https://github.com/Hylbert/Mark2TeX/graphs/contributors">contribuidores</a>.
 </div>
