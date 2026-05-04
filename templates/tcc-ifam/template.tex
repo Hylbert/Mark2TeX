@@ -1,0 +1,371 @@
+\documentclass[
+  12pt,
+  oneside,
+  a4paper,
+  chapter=TITLE,
+  english,
+  $if(lang)$$lang$$else$portuguese$endif$
+]{abntex2}
+
+% --- CODIFICAÇÃO ---
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{times}
+
+% --- MARGENS (ABNT NBR 14724) ---
+\usepackage[a4paper,top=3cm,left=3cm,right=2cm,bottom=2cm]{geometry}
+
+% --- PACOTES ESSENCIAIS ---
+\usepackage{graphicx}
+\usepackage{indentfirst}
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{calc}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{textcomp}
+\usepackage{color,xcolor}
+\usepackage{listings}
+\usepackage{fancyvrb}
+\usepackage{upquote}
+\usepackage{microtype}
+\usepackage{hyperref}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=black,
+  filecolor=black,
+  urlcolor=black,
+  citecolor=black,
+}
+
+% --- SUPORTE A CÓDIGO (Pandoc) ---
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+\newenvironment{Shaded}{}{}
+\newcommand{\passthrough}[1]{#1}
+\newcommand{\KeywordTok}[1]{\textcolor{blue}{\textbf{#1}}}
+\newcommand{\ControlFlowTok}[1]{\textcolor{blue}{\textbf{#1}}}
+\newcommand{\StringTok}[1]{\textcolor{blue}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor{gray}{\textit{#1}}}
+\newcommand{\FunctionTok}[1]{\textcolor{cyan}{#1}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OtherTok}[1]{#1}
+\newcommand{\ErrorTok}[1]{\textcolor{red}{#1}}
+\newcommand{\DataTypeTok}[1]{\textcolor{purple}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor{red}{#1}}
+\newcommand{\AttributeTok}[1]{\textcolor{orange}{#1}}
+\newcommand{\BuiltInTok}[1]{\textcolor{purple}{#1}}
+\newcommand{\ImportTok}[1]{\textcolor{teal}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor{black}{#1}}
+\newcommand{\OperatorTok}[1]{#1}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor{violet}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor{gray}{\textit{#1}}}
+\newcommand{\AnnotationTok}[1]{\textcolor{red}{\textbf{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor{gray}{\textit{#1}}}
+\newcommand{\ConstantTok}[1]{\textcolor{red}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor{violet}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor{green}{#1}}
+\newcommand{\CharTok}[1]{\textcolor{green}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor{orange}{#1}}
+\newcommand{\FloatTok}[1]{\textcolor{orange}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor{purple}{\textbf{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor{gray}{\textit{#1}}}
+\newcommand{\WarningTok}[1]{\textcolor{red}{\textbf{#1}}}
+\newcommand{\AlertTok}[1]{\textcolor{red}{\textbf{#1}}}
+
+% -------------------------------------------------------------------
+% METADADOS
+% -------------------------------------------------------------------
+\titulo{$title$}
+\autor{$for(author)$$if(author.name)$$author.name$$else$$author$$endif$$sep$ \\ $endfor$}
+\instituicao{$if(institution)$$institution$$else$Instituição de Ensino$endif$}
+\local{$if(city)$$city$$else$Cidade$endif$}
+\data{$if(year)$$year$$else$\the\year$endif$}
+
+% -------------------------------------------------------------------
+\begin{document}
+\frenchspacing
+
+% =====================================================================
+% CAPA  (ABNT NBR 14724 + Manual IFAM)
+% Ordem: logo · cabeçalho instituição · autor · título · local/ano
+% Fonte Arial/Times 12, negrito, maiúsculas, centralizado, esp. 1,0
+% =====================================================================
+\begin{capa}
+  \center
+
+  % --- Logo (opcional) ---
+  $if(logo)$
+  \includegraphics[width=$if(logo-width)$$logo-width$$else$0.12$endif$\textwidth]{$logo$}\\[0.3cm]
+  $endif$
+
+  % --- Cabeçalho institucional ---
+  {\ABNTEXchapterfont\bfseries\large
+    \MakeUppercase{$if(institution)$$institution$$else$INSTITUIÇÃO DE ENSINO$endif$}\\
+    $if(campus)$\MakeUppercase{$campus$}\\$endif$
+    $if(department)$\MakeUppercase{$department$}\\$endif$
+    $if(course)$\MakeUppercase{$course$}$endif$
+  }\\[2.5cm]
+
+  % --- Autor(es) ---
+  {\ABNTEXchapterfont\bfseries\large
+    $for(author)$$if(author.name)$\MakeUppercase{$author.name$}$else$\MakeUppercase{$author$}$endif$$sep$\\$endfor$
+  }\\[4cm]
+
+  % --- Título ---
+  {\ABNTEXchapterfont\bfseries\large
+    \MakeUppercase{$title$}$if(subtitle)$: $subtitle$$endif$
+  }\\[\fill]
+
+  % --- Local e Ano ---
+  {\ABNTEXchapterfont\large
+    \MakeUppercase{$if(city)$$city$$else$CIDADE$endif$}$if(state)$ -- $state$$endif$\\
+    $if(year)$$year$$else$\the\year$endif$
+  }
+\end{capa}
+
+% =====================================================================
+% FOLHA DE ROSTO  (ABNT NBR 14724 + Manual IFAM)
+% Autor e título centralizados; natureza/orientador recuados 8 cm
+% =====================================================================
+\begin{folhaderosto}
+  \center
+
+  % Autor
+  {\ABNTEXchapterfont\bfseries\large
+    $for(author)$$if(author.name)$\MakeUppercase{$author.name$}$else$\MakeUppercase{$author$}$endif$$sep$\\$endfor$
+  }\\[15\baselineskip]
+
+  % Título
+  {\ABNTEXchapterfont\bfseries\large
+    \MakeUppercase{$title$}$if(subtitle)$: $subtitle$$endif$
+  }\\[2cm]
+
+  % Natureza do trabalho (recuo de 8 cm, fonte 12, espaço simples, justificado)
+  \hspace*{8cm}
+  \parbox{8cm}{\normalsize\setlength{\parskip}{0pt}\setlength{\parindent}{0pt}\normalfont
+    $if(nature)$$nature$$else$%
+      Trabalho de Conclusão de Curso apresentado como requisito parcial
+      à obtenção do título de
+      $if(degree)$$degree$$else$[Grau pretendido]$endif$,
+      $if(course)$do Curso de $course$,$endif$
+      $if(institution)$do(a) $institution$$if(campus)$, $campus$$endif$$endif$.
+    $endif$
+  }\\[0.8cm]
+
+  % Área de concentração (opcional)
+  $if(area)$
+  \hspace*{8cm}
+  \parbox{8cm}{\normalsize\normalfont
+    Área de Concentração: $area$
+  }\\[0.5cm]
+  $endif$
+
+  % Orientador
+  $if(advisor)$
+  \hspace*{8cm}
+  \parbox{8cm}{\normalsize\normalfont
+    $if(advisor-label)$$advisor-label$$else$Orientador(a)$endif$: $advisor$
+  }\\[0.5cm]
+  $endif$
+
+  % Coorientador (opcional)
+  $if(coadvisor)$
+  \hspace*{8cm}
+  \parbox{8cm}{\normalsize\normalfont
+    $if(coadvisor-label)$$coadvisor-label$$else$Coorientador(a)$endif$: $coadvisor$
+  }\\[0.5cm]
+  $endif$
+
+  \vfill
+
+  % Local e Ano
+  {\ABNTEXchapterfont\large
+    \MakeUppercase{$if(city)$$city$$else$CIDADE$endif$}$if(state)$ -- $state$$endif$\\
+    $if(year)$$year$$else$\the\year$endif$
+  }
+\end{folhaderosto}
+
+% =====================================================================
+% FICHA CATALOGRÁFICA  (verso da folha de rosto)
+% Elaborada pela biblioteca — inserida pelo autor como imagem ou
+% deixada em branco para preenchimento posterior.
+% =====================================================================
+$if(catalog-image)$
+\newpage
+\thispagestyle{empty}
+\vspace*{\fill}
+\begin{center}
+  \includegraphics[width=12.5cm,height=7.5cm,keepaspectratio]{$catalog-image$}
+\end{center}
+$endif$
+
+% =====================================================================
+% FOLHA DE APROVAÇÃO  (obrigatória — ABNT NBR 14724)
+% =====================================================================
+$if(approval-date)$
+\newpage
+\thispagestyle{empty}
+\begin{center}
+  {\ABNTEXchapterfont\bfseries\large
+    $for(author)$$if(author.name)$\MakeUppercase{$author.name$}$else$\MakeUppercase{$author$}$endif$$sep$\\$endfor$
+  }\\[1cm]
+  {\ABNTEXchapterfont\bfseries\large \MakeUppercase{$title$}}\\[1cm]
+  \hspace*{8cm}\parbox{8cm}{\normalsize\normalfont
+    $if(nature)$$nature$$else$Trabalho de Conclusão de Curso$endif$
+  }\\[1cm]
+  Aprovado em: $approval-date$\\[2cm]
+  {\bfseries BANCA EXAMINADORA}\\[1.5cm]
+  $for(committee)$
+  \rule{8cm}{0.4pt}\\
+  $if(committee.title)$$committee.title$ $endif$$committee.name$\\
+  $if(committee.institution)$$committee.institution$$endif$\\[1.5cm]
+  $endfor$
+\end{center}
+$endif$
+
+% =====================================================================
+% DEDICATÓRIA  (opcional — sem título, sem numeração)
+% =====================================================================
+$if(dedication)$
+\newpage
+\thispagestyle{empty}
+\vspace*{\fill}
+\hspace*{8cm}\parbox{8cm}{\normalfont\itshape $dedication$}
+$endif$
+
+% =====================================================================
+% AGRADECIMENTOS  (opcional — título centralizado, negrito)
+% =====================================================================
+$if(acknowledgements)$
+\newpage
+\thispagestyle{empty}
+\begin{center}{\ABNTEXchapterfont\bfseries AGRADECIMENTOS}\end{center}
+\vspace{\onelineskip}
+$acknowledgements$
+$endif$
+
+% =====================================================================
+% EPÍGRAFE  (opcional — sem título, sem numeração, recuo 8 cm)
+% =====================================================================
+$if(epigraph)$
+\newpage
+\thispagestyle{empty}
+\vspace*{\fill}
+\hspace*{8cm}\parbox{8cm}{\normalfont\itshape
+  ``$epigraph$''\\
+  $if(epigraph-author)$\hfill --- $epigraph-author$$endif$
+}
+$endif$
+
+% =====================================================================
+% RESUMO  (obrigatório — parágrafo único, esp. 1,5, 150-500 palavras)
+% =====================================================================
+$if(abstract-pt)$
+\begin{resumoumacoluna}
+\noindent\textbf{RESUMO:}\vspace{\onelineskip}
+
+$abstract-pt$
+
+\vspace{\onelineskip}
+\noindent\textbf{Palavras-chave}: $if(keywords-pt)$$keywords-pt$$endif$.
+\end{resumoumacoluna}
+$endif$
+
+% =====================================================================
+% ABSTRACT  (obrigatório quando houver resumo em língua vernácula)
+% =====================================================================
+$if(abstract-en)$
+\renewcommand{\resumoname}{Abstract}
+\begin{resumoumacoluna}
+\noindent\textbf{ABSTRACT:}\vspace{\onelineskip}
+
+$abstract-en$
+
+\vspace{\onelineskip}
+\noindent\textbf{Keywords}: $if(keywords-en)$$keywords-en$$endif$.
+\end{resumoumacoluna}
+$endif$
+
+% =====================================================================
+% LISTAS  (opcionais — geradas automaticamente pelo LaTeX)
+% =====================================================================
+$if(list-of-figures)$
+\pdfbookmark[0]{\listfigurename}{lof}
+\listoffigures*
+\cleardoublepage
+$endif$
+
+$if(list-of-tables)$
+\pdfbookmark[0]{\listtablename}{lot}
+\listoftables*
+\cleardoublepage
+$endif$
+
+% Lista de Abreviaturas e Siglas  (opcional)
+$if(abbreviations)$
+\begin{siglas}
+$for(abbreviations)$
+  \item[$abbreviations.key$] $abbreviations.value$
+$endfor$
+\end{siglas}
+$endif$
+
+% Lista de Símbolos  (opcional)
+$if(symbols)$
+\begin{simbolos}
+$for(symbols)$
+  \item[$symbols.key$] $symbols.value$
+$endfor$
+\end{simbolos}
+$endif$
+
+% =====================================================================
+% SUMÁRIO
+% =====================================================================
+\pdfbookmark[0]{\contentsname}{toc}
+\tableofcontents*
+\cleardoublepage
+
+% =====================================================================
+% CONTEÚDO TEXTUAL  (gerado pelo Pandoc)
+% =====================================================================
+\textual
+\setcounter{secnumdepth}{3}
+
+$body$
+
+% =====================================================================
+% PÓS-TEXTUAIS
+% =====================================================================
+\postextual
+
+% Referências (obrigatório)
+$if(bibliography)$
+\bibliographystyle{abntex2-alf}
+\bibliography{$bibliography$}
+$endif$
+
+% Glossário (opcional)
+$if(glossary)$
+\begin{glossario}
+$glossary$
+\end{glossario}
+$endif$
+
+% Apêndice (opcional — elaborado pelo autor)
+$if(appendix)$
+\begin{apendicesenv}
+$appendix$
+\end{apendicesenv}
+$endif$
+
+% Anexo (opcional — documento de terceiros)
+$if(annex)$
+\begin{anexosenv}
+$annex$
+\end{anexosenv}
+$endif$
+
+\end{document}
