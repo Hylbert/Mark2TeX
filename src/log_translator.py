@@ -1,12 +1,8 @@
 import re
 
-# ─────────────────────────────────────────────────────────────────────────────
-# CORREÇÃO PRINCIPAL: "bad escape \h at position 9"
-# O LaTeX gera linhas com "\hbox", "\hspace" etc.
-# Regex como re.compile("\hbox") são inválidos em Python — use raw strings:
-# re.compile(r'\\hbox')  →  casa a string literal '\hbox' no texto.
-# ─────────────────────────────────────────────────────────────────────────────
+from .i18n import t
 
+# ──────────────────────────────────────────────────────────────────────────────
 # Padrões compilados uma única vez (performance)
 _RE_PROGRESS = re.compile(r"^PROGRESS:(\d+)%$")
 _RE_PAGE_NUMS = re.compile(r"^(\[\d+\]\s*)+$")
@@ -35,65 +31,51 @@ _RE_PATH_ONLY = re.compile(r"^\s*'?[\w./\\-]+\.(tex|aux|bbl|lof|lot|toc|log|xdv|
 
 def log_translator(line: str) -> str | None:
     """
-    Recebe uma linha bruta do LaTeX/latexmk (já sem o prefixo 'RAW LINE:')
-    e retorna:
-      - None              → suprimir (não exibir no console)
-      - "__PROGRESS__N"   → atualizar progress bar para N%
-      - str               → mensagem traduzida a exibir no console
+    Receives a raw LaTeX/latexmk log line and returns:
+      - None             -> suppress (do not display in console)
+      - "__PROGRESS__N"  -> update progress bar to N%
+      - str              -> translated message to display
     """
     stripped = line.strip()
 
-    # Linha vazia
     if not stripped:
         return None
 
-    # ── Diretiva PROGRESS ────────────────────────────────────────────────────
+    # ── Diretiva PROGRESS ────────────────────────────────────────────────────────────
     m = _RE_PROGRESS.match(stripped)
     if m:
         return f"__PROGRESS__{m.group(1)}"
 
-    # ── Mensagens próprias do script (emojis) — passam direto ─────────────
+    # ── Mensagens próprias do script (emojis) — passam direto ──────────────────
     first_char = stripped[0]
     if ord(first_char) > 127 and first_char not in ("(", "\\", "/"):
         return stripped
 
-    # ── Suprimir: caminhos de pacotes .sty / .cls / etc. ──────────────────
+    # ── Suprimir: caminhos de pacotes .sty / .cls / etc. ────────────────────
     if _RE_STY_PATH.match(stripped):
         return None
     if stripped.startswith("/usr/share/texlive") or stripped.startswith("/etc/texmf"):
         return None
 
-    # ── Suprimir: separadores ─────────────────────────────────────────────
     if re.match(r"^-{3,}$", stripped) or re.match(r"^\*{3,}$", stripped):
         return None
     if _RE_ABNT_DIVIDER.match(stripped):
         return None
-
-    # ── Suprimir: números de página [1] [2] [3]... ────────────────────────
     if _RE_PAGE_NUMS.match(stripped):
         return None
-
-    # ── Suprimir: sequências de colchetes [][][]... ────────────────────────
     if _RE_BRACKET_JUNK.match(stripped) and "[" in stripped:
         return None
-
-    # ── Suprimir: Missing character (emojis sem suporte na fonte) ─────────
     if _RE_MISSING_CHAR.match(stripped):
         return None
     if stripped.startswith("flt;mapping=tex-text;"):
         return None
-
-    # ── Suprimir: avisos deprecated de hooks ──────────────────────────────
     if _RE_HOOKS_WARN.match(stripped):
         return None
     if stripped.startswith("(hooks)"):
         return None
-
-    # ── Suprimir: debug interno de fontes ─────────────────────────────────
     if _RE_FONT_DEBUG.match(stripped):
         return None
 
-    # ── Suprimir: dimensões de layout de página ───────────────────────────
     _LAYOUT_PREFIXES = (
         "Stock height",
         "Top and edge",
@@ -115,7 +97,6 @@ def log_translator(line: str) -> str | None:
     if stripped.startswith(_LAYOUT_PREFIXES):
         return None
 
-    # ── Suprimir: ruído pontual ────────────────────────────────────────────
     _SUPPRESS_EXACT = {
         r"\write18 enabled.",
         "entering extended mode",
@@ -152,114 +133,107 @@ def log_translator(line: str) -> str | None:
     if stripped.startswith(_SUPPRESS_PREFIX):
         return None
 
-    # Suprimir linhas que são só paths avulsos (output.aux, etc.)
     if _RE_PATH_ONLY.match(stripped):
         return None
-
-    # Suprimir continuações numéricas soltas: [2.5cm], [9cm]
     if re.match(r"^\[\d+(\.\d+)?[a-z]*\]$", stripped):
         return None
 
-    # ── Rc files read ──────────────────────────────────────────────────────
+    # ── Rc files ─────────────────────────────────────────────────────────────────
     if stripped == "Rc files read:":
-        return "⚙️ Config: lendo arquivos de configuração"
+        return t("log.config_reading")
     if re.match(r"^/etc/[Ll]atex", stripped):
-        return f"⚙️ Config: {stripped}"
+        return t("log.config_file").format(path=stripped)
 
-    # ── Output written ─────────────────────────────────────────────────────
+    # ── Output written ──────────────────────────────────────────────────────
     m = _RE_OUTPUT_WRITTEN.match(stripped)
     if m:
-        fmt, pages = m.group(1), m.group(2)
-        return f"📄 Saída gerada: {fmt} ({pages} páginas)"
+        return t("log.output_written").format(fmt=m.group(1), pages=m.group(2))
 
-    # ── Latexmk mensagens ──────────────────────────────────────────────────
+    # ── Latexmk ──────────────────────────────────────────────────────────────
     m = _RE_LATEXMK.match(stripped)
     if m:
         msg = m.group(1).strip()
         if msg.startswith("applying rule"):
             rule = re.search(r"'(.+?)'", msg)
             name: str = str(rule.group(1)) if rule else msg
-            return f"🔧 Aplicando regra: {name}"
+            return t("log.applying_rule").format(name=name)
         if "This is Latexmk" in msg:
             ver = re.search(r"version: ([\d.]+)", msg)
             v = ver.group(1) if ver else ""
-            return f"ℹ️ Latexmk {v}"
+            return t("log.latexmk_version").format(ver=v)
         if "References changed" in msg:
-            return "🔄 Referências alteradas, recompilando..."
+            return t("log.refs_changed")
         if "Found bibliography files" in msg:
             f_match = re.search(r"files (.+)$", msg)
             fname = str(f_match.group(1)) if f_match else msg
-            return f"📚 Arquivo de referências: {fname}"
+            return t("log.bib_file").format(fname=fname)
         if "Found input bbl" in msg or "Log file says" in msg or "Examining" in msg:
             return None
-        return f"🔧 Latexmk: {msg}"
+        return t("log.latexmk_generic").format(msg=msg)
 
-    # ── This is XeTeX / BibTeX ─────────────────────────────────────────────
+    # ── This is XeTeX / BibTeX ───────────────────────────────────────────────
     if stripped.startswith("This is XeTeX"):
         ver = re.search(r"Version ([\d.\-]+)", stripped)
         v = ver.group(1) if ver else ""
-        return f"ℹ️ Motor: XeTeX {v}"
+        return t("log.engine_xetex").format(ver=v)
     if stripped.startswith("This is BibTeX"):
         ver = re.search(r"Version ([\d.]+)", stripped)
         v = ver.group(1) if ver else ""
-        return f"ℹ️ Motor: BibTeX {v}"
+        return t("log.engine_bibtex").format(ver=v)
 
-    # ── Document Class ─────────────────────────────────────────────────────
+    # ── Document Class ───────────────────────────────────────────────────────────
     m = _RE_DOC_CLASS.match(stripped)
     if m:
         cls = m.group(1)
         if cls == "memoir":
-            return None  # classe interna
+            return None
         ver = re.search(r"v[-\d.]+", stripped)
         v = f" {ver.group(0)}" if ver else ""
-        return f"📄 Classe: {cls}{v}"
+        return t("log.doc_class").format(cls=cls, ver=v)
 
-    # ── Rule / Run ─────────────────────────────────────────────────────────
+    # ── Rule / Run ──────────────────────────────────────────────────────────────
     if _RE_RULE_CHANGE.match(stripped):
-        return None  # "Rule 'xelatex': File changes..." → suprimir
+        return None
 
     m = _RE_RUN_NUMBER.match(stripped)
     if m:
-        run_n = str(m.group(1))
-        run_rule = str(m.group(2))
-        return f"🔄 Compilação {run_n} — regra: {run_rule}"
+        return t("log.run_n").format(n=m.group(1), rule=m.group(2))
 
     m = _RE_RUNNING.match(stripped)
     if m:
         cmd = m.group(1)
         if "xelatex" in cmd:
-            return "▶️ xelatex output.tex"
+            return t("log.running_xelatex")
         if "bibtex" in cmd:
             parts = cmd.split()
             arg = parts[-1] if parts else ""
-            return f"▶️ bibtex {arg}"
-        return f"▶️ {cmd[:80]}"
+            return t("log.running_bibtex").format(arg=arg)
+        return t("log.running_cmd").format(cmd=cmd[:80])
 
-    # ── Erros LaTeX ────────────────────────────────────────────────────────
+    # ── Erros LaTeX ─────────────────────────────────────────────────────────────
     m = _RE_LATEX_ERROR.match(stripped)
     if m:
-        return f"❌ Erro LaTeX: {m.group(1)}"
+        return t("log.latex_error").format(msg=m.group(1))
 
     m = _RE_GENERIC_ERROR.match(stripped)
     if m:
-        return f"❌ {m.group(1)}"
+        return t("log.error").format(msg=m.group(1))
 
-    # ── Localização do erro: l.XX ──────────────────────────────────────────
+    # ── Localização do erro: l.XX ───────────────────────────────────────────────
     m = _RE_LINE_REF.match(stripped)
     if m:
         lineno, ctx = m.group(1), m.group(2).strip()
-        # ctx_clean usa variável separada para o mypy inferir str corretamente
         ctx_clean: str = re.sub(r"\\TU/\S+\s*", "", ctx).strip()
         if ctx_clean:
-            return f"   ↳ linha {lineno}: {ctx_clean}"
-        return f"   ↳ linha {lineno}"
+            return t("log.line_ref_ctx").format(n=lineno, ctx=ctx_clean)
+        return t("log.line_ref").format(n=lineno)
 
-    # ── Overfull / Underfull hbox ──────────────────────────────────────────
+    # ── Overfull / Underfull ────────────────────────────────────────────────────
     m = _RE_OVERFULL.match(stripped)
     if m:
         kind, amount, l1, l2 = m.groups()
         if kind == "Underfull":
-            return None  # underfull é cosmético
+            return None
         pts_match = re.search(r"[\d.]+", amount)
         if pts_match:
             try:
@@ -267,44 +241,42 @@ def log_translator(line: str) -> str | None:
                     return None
             except ValueError:
                 pass
-        return f"⚠️ Texto largo ({amount}) nas linhas {l1}–{l2}"
+        return t("log.overfull").format(amount=amount, l1=l1, l2=l2)
 
-    # ── Avisos de pacotes ──────────────────────────────────────────────────
+    # ── Avisos de pacotes ───────────────────────────────────────────────────────
     m = _RE_PKG_WARN.match(stripped)
     if m:
         pkg, msg = m.group(1), m.group(2)
         if "Suppressing empty link" in msg or "Rerun" in msg:
             return None
-        return f"⚠️ [{pkg}] {msg}"
+        return t("log.pkg_warn").format(pkg=pkg, msg=msg)
 
     m = _RE_LATEX_WARN.match(stripped)
     if m:
         msg = m.group(1)
         if "Labels may have changed" in msg:
-            return "🔄 Referências alteradas, recompilando..."
+            return t("log.refs_changed")
         if "Empty thebibliography" in msg:
-            return "⚠️ Seção de referências vazia"
+            return t("log.refs_empty")
         if "Rerun" in msg:
             return None
-        return f"⚠️ {msg}"
+        return t("log.latex_warn").format(msg=msg)
 
-    # ── BibTeX ─────────────────────────────────────────────────────────────
+    # ── BibTeX ────────────────────────────────────────────────────────────────────
     if stripped.startswith("The style file"):
         sty = stripped.replace("The style file", "").strip()
-        return f"📝 Estilo bibliográfico: {sty}"
+        return t("log.bib_style").format(sty=sty)
     if stripped.startswith("Database file"):
         db = re.sub(r"^Database file\s*#?\d*:?\s*", "", stripped)
-        return f"📚 Base de dados: {db}"
+        return t("log.bib_db").format(db=db)
     if "I found no commands" in stripped:
-        return "ℹ️ Nenhuma citação encontrada no documento"
+        return t("log.no_citations")
     if re.match(r"^There was[e]? \d+ error", stripped):
-        return f"❌ {stripped}"
+        return t("log.bib_errors").format(msg=stripped)
 
-    # ── Suprimir: linhas muito curtas ou só pontuação ──────────────────────
     if len(stripped) <= 2:
         return None
     if re.match(r"^[()./\\]+$", stripped):
         return None
 
-    # ── Passagem direta para o restante ────────────────────────────────────
     return stripped

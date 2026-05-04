@@ -19,25 +19,23 @@ from textual.widgets import (
     RichLog,
 )
 
+from . import config as cfg
 from .docker_manager import DockerManager
+from .i18n import set_language, t
 from .log_translator import log_translator
+from .settings_screen import LanguageChanged, SettingsScreen
 from .utils.visuals import M2TBannerWidget, M2TMenuOption
 from .watcher import WatcherManager
 
 
-# ── Logger configurado uma única vez ────────────────────────────────────────
 def _setup_logger() -> logging.Logger:
     logger = logging.getLogger("mark2tex")
-
-    # Só ativa se DEBUG=1 ou MARK2TEX_DEBUG=1
     if not (os.getenv("MARK2TEX_DEBUG") or os.getenv("DEBUG")):
         logger.addHandler(logging.NullHandler())
         return logger
-
     log_dir = Path(user_log_dir("mark2tex", appauthor=False))
     log_dir.mkdir(parents=True, exist_ok=True)
     log_file = log_dir / "debug.log"
-
     handler = logging.FileHandler(log_file, encoding="utf-8")
     handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(message)s"))
     logger.setLevel(logging.DEBUG)
@@ -59,23 +57,38 @@ class HelpScreen(ModalScreen):
 
     def compose(self) -> ComposeResult:
         with Vertical(classes="menu-window"):
-            yield Label("AJUDA & ATALHOS", id="menu-header", classes="menu-header")
+            yield Label(t("help.title"), id="menu-header", classes="menu-header")
             with Vertical(id="help-content"):
-                yield Label("Key Bindings:", id="help-bindings-title")
-                yield Label("ESC / q      — Menu Global")
-                yield Label("? / F1       — Abrir Ajuda")
-                yield Label("c            — Compilar documento")
-                yield Label("w            — Ativar/Desativar Watch Mode")
-                yield Label("Tab          — Navegar entre painéis")
-                yield Label("↑ ↓          — Navegar nas listas")
+                yield Label(t("help.bindings_title"), id="help-bindings-title")
+                yield Label(
+                    "ESC / q      — "
+                    + t("menu.settings").capitalize()
+                    + " / "
+                    + t("menu.exit").lower()
+                )
+                yield Label("? / F1       — " + t("menu.help").capitalize())
+                yield Label("c            — " + t("btn.compile").capitalize())
+                yield Label("w            — " + t("btn.watch_on") + " / " + t("btn.watch_off"))
+                yield Label(
+                    "Tab          — "
+                    + (
+                        "Navegar entre painéis"
+                        if t("menu.exit") == "SAIR"
+                        else "Navigate between panels"
+                    )
+                )
+                yield Label(
+                    "↑ ↓          — "
+                    + ("Navegar nas listas" if t("menu.exit") == "SAIR" else "Navigate lists")
+                )
                 yield Label("")
-                yield Label("Fluxo:", id="help-commands-title")
-                yield Label("1. Selecione um arquivo .md no painel esquerdo")
-                yield Label("2. Escolha o template (tcc, artigo, projeto)")
-                yield Label("3. Pressione c ou clique em COMPILAR")
-                yield Label("4. Acompanhe o progresso no console abaixo")
+                yield Label(t("help.flow_title"), id="help-commands-title")
+                yield Label(t("help.flow_1"))
+                yield Label(t("help.flow_2"))
+                yield Label(t("help.flow_3"))
+                yield Label(t("help.flow_4"))
                 yield Label("")
-                yield Label("Pressione ESC para voltar", id="help-footer")
+                yield Label(t("help.footer"), id="help-footer")
 
 
 class GlobalMenu(ModalScreen):
@@ -87,8 +100,9 @@ class GlobalMenu(ModalScreen):
                 yield M2TBannerWidget()
                 yield Label("─" * 46, id="menu-divider")
                 yield ListView(
-                    M2TMenuOption("AJUDA", item_id="opt-help"),
-                    M2TMenuOption("SAIR", item_id="opt-exit"),
+                    M2TMenuOption(t("menu.settings"), item_id="opt-settings"),
+                    M2TMenuOption(t("menu.help"), item_id="opt-help"),
+                    M2TMenuOption(t("menu.exit"), item_id="opt-exit"),
                     id="global-menu-list",
                 )
                 yield Label("ESC · fechar", id="menu-footer-hint")
@@ -97,7 +111,9 @@ class GlobalMenu(ModalScreen):
         self.query_one("#global-menu-list", ListView).focus()
 
     def on_list_view_selected(self, event: ListView.Selected) -> None:
-        if event.item.id == "opt-help":
+        if event.item.id == "opt-settings":
+            self.app.push_screen(SettingsScreen())
+        elif event.item.id == "opt-help":
             self.app.push_screen(HelpScreen())
         elif event.item.id == "opt-exit":
             self.app.exit()
@@ -116,70 +132,72 @@ class Mark2TeXApp(App):
         ("w", "toggle_watch", "Watch Mode"),
     ]
 
+    def on_load(self) -> None:
+        settings = cfg.load()
+        set_language(settings.get("language", "pt_BR"))
+        # Aplica o tema salvo antes do compose
+        saved_theme = settings.get("theme", "textual-dark")
+        self.theme = saved_theme
+
     def compose(self) -> ComposeResult:
         yield Header()
         with Horizontal(id="outer-layout"):
-            # ── Coluna esquerda: file explorer + config + console ──
             with Vertical(id="left-column"):
                 with Horizontal(id="main-layout"):
                     with Vertical(id="file-explorer"):
                         yield ListView(id="file-list")
-
                     with Vertical(id="config-panel"):
                         with Vertical(id="status-panel"):
-                            yield Label("Arquivo  : —", id="status-file")
-                            yield Label("Template : —", id="status-template")
-
-                        yield Label("Defina o Template do Arquivo PDF", id="template-title")
+                            yield Label(t("status.file"), id="status-file")
+                            yield Label(t("status.template"), id="status-template")
+                        yield Label(t("panel.template_label"), id="template-title")
                         yield ListView(
                             OptionItem("tcc"),
                             OptionItem("artigo"),
                             OptionItem("projeto"),
                             id="template-list",
                         )
-
-                        # Botões empilhados verticalmente para não sumirem
                         with Horizontal(id="action-bar"):
-                            yield Button("COMPILAR", id="compile-btn")
-                            yield Button("WATCH: OFF", id="watch-btn")
-
+                            yield Button(t("btn.compile"), id="compile-btn")
+                            yield Button(t("btn.watch_off"), id="watch-btn")
                 yield ProgressBar(id="progress-bar", total=100)
                 yield RichLog(id="console-panel", highlight=False, markup=False, wrap=True)
-
             with Vertical(id="preview-panel"):
                 with ScrollableContainer(id="preview-scroll"):
                     yield Markdown("", id="preview-content")
-
         yield Footer()
 
     def on_mount(self) -> None:
         self.docker_manager = DockerManager()
         self.watcher_manager = WatcherManager()
         self.is_watching = False
-
         self.selected_file: str | None = None
         self.selected_template: str | None = None
-
-        # ── Border titles ──
-        self.query_one("#file-explorer").border_title = "• Arquivos"
-        self.query_one("#config-panel").border_title = "• Configuração"
-        self.query_one("#preview-panel").border_title = "• Preview"
-        self.query_one("#console-panel").border_title = "• Console"
-
+        self._refresh_ui_labels()
         md_files = sorted(f for f in os.listdir(".") if f.endswith(".md"))
         file_list = self.query_one("#file-list", ListView)
         for f in md_files:
             file_list.append(OptionItem(f))
 
-    # ------------------------------------------------------------------
-    # Eventos de lista
-    # ------------------------------------------------------------------
+    def _refresh_ui_labels(self) -> None:
+        self.query_one("#file-explorer").border_title = t("panel.files")
+        self.query_one("#config-panel").border_title = t("panel.config")
+        self.query_one("#preview-panel").border_title = t("panel.preview")
+        self.query_one("#console-panel").border_title = t("panel.console")
+        self.query_one("#template-title", Label).update(t("panel.template_label"))
+        self.query_one("#status-file", Label).update(t("status.file"))
+        self.query_one("#status-template", Label).update(t("status.template"))
+        self.query_one("#compile-btn", Button).label = t("btn.compile")
+        if not self.is_watching:
+            self.query_one("#watch-btn", Button).label = t("btn.watch_off")
+
+    def on_language_changed(self, _: LanguageChanged) -> None:
+        self._refresh_ui_labels()
 
     def on_list_view_selected(self, event: ListView.Selected) -> None:
         item = event.item
         if not isinstance(item, OptionItem):
             return
-
         if event.list_view.id == "file-list":
             self.selected_file = item.label_text
             self.query_one("#status-file", Label).update(f"Arquivo  : {self.selected_file}")
@@ -191,7 +209,6 @@ class Mark2TeXApp(App):
         item = event.item
         if not isinstance(item, OptionItem):
             return
-
         if event.list_view.id == "file-list":
             self.selected_file = item.label_text
             self.query_one("#status-file", Label).update(f"Arquivo  : {self.selected_file}")
@@ -201,19 +218,13 @@ class Mark2TeXApp(App):
             self.query_one("#status-template", Label).update(f"Template : {self.selected_template}")
 
     def _update_preview(self, filename: str) -> None:
-        """Lê o arquivo .md e atualiza o widget Markdown de preview."""
         try:
             with open(filename, encoding="utf-8") as f:
                 content = f.read()
         except (FileNotFoundError, PermissionError, OSError):
             content = f"_Não foi possível ler o arquivo `{filename}`._"
-
         preview = self.query_one("#preview-content", Markdown)
         self.call_after_refresh(preview.update, content)
-
-    # ------------------------------------------------------------------
-    # Actions / botões
-    # ------------------------------------------------------------------
 
     def _get_selection(self) -> tuple[str | None, str | None]:
         return self.selected_file, self.selected_template
@@ -244,22 +255,13 @@ class Mark2TeXApp(App):
     def _set_progress(self, value: int) -> None:
         self.query_one("#progress-bar", ProgressBar).update(progress=value)
 
-    # ------------------------------------------------------------------
-    # Watch Mode
-    # ------------------------------------------------------------------
-
     def toggle_watch_mode(self) -> None:
         btn = self.query_one("#watch-btn", Button)
-
         if not self.is_watching:
             selected_file, selected_template = self._get_selection()
             if not selected_file or not selected_template:
-                self._log_console(
-                    "❌ Selecione um arquivo e um template antes de ativar o Watch Mode.",
-                    style="#e05c5c",
-                )
+                self._log_console(t("compile.select_watch"), style="#e05c5c")
                 return
-
             self.watcher_manager.start_watching(
                 selected_file,
                 selected_template,
@@ -267,31 +269,21 @@ class Mark2TeXApp(App):
             )
             self.is_watching = True
             btn.label = Text.assemble(
-                ("● ", "bold rgb(76,175,135)"),
-                ("WATCH: ON", "white bold"),
+                ("● ", "bold rgb(76,175,135)"), (t("btn.watch_on"), "white bold")
             )
             btn.add_class("watching")
-            self._log_console(f"🔭 Watch Mode ativado para {selected_file}...", style="#5ab4bc")
+            self._log_console(f"{t('watch.on')} {selected_file}...", style="#5ab4bc")
         else:
             self.watcher_manager.stop_watching()
             self.is_watching = False
-            btn.label = Text.assemble(
-                ("● ", "rgb(120,120,120)"),
-                ("WATCH: OFF", "white"),
-            )
+            btn.label = Text.assemble(("● ", "rgb(120,120,120)"), (t("btn.watch_off"), "white"))
             btn.remove_class("watching")
-            self._log_console("💤 Watch Mode desativado.", style="#e0a24a")
-
-    # ------------------------------------------------------------------
-    # Compilação
-    # ------------------------------------------------------------------
+            self._log_console(t("watch.off"), style="#e0a24a")
 
     def compile_document(self) -> None:
         selected_file, selected_template = self._get_selection()
         if not selected_file or not selected_template:
-            self._log_console(
-                "❌ Selecione um arquivo e um template para compilar.", style="#e05c5c"
-            )
+            self._log_console(t("compile.select_file"), style="#e05c5c")
             return
         self.compile_specific_document(selected_file, selected_template)
 
@@ -309,51 +301,44 @@ class Mark2TeXApp(App):
         ui("progress", 0)
         ui(
             "console",
-            (f"🚀 Compilando {selected_file} com template '{selected_template}'...", "#5ab4bc"),
+            (
+                f"{t('compile.start')} {selected_file} com template '{selected_template}'...",
+                "#5ab4bc",
+            ),
         )
-
         try:
             for line in self.docker_manager.compile(selected_file, selected_template):
                 clean = line.strip()
                 if not clean:
                     continue
-
                 _logger.debug("RAW LINE: %s", line)
-
                 result = log_translator(clean)
                 if result is None:
                     continue
-
                 if result.startswith("__PROGRESS__"):
                     percent = int(result.removeprefix("__PROGRESS__"))
                     ui("progress", percent)
                     ui("console", (f"⏳ Processing... {percent}%", "white"))
                     continue
-
                 if result.startswith(("⚠️", "⚠", "❌", "🔄")):
                     ui("progress_bump", None)
-
                 ui("console", (result, "white"))
-
         except Exception as exc:
-            ui("console", (f"❌ Erro inesperado: {exc}", "#e05c5c"))
+            ui("console", (f"{t('compile.error')}: {exc}", "#e05c5c"))
 
     def _apply_ui_update(self, action: str, value=None) -> None:
         _logger.debug("UI APPLY - %s: %s", action, value)
         try:
             if action == "progress":
                 self._set_progress(int(value))
-
             elif action == "progress_bump":
                 bar = self.query_one("#progress-bar", ProgressBar)
                 current = bar.progress or 0
                 if current < 99:
                     self._set_progress(min(int(current) + 1, 99))
-
             elif action == "console":
                 message, style = value
                 self._log_console(message, style=style)
-
         except Exception as exc:
             print(f"[UI Error] {action}: {exc}")
 

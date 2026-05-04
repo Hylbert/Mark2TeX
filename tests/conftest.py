@@ -1,7 +1,6 @@
+
 import pytest
-import tempfile
-import os
-from pathlib import Path
+
 
 @pytest.fixture
 def sample_md_file(tmp_path):

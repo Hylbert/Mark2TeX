@@ -1,5 +1,7 @@
-from src.cli import build_parser
 from unittest.mock import patch
+
+from src.cli import build_parser
+
 
 def test_parser_creates_successfully():
     parser = build_parser()
