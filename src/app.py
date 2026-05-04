@@ -29,6 +29,16 @@ from .settings_screen import LanguageChanged, SettingsScreen
 from .utils.visuals import M2TBannerWidget, M2TMenuOption
 from .watcher import WatcherManager
 
+# ---------------------------------------------------------------------------
+# Fontes disponíveis: (id interno, rótulo exibido na TUI)
+# ---------------------------------------------------------------------------
+AVAILABLE_FONTS: list[tuple[str, str]] = [
+    ("times",       "Times New Roman  (Liberation Serif)"),
+    ("arial",       "Arial            (Liberation Sans)"),
+    ("helvetica",   "Helvetica        (Nimbus Sans)"),
+    ("ubuntu-sans", "Ubuntu Sans"),
+]
+
 
 def _setup_logger() -> logging.Logger:
     logger = logging.getLogger("mark2tex")
@@ -89,6 +99,15 @@ class OptionItem(ListItem):
     def __init__(self, label_text: str, item_id: str | None = None) -> None:
         super().__init__(Label(label_text), id=item_id)
         self.label_text = label_text
+
+
+class FontItem(ListItem):
+    """Item de fonte na lista da TUI. Guarda o id interno da fonte."""
+
+    def __init__(self, font_id: str, display_label: str) -> None:
+        super().__init__(Label(display_label))
+        self.font_id = font_id
+        self.display_label = display_label
 
 
 class HelpScreen(ModalScreen):
@@ -173,8 +192,11 @@ class Mark2TeXApp(App):
                         with Vertical(id="status-panel"):
                             yield Label(t("status.file"),     id="status-file")
                             yield Label(t("status.template"), id="status-template")
+                            yield Label(t("status.font"),     id="status-font")
                         yield Label(t("panel.template_label"), id="template-title")
                         yield ListView(id="template-list")
+                        yield Label(t("panel.font_label"), id="font-title")
+                        yield ListView(id="font-list")
                         with Horizontal(id="action-bar"):
                             yield Button(t("btn.compile"),   id="compile-btn")
                             yield Button(t("btn.watch_off"), id="watch-btn")
@@ -193,9 +215,11 @@ class Mark2TeXApp(App):
         self.is_watching      = False
         self.selected_file:     str | None = None
         self.selected_template: str | None = None
+        self.selected_font:     str | None = None
         self._console_lines:    list[str]  = []
         self._refresh_ui_labels()
         self._populate_templates()
+        self._populate_fonts()
         self._populate_files()
 
     def _populate_templates(self) -> None:
@@ -203,6 +227,12 @@ class Mark2TeXApp(App):
         template_list.clear()
         for name in self.docker_manager.list_templates():
             template_list.append(OptionItem(name))
+
+    def _populate_fonts(self) -> None:
+        font_list = self.query_one("#font-list", ListView)
+        font_list.clear()
+        for font_id, label in AVAILABLE_FONTS:
+            font_list.append(FontItem(font_id, label))
 
     def _populate_files(self) -> None:
         md_files = sorted(f for f in os.listdir(".") if f.endswith(".md"))
@@ -215,9 +245,11 @@ class Mark2TeXApp(App):
         self.query_one("#config-panel").border_title   = t("panel.config")
         self.query_one("#preview-panel").border_title  = t("panel.preview")
         self.query_one("#console-panel").border_title  = t("panel.console")
-        self.query_one("#template-title",  Label).update(t("panel.template_label"))
+        self.query_one("#template-title", Label).update(t("panel.template_label"))
+        self.query_one("#font-title",     Label).update(t("panel.font_label"))
         self.query_one("#status-file",     Label).update(t("status.file"))
         self.query_one("#status-template", Label).update(t("status.template"))
+        self.query_one("#status-font",     Label).update(t("status.font"))
         self.query_one("#compile-btn",     Button).label = t("btn.compile")
         if not self.is_watching:
             self.query_one("#watch-btn", Button).label = t("btn.watch_off")
@@ -227,26 +259,28 @@ class Mark2TeXApp(App):
 
     def on_list_view_selected(self, event: ListView.Selected) -> None:
         item = event.item
-        if not isinstance(item, OptionItem):
-            return
-        if event.list_view.id == "file-list":
+        if event.list_view.id == "file-list" and isinstance(item, OptionItem):
             self.selected_file = item.label_text
             self.query_one("#status-file", Label).update(f"Arquivo  : {self.selected_file}")
-        elif event.list_view.id == "template-list":
+        elif event.list_view.id == "template-list" and isinstance(item, OptionItem):
             self.selected_template = item.label_text
             self.query_one("#status-template", Label).update(f"Template : {self.selected_template}")
+        elif event.list_view.id == "font-list" and isinstance(item, FontItem):
+            self.selected_font = item.font_id
+            self.query_one("#status-font", Label).update(f"Fonte    : {item.display_label}")
 
     def on_list_view_highlighted(self, event: ListView.Highlighted) -> None:
         item = event.item
-        if not isinstance(item, OptionItem):
-            return
-        if event.list_view.id == "file-list":
+        if event.list_view.id == "file-list" and isinstance(item, OptionItem):
             self.selected_file = item.label_text
             self.query_one("#status-file", Label).update(f"Arquivo  : {self.selected_file}")
             self._update_preview(item.label_text)
-        elif event.list_view.id == "template-list":
+        elif event.list_view.id == "template-list" and isinstance(item, OptionItem):
             self.selected_template = item.label_text
             self.query_one("#status-template", Label).update(f"Template : {self.selected_template}")
+        elif event.list_view.id == "font-list" and isinstance(item, FontItem):
+            self.selected_font = item.font_id
+            self.query_one("#status-font", Label).update(f"Fonte    : {item.display_label}")
 
     def _update_preview(self, filename: str) -> None:
         try:
@@ -257,8 +291,8 @@ class Mark2TeXApp(App):
         preview = self.query_one("#preview-content", Markdown)
         self.call_after_refresh(preview.update, content)
 
-    def _get_selection(self) -> tuple[str | None, str | None]:
-        return self.selected_file, self.selected_template
+    def _get_selection(self) -> tuple[str | None, str | None, str | None]:
+        return self.selected_file, self.selected_template, self.selected_font
 
     def action_show_global_menu(self) -> None:
         self.push_screen(GlobalMenu())
@@ -308,14 +342,16 @@ class Mark2TeXApp(App):
     def toggle_watch_mode(self) -> None:
         btn = self.query_one("#watch-btn", Button)
         if not self.is_watching:
-            selected_file, selected_template = self._get_selection()
+            selected_file, selected_template, selected_font = self._get_selection()
             if not selected_file or not selected_template:
                 self._log_console(t("compile.select_watch"), style="#e05c5c")
                 return
             self.watcher_manager.start_watching(
                 selected_file,
                 selected_template,
-                lambda: self.compile_specific_document(selected_file, selected_template),
+                lambda: self.compile_specific_document(
+                    selected_file, selected_template, selected_font
+                ),
             )
             self.is_watching = True
             btn.label = Text.assemble(("● ", "bold rgb(76,175,135)"), (t("btn.watch_on"), "white bold"))
@@ -329,27 +365,41 @@ class Mark2TeXApp(App):
             self._log_console(t("watch.off"), style="#e0a24a")
 
     def compile_document(self) -> None:
-        selected_file, selected_template = self._get_selection()
+        selected_file, selected_template, selected_font = self._get_selection()
         if not selected_file or not selected_template:
             self._log_console(t("compile.select_file"), style="#e05c5c")
             return
-        self.compile_specific_document(selected_file, selected_template)
+        self.compile_specific_document(selected_file, selected_template, selected_font)
 
-    def compile_specific_document(self, selected_file: str, selected_template: str) -> None:
+    def compile_specific_document(
+        self,
+        selected_file: str,
+        selected_template: str,
+        selected_font: str | None = None,
+    ) -> None:
         self.run_worker(
-            lambda: self._run_compilation(selected_file, selected_template),
+            lambda: self._run_compilation(selected_file, selected_template, selected_font),
             thread=True,
         )
 
-    def _run_compilation(self, selected_file: str, selected_template: str) -> None:
+    def _run_compilation(
+        self,
+        selected_file: str,
+        selected_template: str,
+        selected_font: str | None,
+    ) -> None:
         def ui(action: str, value=None) -> None:
             _logger.debug("UI REQUEST - %s: %s", action, value)
             self.call_from_thread(self._apply_ui_update, action, value)
 
         ui("progress", 0)
         ui("console", (f"{t('compile.start')} {selected_file} com template '{selected_template}'...", "#5ab4bc"))
+        if selected_font:
+            ui("console", (f"🔤 {t('font.using')} {selected_font}", "#5ab4bc"))
         try:
-            for line in self.docker_manager.compile(selected_file, selected_template):
+            for line in self.docker_manager.compile(
+                selected_file, selected_template, font=selected_font
+            ):
                 clean = line.strip()
                 if not clean:
                     continue
