@@ -1,6 +1,7 @@
 import logging
 import os
-import pyperclip
+import shutil
+import subprocess
 from pathlib import Path
 
 from platformdirs import user_log_dir
@@ -45,6 +46,43 @@ def _setup_logger() -> logging.Logger:
 
 
 _logger = _setup_logger()
+
+
+def _copy_to_clipboard(text: str) -> None:
+    """Copia texto para a área de transferência.
+
+    Tenta, em ordem:
+      1. pyperclip  (cross-platform, requer xclip/xsel/wl-clipboard no Linux)
+      2. wl-copy    (Wayland nativo)
+      3. xclip      (X11)
+      4. xsel       (X11 alternativo)
+    Lança RuntimeError se nenhum método funcionar.
+    """
+    # 1. pyperclip
+    try:
+        import pyperclip
+        pyperclip.copy(text)
+        return
+    except Exception:
+        pass
+
+    # 2-4. ferramentas de sistema
+    for cmd in (
+        ["wl-copy"],
+        ["xclip", "-selection", "clipboard"],
+        ["xsel", "--clipboard", "--input"],
+    ):
+        if shutil.which(cmd[0]):
+            try:
+                subprocess.run(cmd, input=text.encode(), check=True, timeout=3)
+                return
+            except Exception:
+                continue
+
+    raise RuntimeError(
+        "Nenhum mecanismo de clipboard disponível.\n"
+        "Instale: xclip, xsel ou wl-clipboard (Wayland)."
+    )
 
 
 class OptionItem(ListItem):
@@ -155,7 +193,7 @@ class Mark2TeXApp(App):
         self.is_watching      = False
         self.selected_file:     str | None = None
         self.selected_template: str | None = None
-        self._console_lines:    list[str]  = []   # buffer para _copy_console
+        self._console_lines:    list[str]  = []
         self._refresh_ui_labels()
         self._populate_templates()
         self._populate_files()
@@ -245,13 +283,13 @@ class Mark2TeXApp(App):
     def _copy_console(self) -> None:
         text = "\n".join(self._console_lines).strip()
         try:
-            pyperclip.copy(text)
+            _copy_to_clipboard(text)
             btn = self.query_one("#copy-console-btn", Button)
             btn.label = "✓"
             btn.add_class("console-action-btn--copied")
             self.set_timer(1.5, self._reset_copy_btn)
-        except Exception:
-            self._log_console("❌ Não foi possível copiar para a área de transferência.", style="#e05c5c")
+        except RuntimeError as exc:
+            self._log_console(f"❌ {exc}", style="#e05c5c")
 
     def _reset_copy_btn(self) -> None:
         btn = self.query_one("#copy-console-btn", Button)
