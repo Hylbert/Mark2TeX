@@ -404,6 +404,7 @@ source = { editable = "." }
 dependencies = [
     { name = "docker" },
     { name = "pillow" },
+    { name = "platformdirs" },
     { name = "rich" },
     { name = "textual" },
     { name = "watchdog" },
@@ -423,6 +424,7 @@ requires-dist = [
     { name = "docker", specifier = ">=7.0.0" },
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.10.0" },
     { name = "pillow", specifier = ">=10.0.0" },
+    { name = "platformdirs", specifier = ">=4.0.0" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0.0" },
     { name = "pytest-asyncio", marker = "extra == 'dev'", specifier = ">=0.23.0" },
     { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=5.0.0" },

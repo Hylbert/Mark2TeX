@@ -1,5 +1,8 @@
+import logging
 import os
+from pathlib import Path
 
+from platformdirs import user_log_dir
 from rich.text import Text
 from textual.app import App, ComposeResult
 from textual.containers import Horizontal, ScrollableContainer, Vertical
@@ -20,6 +23,29 @@ from .docker_manager import DockerManager
 from .log_translator import log_translator
 from .utils.visuals import M2TBannerWidget, M2TMenuOption
 from .watcher import WatcherManager
+
+
+# ── Logger configurado uma única vez ────────────────────────────────────────
+def _setup_logger() -> logging.Logger:
+    logger = logging.getLogger("mark2tex")
+
+    # Só ativa se DEBUG=1 ou MARK2TEX_DEBUG=1
+    if not (os.getenv("MARK2TEX_DEBUG") or os.getenv("DEBUG")):
+        logger.addHandler(logging.NullHandler())
+        return logger
+
+    log_dir = Path(user_log_dir("mark2tex", appauthor=False))
+    log_dir.mkdir(parents=True, exist_ok=True)
+    log_file = log_dir / "debug.log"
+
+    handler = logging.FileHandler(log_file, encoding="utf-8")
+    handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(message)s"))
+    logger.setLevel(logging.DEBUG)
+    logger.addHandler(handler)
+    return logger
+
+
+_logger = _setup_logger()
 
 
 class OptionItem(ListItem):
@@ -277,8 +303,7 @@ class Mark2TeXApp(App):
 
     def _run_compilation(self, selected_file: str, selected_template: str) -> None:
         def ui(action: str, value=None) -> None:
-            with open("tui_console_debug.log", "a", encoding="utf-8") as f:
-                f.write(f"UI REQUEST - {action}: {value}\n")
+            _logger.debug("UI REQUEST - %s: %s", action, value)
             self.call_from_thread(self._apply_ui_update, action, value)
 
         ui("progress", 0)
@@ -293,8 +318,7 @@ class Mark2TeXApp(App):
                 if not clean:
                     continue
 
-                with open("tui_console_debug.log", "a", encoding="utf-8") as f:
-                    f.write(f"RAW LINE: {line}")
+                _logger.debug("RAW LINE: %s", line)
 
                 result = log_translator(clean)
                 if result is None:
@@ -315,8 +339,7 @@ class Mark2TeXApp(App):
             ui("console", (f"❌ Erro inesperado: {exc}", "#e05c5c"))
 
     def _apply_ui_update(self, action: str, value=None) -> None:
-        with open("tui_console_debug.log", "a", encoding="utf-8") as f:
-            f.write(f"UI APPLY - {action}: {value}\n")
+        _logger.debug("UI APPLY - %s: %s", action, value)
         try:
             if action == "progress":
                 self._set_progress(int(value))
