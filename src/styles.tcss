@@ -1,9 +1,6 @@
 /*
 * Mark2TeX TUI Styles
-* Palette:
-* Background: transparent
-* Primary: #03656b
-* Text: white
+* Palette: #03656b  (primary teal)
 */
 
 Screen {
@@ -18,20 +15,11 @@ Header {
 
 /* ── Layout raiz ── */
 
-#outer-layout {
-    height: 1fr;
-}
+#outer-layout  { height: 1fr; }
+#left-column   { width: 2fr; height: 1fr; }
+#main-layout   { height: 1fr; }
 
-#left-column {
-    width: 2fr;
-    height: 1fr;
-}
-
-#main-layout {
-    height: 1fr;
-}
-
-/* ── Painel esquerdo: lista de arquivos ── */
+/* ── Painel de arquivos ── */
 
 #file-explorer {
     width: 30;
@@ -43,7 +31,7 @@ Header {
     border-title-align: left;
 }
 
-/* ── Painel central: configuração ── */
+/* ── Painel de configuração ── */
 
 #config-panel {
     width: 1fr;
@@ -84,10 +72,7 @@ Header {
     align: center middle;
 }
 
-#action-bar Button {
-    width: 1fr;
-    margin: 0 1;
-}
+#action-bar Button { width: 1fr; margin: 0 1; }
 
 /* ── Console ── */
 
@@ -102,7 +87,7 @@ Header {
     border-title-align: left;
 }
 
-/* ── Painel direito: preview .md ── */
+/* ── Preview ── */
 
 #preview-panel {
     width: 45%;
@@ -114,15 +99,8 @@ Header {
     border-title-align: left;
 }
 
-#preview-scroll {
-    height: 1fr;
-    padding: 1 2;
-    scrollbar-gutter: stable;
-}
-
-#preview-content {
-    background: transparent;
-}
+#preview-scroll  { height: 1fr; padding: 1 2; scrollbar-gutter: stable; }
+#preview-content { background: transparent; }
 
 /* ── Botões ── */
 
@@ -133,38 +111,12 @@ Button {
     text-style: bold;
     padding: 0 2;
 }
+Button:hover   { background: #03656b; color: white; border: tall #03656b; }
+Button:focus   { border: tall #4caf87; color: #4caf87; background: transparent; text-style: bold; }
+Button.-active { background: #024d52; color: white; border: tall #024d52; }
 
-Button:hover {
-    background: #03656b;
-    color: white;
-    border: tall #03656b;
-}
-
-Button:focus {
-    border: tall #4caf87;
-    color: #4caf87;
-    background: transparent;
-    text-style: bold;
-}
-
-Button.-active {
-    background: #024d52;
-    color: white;
-    border: tall #024d52;
-}
-
-Button.watching {
-    background: transparent;
-    color: #4caf87;
-    border: tall #4caf87;
-    text-style: bold;
-}
-
-Button.watching:hover {
-    background: #4caf87;
-    color: #272c31;
-    border: tall #4caf87;
-}
+Button.watching       { background: transparent; color: #4caf87; border: tall #4caf87; text-style: bold; }
+Button.watching:hover { background: #4caf87; color: #272c31; border: tall #4caf87; }
 
 /* ── GlobalMenu ── */
 
@@ -173,17 +125,8 @@ GlobalMenu {
     background: #272c31;
 }
 
-.modal-center {
-    width: 100%;
-    height: 100%;
-    align: center middle;
-}
-
-.menu-window {
-    width: 80;
-    height: auto;
-    padding: 0;
-}
+.modal-center  { width: 100%; height: 100%; align: center middle; }
+.menu-window   { width: 80; height: auto; padding: 0; }
 
 M2TBannerWidget {
     width: 100%;
@@ -219,24 +162,10 @@ M2TBannerWidget {
     content-align: center middle;
 }
 
-#global-menu-list ListItem.--highlight {
-    background: rgba(39, 44, 49, 0.6);
-}
+#global-menu-list ListItem.--highlight { background: rgba(39,44,49,0.6); }
 
-.menu-art-normal {
-    color: rgb(239, 239, 239);
-    width: 100%;
-    content-align: center middle;
-    text-align: center;
-}
-
-.menu-art-selected {
-    color: #038288;
-    text-style: bold;
-    width: 100%;
-    content-align: center middle;
-    text-align: center;
-}
+.menu-art-normal   { color: rgb(239,239,239); width: 100%; content-align: center middle; text-align: center; }
+.menu-art-selected { color: #038288; text-style: bold; width: 100%; content-align: center middle; text-align: center; }
 
 #menu-footer-hint {
     color: #555555;
@@ -250,14 +179,14 @@ M2TBannerWidget {
 
 HelpScreen {
     align: center middle;
-    background: rgba(0, 0, 0, 0.65);
+    background: rgba(0,0,0,0.65);
 }
 
 HelpScreen > .menu-window {
     width: 52;
     height: auto;
     max-height: 18;
-    background: rgba(39, 44, 49, 0.85);
+    background: rgba(39,44,49,0.85);
     border: round #03656b;
 }
 
@@ -280,19 +209,9 @@ HelpScreen > .menu-window {
     content-align: center middle;
 }
 
-#help-content {
-    padding: 1 2;
-}
-
-#help-bindings-title {
-    text-style: bold;
-    color: #03656b;
-}
-
-#help-commands-title {
-    text-style: bold;
-    color: #03656b;
-}
+#help-content        { padding: 1 2; }
+#help-bindings-title { text-style: bold; color: #03656b; }
+#help-commands-title { text-style: bold; color: #03656b; }
 
 #help-footer {
     text-align: center;
@@ -303,56 +222,43 @@ HelpScreen > .menu-window {
     width: 100%;
 }
 
-/* ── SettingsScreen ─────────────────────────────────────────────── */
+/* ════════════════════════════════════════════════════════════
+   SettingsScreen
+   ════════════════════════════════════════════════════════════ */
 
 SettingsScreen {
     align: center middle;
-    background: rgba(0, 0, 0, 0.7);
+    background: rgba(0,0,0,0.7);
 }
 
-/* Janela principal */
+/* Janela */
 #sw-window {
-    width: 92;
-    height: 26;
-    background: rgb(28, 32, 36);
+    width: 88;
+    height: auto;
+    min-height: 20;
+    background: rgb(28,32,36);
     border: round #03656b;
 }
 
-/* ── Linha de abas ── */
+/* Linha de abas */
 #sw-tabbar {
     height: 1;
     width: 100%;
-    background: rgb(20, 24, 27);
+    background: rgb(20,24,27);
     border-bottom: solid #03656b;
     padding: 0 1;
     align: left middle;
 }
 
-#sw-tab-hint {
-    color: #555555;
-    text-style: italic;
-    margin-right: 1;
-}
+#sw-tab-hint { color: #555555; text-style: italic; margin-right: 1; }
 
-.sw-tab {
-    color: rgb(130, 135, 140);
-    background: transparent;
-    padding: 0 1;
-}
+.sw-tab        { color: rgb(130,135,140); background: transparent; padding: 0 1; }
+.sw-tab-active { color: white; text-style: bold; background: #03656b; }
 
-.sw-tab-active {
-    color: white;
-    text-style: bold;
-    background: #03656b;
-}
+/* Corpo */
+#sw-body  { height: 1fr; width: 100%; }
 
-/* ── Corpo ── */
-#sw-body {
-    height: 1fr;
-    width: 100%;
-}
-
-/* Coluna esquerda — lista de opções */
+/* Coluna esquerda */
 #sw-left {
     width: 36;
     height: 1fr;
@@ -373,7 +279,7 @@ SettingsScreen {
 }
 
 #sw-option-list ListItem.--highlight {
-    background: rgba(3, 101, 107, 0.25);
+    background: rgba(3,101,107,0.25);
 }
 
 /* Nome da opção */
@@ -385,62 +291,41 @@ SettingsScreen {
     padding-top: 1;
 }
 
-.opt-name-hl {
-    color: white;
-    text-style: bold;
-}
+.opt-hl { color: white; text-style: bold; }
 
-/* Valor atual da opção */
-.opt-value {
-    color: rgb(3, 130, 136);
+/* Controle  ← valor → */
+.opt-ctrl {
+    color: rgb(3,130,136);
     text-align: center;
     width: 100%;
     padding-bottom: 1;
 }
 
-.opt-value-hl {
+.opt-ctrl-hl {
     color: #4caf87;
     text-style: bold;
 }
 
-/* Divisor vertical */
-#sw-divider {
-    width: 1;
-    height: 1fr;
-    background: transparent;
-}
-
-/* Coluna direita — descrição + controle */
+/* Coluna direita */
 #sw-right {
     width: 1fr;
     height: 1fr;
-    padding: 1 3;
+    padding: 2 3;
 }
 
 #sw-description {
-    color: rgb(200, 205, 210);
+    color: rgb(200,205,210);
     width: 100%;
     height: auto;
-    padding-bottom: 1;
-    border-bottom: solid #03656b 25%;
-    margin-bottom: 1;
 }
 
-#sw-control {
-    color: white;
-    width: 100%;
-    height: auto;
-    content-align: center middle;
-    text-align: center;
-}
-
-/* ── Rodapé ── */
+/* Rodapé */
 #sw-footer {
     height: 1;
     width: 100%;
     color: #444444;
     text-style: italic;
-    background: rgb(20, 24, 27);
+    background: rgb(20,24,27);
     border-top: solid #03656b;
     padding: 0 1;
 }

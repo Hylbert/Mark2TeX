@@ -5,21 +5,30 @@ from pathlib import Path
 
 from platformdirs import user_config_dir
 
-CONFIG_DIR = Path(user_config_dir("mark2tex", appauthor=False))
+CONFIG_DIR  = Path(user_config_dir("mark2tex", appauthor=False))
 CONFIG_FILE = CONFIG_DIR / "config.json"
-
-DEFAULTS: dict = {
-    "language": "pt_BR",
-}
 
 SUPPORTED_LANGUAGES: dict[str, str] = {
     "pt_BR": "Português (Brasil)",
     "en_US": "English",
 }
 
+# Temas: chave interna -> nome exibido
+SUPPORTED_THEMES: dict[str, str] = {
+    "default": "Default",
+    "nord":    "Nord",
+    "dracula": "Dracula",
+    "solarized": "Solarized",
+    "gruvbox": "Gruvbox",
+}
+
+DEFAULTS: dict = {
+    "language": "pt_BR",
+    "theme":    "default",
+}
+
 
 def load() -> dict:
-    """Carrega configurações do disco, com fallback para DEFAULTS."""
     CONFIG_DIR.mkdir(parents=True, exist_ok=True)
     if CONFIG_FILE.exists():
         try:
@@ -31,7 +40,6 @@ def load() -> dict:
 
 
 def save(settings: dict) -> None:
-    """Salva configurações em ~/.config/mark2tex/config.json."""
     CONFIG_DIR.mkdir(parents=True, exist_ok=True)
     CONFIG_FILE.write_text(
         json.dumps(settings, indent=2, ensure_ascii=False),
