@@ -167,6 +167,7 @@ $endif$$endif$$endif$
 
 \DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
 \newenvironment{Shaded}{}{}
+\providecommand{\tightlist}{\setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 \newcommand{\passthrough}[1]{#1}
 \newcommand{\KeywordTok}[1]{\textcolor{m2tprimary}{\textbf{#1}}}
 \newcommand{\ControlFlowTok}[1]{\textcolor{m2tprimary}{\textbf{#1}}}
@@ -215,6 +216,60 @@ $endif$$endif$$endif$
 \newcommand{\PUT}{\texttt{\textbf{\textcolor{m2tprimary}{PUT}}}}
 \newcommand{\DELETE}{\texttt{\textbf{\textcolor{m2tred}{DELETE}}}}
 \newcommand{\PATCH}{\texttt{\textbf{\textcolor{m2tlight}{PATCH}}}}
+
+% -------------------------------------------------------------------
+% ÍNDICE — estilo via tocloft (compatível com hyperref)
+% -------------------------------------------------------------------
+% Cores e fontes das entradas
+\renewcommand{\cftsecfont}{\bfseries\color{m2tdark}}
+\renewcommand{\cftsecpagefont}{\bfseries\color{m2tprimary}}
+\renewcommand{\cftsubsecfont}{\color{m2tdark}}
+\renewcommand{\cftsubsecpagefont}{\color{m2tprimary}}
+\renewcommand{\cftsubsubsecfont}{\color{m2tdark}}
+\renewcommand{\cftsubsubsecpagefont}{\color{m2tprimary}}
+
+% Fundo colorido nas seções: usamos \cftsetpnumwidth + etoolbox para
+% envolver cada linha de seção num \colorbox sem redefinir \contentsline
+\newlength{\m@tocpad}\setlength{\m@tocpad}{3pt}
+
+% Patch em \l@section para adicionar fundo teal-pálido
+\pretocmd{\l@section}{%
+  \setlength{\fboxsep}{\m@tocpad}%
+  \renewcommand{\cftsecfont}{\bfseries\color{m2tdark}}%
+}{}{}
+\apptocmd{\l@section}{}{}{}
+
+% Fundo via \cftsetindents + regra acima do item de seção
+\setlength{\cftbeforesecskip}{2pt}
+\setlength{\cftbeforesubsecskip}{1pt}
+\setlength{\cftbeforesubsubsecskip}{0pt}
+
+% Largura do número de página
+\setlength{\cftpnumwidth}{1.8em}
+
+% Líderes
+\renewcommand{\cftsecleader}{\color{m2tborder}\cftdotfill{\cftdotsep}}
+\renewcommand{\cftsubsecleader}{\color{m2tborder}\cftdotfill{\cftdotsep}}
+
+% Prefixo/sufixo de seção: colorbox completo na linha
+\renewcommand{\cftsecpresnum}{%
+  \leavevmode
+  \setlength{\fboxsep}{3pt}%
+  \colorbox{m2tpale}\bgroup\bfseries\color{m2tdark}%
+}
+\renewcommand{\cftsecaftersnum}{\egroup\hspace{0.4em}}
+% Ajuste de indentação para acomodar o colorbox
+\setlength{\cftsecindent}{0pt}
+\setlength{\cftsecnumwidth}{2.4em}
+
+\renewcommand{\cftsubsecpresnum}{%
+  \leavevmode
+  \setlength{\fboxsep}{2pt}%
+  \colorbox{m2tlightgray}\bgroup\color{m2tdark}%
+}
+\renewcommand{\cftsubsecaftersnum}{\egroup\hspace{0.3em}}
+\setlength{\cftsubsecindent}{1em}
+\setlength{\cftsubsecnumwidth}{2.8em}
 
 % -------------------------------------------------------------------
 \begin{document}
@@ -319,43 +374,6 @@ $endif$
     {\fontsize{26}{32}\selectfont\bfseries\color{m2tprimary}
      $if(toc-title)$$toc-title$$else$Índice$endif$}
   \end{center}
-
-  \renewcommand{\cftsecfont}{\bfseries\color{m2tdark}}
-  \renewcommand{\cftsecpagefont}{\bfseries\color{m2tprimary}}
-  \renewcommand{\cftsubsecfont}{\color{m2tdark}}
-  \renewcommand{\cftsubsecpagefont}{\color{m2tprimary}}
-  \renewcommand{\cftsubsubsecfont}{\color{m2tdark}}
-  \renewcommand{\cftsubsubsecpagefont}{\color{m2tprimary}}
-
-  \newlength{\tochpad}\setlength{\tochpad}{6pt}
-  \newlength{\tocvpad}\setlength{\tocvpad}{2pt}
-  \newlength{\tocgap}\setlength{\tocgap}{4pt}
-
-  \let\originalcontentsline\contentsline
-  \renewcommand{\contentsline}[4]{%
-    \ifnum\pdfstrcmp{##1}{section}=0
-      \vspace{\tocgap}%
-      {\setlength{\fboxsep}{\tocvpad}%
-      \noindent\colorbox{m2tpale}{%
-        \hspace{\tochpad}%
-        \parbox{\dimexpr\linewidth-2\fboxsep-2\tochpad\relax}{%
-          \originalcontentsline{##1}{##2}{##3}{##4}}%
-        \hspace{\tochpad}%
-      }}\par\nointerlineskip
-    \else\ifnum\pdfstrcmp{##1}{subsection}=0
-      \vspace{\tocgap}%
-      {\setlength{\fboxsep}{\tocvpad}%
-      \noindent\colorbox{m2tlightgray}{%
-        \hspace{\tochpad}%
-        \parbox{\dimexpr\linewidth-2\fboxsep-2\tochpad\relax}{%
-          \originalcontentsline{##1}{##2}{##3}{##4}}%
-        \hspace{\tochpad}%
-      }}\par\nointerlineskip
-    \else
-      \originalcontentsline{##1}{##2}{##3}{##4}%
-    \fi\fi
-  }
-
   \addtocontents{toc}{\protect\thispagestyle{empty}}
   \tableofcontents
 }
