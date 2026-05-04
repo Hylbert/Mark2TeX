@@ -121,6 +121,11 @@ class Mark2TeXApp(App):
         ("w", "toggle_watch", "Watch Mode"),
     ]
 
+    def on_load(self) -> None:
+        """Roda antes do compose() — garante idioma correto desde o primeiro render."""
+        settings = cfg.load()
+        set_language(settings.get("language", "pt_BR"))
+
     def compose(self) -> ComposeResult:
         yield Header()
         with Horizontal(id="outer-layout"):
@@ -156,10 +161,6 @@ class Mark2TeXApp(App):
         yield Footer()
 
     def on_mount(self) -> None:
-        # ── Carrega idioma salvo pelo usuário ──
-        settings = cfg.load()
-        set_language(settings.get("language", "pt_BR"))
-
         self.docker_manager = DockerManager()
         self.watcher_manager = WatcherManager()
         self.is_watching = False
