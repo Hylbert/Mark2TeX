@@ -1,71 +1,170 @@
 # Contributing to Mark2TeX
 
-**⚠️ Project Status: BETA**
-Mark2TeX is currently in Beta. We are welcoming community contributions, but please be aware that the architecture and interface may undergo significant structural changes as we refine the tool.
+Thank you for taking the time to contribute! Mark2TeX is built in the open and every contribution — from fixing a typo to adding a full template — makes a real difference.
 
-We are thrilled that you are interested in contributing to Mark2TeX! 🚀 Before submitting your contribution, please take a moment to read these guidelines.
+## Table of Contents
 
-- [Philosophy](#philosophy)
-- [Issue Reporting Guidelines](#issue-reporting-guidelines)
-- [Pull Request Guidelines](#pull-request-guidelines)
-- [Where to Start?](#where-to-start)
-- [Quick Start](#quick-start)
-
-## Philosophy
-
-🔑 Our philosophy is to keep things clean, simple, and minimalist.
-Mark2TeX aims to remove the friction between the idea and the final document. We want improvements to align with this simplicity: the tool should be powerful under the hood, but invisible and intuitive for the user.
-
-## Issue Reporting Guidelines
-
-Please search for similar issues before opening a new one and always use the available issue template. If you find a bug or have a feature suggestion, describe the scenario in detail, the Docker version used, and if possible, attach an example of the Markdown file that caused the problem.
-
-## Pull Request Guidelines
-
-**For *all* Pull Requests**: provide a detailed description of the problem solved or the feature added.
-
-Before submitting your PR, make sure that:
-
-- The PR is submitted directly to the `develop` branch.
-- The final merge must be performed using the `--no-ff` flag to preserve the branch history.
-- **Language**: All commit messages and Pull Request descriptions must be written in **English**, following the [Conventional Commits](https://www.conventionalcommits.org/) standard.
-- You referenced the related issue in the PR comment.
-- The documentation in `docs/` or `README.md` has been updated to reflect the change.
-- All compilation tests pass (the PDF is generated without errors).
-- The code follows programming best practices and is clean.
-
-### If you are adding a new feature:
-
-- Open an issue for suggestion first so we can discuss the implementation.
-- Provide the justification for why this feature is useful for the user.
-- Submit your PR after agreement from the maintainers.
-
-### If you are fixing a bug:
-
-- If you are resolving a specific issue, add `fix: #<issue-number> <short message>` to your PR title (e.g., `fix: #12 fixes character encoding error`).
-- Provide a detailed description of the bug and how the fix resolves it.
-
-## Where to Start?
-
-A great way to start is by looking for issues with the `bug`, `help wanted`, or `feature request` labels. Issues marked as `good first issue` are ideal for new contributors.
-
-For larger changes, discuss the solution first; for small changes, you can open the PR directly.
-
-## Quick Start
-
-1. **Fork** the repository.
-2. Clone your fork: `git clone git@github.com:<your-username>/Mark2TeX.git`
-3. Create a feature branch: `git checkout -b feature/feature-name`
-4. Implement the changes and push your branch.
-5. Create a Pull Request against the `develop` branch describing your changes.
-
-**Syncing your PR:**
-
-If there are conflicts or if you want to update your local branch:
-1. `git fetch upstream`
-2. `git rebase upstream/develop`
-3. Resolve conflicts and force push: `git push -f`
+1. [Code of Conduct](#code-of-conduct)
+2. [Getting Started](#getting-started)
+3. [Branch Strategy](#branch-strategy)
+4. [Commit Messages](#commit-messages)
+5. [Pull Request Process](#pull-request-process)
+6. [Running Locally](#running-locally)
+7. [Project Structure](#project-structure)
 
 ---
 
-Thank you for your time and effort in making Mark2TeX better for everyone! 🎓
+## Code of Conduct
+
+All contributors are expected to uphold our [Code of Conduct](CODE_OF_CONDUCT.md). Please read it before participating.
+
+---
+
+## Getting Started
+
+1. **Fork** the repository on GitHub.
+2. **Clone** your fork locally:
+   ```bash
+   git clone https://github.com/<your-username>/Mark2TeX.git
+   cd Mark2TeX
+   ```
+3. **Create a branch** from `develop` (see [Branch Strategy](#branch-strategy)).
+4. **Make your changes**, following the coding style already in use.
+5. **Open a Pull Request** against `develop`.
+
+---
+
+## Branch Strategy
+
+Mark2TeX follows **GitFlow**:
+
+| Branch | Purpose |
+|---|---|
+| `main` | Stable production releases only |
+| `develop` | Integration branch — all PRs target here |
+| `feature/<slug>` | New features and non-urgent improvements |
+| `fix/<slug>` | Bug fixes |
+| `hotfix/<slug>` | Critical fixes branched directly from `main` |
+| `docs/<slug>` | Documentation-only changes |
+| `release/<version>` | Release preparation |
+
+**Rules:**
+- Always branch from `develop` (except hotfixes, which branch from `main`).
+- Never commit directly to `main` or `develop`.
+- Keep branches focused — one feature or fix per branch.
+- Delete branches after merging.
+
+---
+
+## Commit Messages
+
+We use [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).
+
+```
+<type>(<scope>): <short description>
+
+[optional body]
+
+[optional footer]
+```
+
+**Types:**
+
+| Type | When to use |
+|---|---|
+| `feat` | A new feature |
+| `fix` | A bug fix |
+| `docs` | Documentation changes only |
+| `style` | Formatting, missing semicolons — no logic change |
+| `refactor` | Code change that neither fixes a bug nor adds a feature |
+| `test` | Adding or correcting tests |
+| `chore` | Build process, tooling, dependencies |
+
+**Examples:**
+```
+feat(templates): add ABNT article template
+fix(build.sh): normalize CRLF line endings
+docs(readme): update quickstart with make build-image step
+```
+
+---
+
+## Pull Request Process
+
+1. Ensure your branch is up to date with `develop`:
+   ```bash
+   git fetch origin
+   git rebase origin/develop
+   ```
+2. Fill out the [PR template](PULL_REQUEST_TEMPLATE.md) completely.
+3. Link any related issues in the PR description using `Closes #<issue>`.
+4. A maintainer will review the PR. Address any requested changes.
+5. Once approved, the maintainer will merge using squash-merge to keep `develop` history clean.
+
+---
+
+## Running Locally
+
+### Requirements
+
+- Python 3.10+
+- Docker (daemon running)
+- `pipx`
+- `make`
+
+### Setup
+
+```bash
+# Install in editable mode
+pipx install -e .
+
+# Build the Docker image (required before first compilation)
+make build-image
+```
+
+> **Why `make build-image`?** This command builds the `mark2tex:latest` Docker image containing XeLaTeX, Pandoc, and all required fonts. Without it, the compilation pipeline has nothing to run inside. After the initial build, Docker caches the image — you only need to rebuild when the `Dockerfile` changes.
+
+### Running the TUI
+
+```bash
+# Navigate to a folder with .md files
+cd path/to/your/project
+mark2tex
+```
+
+### Running tests
+
+```bash
+make test
+```
+
+### Resetting the environment
+
+```bash
+pipx uninstall mark2tex
+# or, to also remove Docker artifacts:
+mark2tex uninstall
+```
+
+---
+
+## Project Structure
+
+```
+Mark2TeX/
+├── src/
+│   ├── app.py            # TUI interface (Textual)
+│   ├── cli.py            # Entry point for `mark2tex` command
+│   ├── setup_env.py      # Docker environment check
+│   ├── docker_manager.py # Build pipeline orchestration
+│   ├── watcher.py        # Watch mode logic
+│   └── log_translator.py # LaTeX log parsing and translation
+├── bin/
+│   └── build.sh          # Core compilation script (runs inside Docker)
+├── templates/            # LaTeX templates (one subdirectory per template)
+├── examples/             # Example .md files for each template
+├── docs/                 # Extended documentation
+├── Dockerfile            # Docker image definition
+├── Makefile              # Helper targets: build-image, compile, test
+└── pyproject.toml        # Python package metadata
+```
