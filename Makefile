@@ -2,7 +2,7 @@
 
 # Default values
 TEMPLATE ?= tcc
-INPUT ?= Reconhecimento_de_gestos.md
+INPUT ?= exemplo.md
 
 .PHONY: build-image compile clean
 
@@ -21,4 +21,4 @@ compile:
 		bash /app/bin/build.sh "$(INPUT)" "$(TEMPLATE)"
 
 clean:
-	rm -f *.aux *.log *.out *.toc *.lot *.lof *.bbl *.blg *.synctex.gz *.tex output.pdf
+	rm -f *.aux *.log *.out *.toc *.lot *.lof *.bbl *.blg *.synctex.gz *.tex *.xdv *.fls *.fdb_latexmk output.pdf
