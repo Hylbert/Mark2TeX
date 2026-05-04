@@ -17,6 +17,9 @@ RUN apt-get update && apt-get install -y \
     texlive-bibtex-extra \
     latexmk \
     ttf-mscorefonts-installer \
+    fonts-liberation \
+    fonts-urw-base35 \
+    fonts-ubuntu \
     make \
     bash \
     && rm -rf /var/lib/apt/lists/*
@@ -26,14 +29,18 @@ RUN curl -LO https://github.com/jgm/pandoc/releases/download/3.1.11/pandoc-3.1.1
     dpkg -i pandoc-3.1.11-1-amd64.deb && \
     rm pandoc-3.1.11-1-amd64.deb
 
+# Register new fonts with XeTeX/fontconfig
+RUN fc-cache -fv
+
 # Create a non-root user for security and file permission management
 RUN useradd -m mark2tex
 USER mark2tex
 WORKDIR /app
 
 # Copy scripts and templates into the image
-COPY --chown=mark2tex:mark2tex scripts/ /app/scripts/
-COPY --chown=mark2tex:mark2tex templates/ /app/templates/
+COPY --chown=mark2tex:mark2tex bin/ /opt/mark2tex/bin/
+COPY --chown=mark2tex:mark2tex templates/ /opt/mark2tex/templates/
+RUN chmod -R 755 /opt/mark2tex && chmod +x /opt/mark2tex/bin/*.sh
 
 # Default command
 CMD ["/bin/bash"]

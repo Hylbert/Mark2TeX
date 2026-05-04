@@ -1,0 +1,23 @@
+name: Security
+
+on:
+  schedule:
+    - cron: "0 8 * * 1"  # toda segunda-feira às 8h
+  push:
+    branches: [main, develop]
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Instalar pip-audit
+        run: pip install pip-audit
+
+      - name: Auditar dependências
+        run: pip-audit --ignore-vuln CVE-2026-3219

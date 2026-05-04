@@ -1,0 +1,66 @@
+name: CI
+
+on:
+  push:
+    branches: [develop, "feature/*"]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Configurar Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Instalar ferramentas de desenvolvimento
+        run: pip install ruff mypy pytest pytest-asyncio pytest-cov
+
+      - name: Instalar pacote em modo editável
+        run: pip install -e .
+
+      - name: Lint — ruff
+        run: ruff check src/
+
+      - name: Verificação de tipos — mypy
+        run: mypy src/ --ignore-missing-imports
+
+      - name: Testes com cobertura
+        run: pytest tests/ -v --tb=short --cov=src --cov-report=term-missing --cov-fail-under=50
+
+      - name: Upload cobertura para Codecov
+        uses: codecov/codecov-action@v4
+        if: always()
+        with:
+          fail_ci_if_error: false
+
+  build-package:
+    needs: lint-and-test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Configurar Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Build wheel + sdist
+        run: |
+          pip install build
+          python -m build
+
+      - name: Upload artefato dist/
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/

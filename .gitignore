@@ -1,3 +1,4 @@
+# LaTeX auxiliary files
 *.aux
 *.log
 *.out
@@ -8,6 +9,36 @@
 *.blg
 *.synctex.gz
 *.tex
-output.pdf
+*.xdv
+*.fls
+*.fdb_latexmk
+
+# Generated output
+*.pdf
+
+# macOS
 .DS_Store
+
+# Mark2TeX internal
 docs/superpowers/
+.openclaude.worktrees/
+.openclaude
+.worktrees
+
+# Python
+__pycache__/
+*.pyc
+*.egg-info/
+dist/
+build/
+.coverage
+.pytest_cache/
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# Environment variables
+.env
+.env.*
