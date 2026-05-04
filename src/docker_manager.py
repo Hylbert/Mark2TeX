@@ -25,10 +25,15 @@ class DockerManager:
             if d.is_dir() and (d / "template.tex").exists()
         )
 
-    def compile(self, input_file: str, template: str):
-        cwd        = Path.cwd().resolve()
-        input_path = cwd / input_file
-        build_sh   = (self.bin_dir / "build.sh").resolve()
+    def compile(
+        self,
+        input_file: str,
+        template: str,
+        font: str | None = None,
+    ):
+        cwd           = Path.cwd().resolve()
+        input_path    = cwd / input_file
+        build_sh      = (self.bin_dir / "build.sh").resolve()
         templates_dir = self.templates_dir.resolve()
 
         if not input_path.exists():
@@ -45,6 +50,9 @@ class DockerManager:
             f"/app/{Path(input_file).name}",
             template,
         ]
+
+        if font:
+            command.extend(["--font", font])
 
         if platform.system() != "Windows":
             uid = os.getuid() if hasattr(os, "getuid") else None

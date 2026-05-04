@@ -39,6 +39,7 @@ _STRINGS: dict[str, dict[str, str]] = {
         "panel.preview": "• Preview",
         "panel.console": "• Console",
         "panel.template_label": "Defina o Template do Arquivo PDF",
+        "panel.font_label": "Defina a Fonte do Documento",
         # Botões
         "btn.compile": "COMPILAR",
         "btn.watch_off": "WATCH: OFF",
@@ -46,6 +47,9 @@ _STRINGS: dict[str, dict[str, str]] = {
         # Status
         "status.file": "Arquivo  : —",
         "status.template": "Template : —",
+        "status.font": "Fonte    : — (padrão do template)",
+        # Fonte
+        "font.using": "Fonte selecionada:",
         # Help
         "help.title": "AJUDA & ATALHOS",
         "help.footer": "Pressione ESC para voltar",
@@ -120,6 +124,7 @@ _STRINGS: dict[str, dict[str, str]] = {
         "panel.preview": "• Preview",
         "panel.console": "• Console",
         "panel.template_label": "Set the PDF Template",
+        "panel.font_label": "Set the Document Font",
         # Botões
         "btn.compile": "COMPILE",
         "btn.watch_off": "WATCH: OFF",
@@ -127,6 +132,9 @@ _STRINGS: dict[str, dict[str, str]] = {
         # Status
         "status.file": "File     : —",
         "status.template": "Template : —",
+        "status.font": "Font     : — (template default)",
+        # Fonte
+        "font.using": "Selected font:",
         # Help
         "help.title": "HELP & SHORTCUTS",
         "help.footer": "Press ESC to go back",

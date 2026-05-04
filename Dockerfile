@@ -17,6 +17,9 @@ RUN apt-get update && apt-get install -y \
     texlive-bibtex-extra \
     latexmk \
     ttf-mscorefonts-installer \
+    fonts-liberation \
+    fonts-urw-base35 \
+    fonts-ubuntu \
     make \
     bash \
     && rm -rf /var/lib/apt/lists/*
@@ -25,6 +28,9 @@ RUN apt-get update && apt-get install -y \
 RUN curl -LO https://github.com/jgm/pandoc/releases/download/3.1.11/pandoc-3.1.11-1-amd64.deb && \
     dpkg -i pandoc-3.1.11-1-amd64.deb && \
     rm pandoc-3.1.11-1-amd64.deb
+
+# Register new fonts with XeTeX/fontconfig
+RUN fc-cache -fv
 
 # Create a non-root user for security and file permission management
 RUN useradd -m mark2tex

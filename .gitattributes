@@ -1,0 +1,36 @@
+# Mark2TeX — Git line ending policy
+# Normalize all text files to LF on commit (safe on all platforms)
+* text=auto eol=lf
+
+# Shell scripts MUST always be LF — never CRLF (breaks bash in Docker)
+*.sh text eol=lf
+*.bash text eol=lf
+
+# Python / configs
+*.py text eol=lf
+*.toml text eol=lf
+*.cfg text eol=lf
+*.ini text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+*.tex text eol=lf
+*.bib text eol=lf
+*.txt text eol=lf
+
+# Windows-only files may keep CRLF
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# Binaries — no line ending conversion
+*.pdf binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.zip binary
+*.tar binary
+*.gz binary

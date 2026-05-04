@@ -4,6 +4,27 @@
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 
+% -------------------------------------------------------------------
+% FONTE  —  controlada por flags booleanas geradas pelo build.sh
+%
+%   font-arial     → Liberation Sans   (métricas idênticas à Arial)
+%   font-helvetica → Nimbus Sans       (Helvetica livre, URW)
+%   font-times     → Liberation Serif  (métricas idênticas à Times New Roman)
+%   font-ubuntu    → Ubuntu            (família clássica, estáticas disponíveis)
+%
+% Padrão (nenhuma flag): Ubuntu
+% -------------------------------------------------------------------
+\usepackage{fontspec}
+$if(font-arial)$
+  \setmainfont{Liberation Sans}
+$else$$if(font-helvetica)$
+  \setmainfont{Nimbus Sans}
+$else$$if(font-times)$
+  \setmainfont{Liberation Serif}
+$else$
+  \setmainfont{Ubuntu}
+$endif$$endif$$endif$
+
 % --- PACOTES ---
 \usepackage{geometry}
 \usepackage{graphicx}
@@ -33,21 +54,17 @@
 
 % -------------------------------------------------------------------
 % PALETA  Mark2TeX
-% Primárias: #03656b (teal), #272c31 (dark), white
-% Complemento: #04999f (teal claro), #e8f7f7 (teal pálido),
-%              #f5a623 (amber), #d43f44 (red), #4caf89 (green),
-%              #f5f5f5 (light gray), #e0e0e0 (border)
 % -------------------------------------------------------------------
-\definecolor{m2tprimary}{HTML}{03656b}   % teal principal
-\definecolor{m2tdark}{HTML}{272c31}      % fundo escuro / texto principal
-\definecolor{m2tlight}{HTML}{04999f}     % teal mais claro (hover/sub)
-\definecolor{m2tpale}{HTML}{e8f7f7}      % teal pálido (fundo de TOC/info)
-\definecolor{m2tamber}{HTML}{f5a623}     % warning
-\definecolor{m2tred}{HTML}{d43f44}       % danger
-\definecolor{m2tgreen}{HTML}{4caf89}     % sucesso / GET
-\definecolor{m2tlightgray}{HTML}{f5f5f5} % fundo de código / linhas pares
-\definecolor{m2tborder}{HTML}{e0e0e0}    % bordas suaves
-\definecolor{m2tcodebg}{HTML}{f8f9fa}    % fundo de bloco de código
+\definecolor{m2tprimary}{HTML}{03656b}
+\definecolor{m2tdark}{HTML}{272c31}
+\definecolor{m2tlight}{HTML}{04999f}
+\definecolor{m2tpale}{HTML}{e8f7f7}
+\definecolor{m2tamber}{HTML}{f5a623}
+\definecolor{m2tred}{HTML}{d43f44}
+\definecolor{m2tgreen}{HTML}{4caf89}
+\definecolor{m2tlightgray}{HTML}{f5f5f5}
+\definecolor{m2tborder}{HTML}{e0e0e0}
+\definecolor{m2tcodebg}{HTML}{f8f9fa}
 
 \hypersetup{
   colorlinks=true,
@@ -63,22 +80,18 @@
 \fancyhf{}
 \renewcommand{\headrulewidth}{0pt}
 
-% Linha de acento teal no topo (páginas internas)
 \AddToShipoutPictureBG{%
   \ifnum\value{page}>1
-    % barra teal no topo
     \AtPageUpperLeft{%
       \begin{tikzpicture}[remember picture,overlay]
         \fill[m2tprimary] (0,0) rectangle (\paperwidth,-4pt);
       \end{tikzpicture}%
     }%
-    % número de página no canto inferior direito
     \AtPageLowerLeft{\put(\dimexpr\paperwidth-45pt\relax, 18pt){%
       \begin{tikzpicture}
         \node[m2tdark, font=\bfseries\normalsize] at (0,0) {\thepage};
       \end{tikzpicture}%
     }}%
-    % nome do documento no rodapé esquerdo
     \AtPageLowerLeft{\put(28pt, 18pt){%
       \begin{tikzpicture}
         \node[m2tprimary, font=\small] at (0,0)
@@ -106,38 +119,32 @@
 % -------------------------------------------------------------------
 \tcbuselibrary{skins,breakable}
 
-% Código
 \newtcolorbox{codebox}[1][]{
   colback=m2tcodebg,colframe=m2tborder,
   boxrule=1pt,arc=3pt,
   left=8pt,right=8pt,top=6pt,bottom=6pt,
   fontupper=\ttfamily\small,breakable,#1}
 
-% Info (teal)
 \newtcolorbox{infobox}[1][]{
   colback=m2tpale,colframe=m2tprimary,
   boxrule=0pt,leftrule=4pt,arc=0pt,
   left=10pt,right=10pt,top=8pt,bottom=8pt,breakable,#1}
 
-% Warning (amber)
 \newtcolorbox{warningbox}[1][]{
   colback=m2tamber!8,colframe=m2tamber,
   boxrule=0pt,leftrule=4pt,arc=0pt,
   left=10pt,right=10pt,top=8pt,bottom=8pt,breakable,#1}
 
-% Danger (red)
 \newtcolorbox{dangerbox}[1][]{
   colback=m2tred!8,colframe=m2tred,
   boxrule=0pt,leftrule=4pt,arc=0pt,
   left=10pt,right=10pt,top=8pt,bottom=8pt,breakable,#1}
 
-% Sucesso / dica (green)
 \newtcolorbox{successbox}[1][]{
   colback=m2tgreen!8,colframe=m2tgreen,
   boxrule=0pt,leftrule=4pt,arc=0pt,
   left=10pt,right=10pt,top=8pt,bottom=8pt,breakable,#1}
 
-% Regra / nota (dark)
 \newtcolorbox{rulebox}[1][]{
   colback=m2tlightgray,colframe=m2tdark,
   boxrule=0pt,leftrule=4pt,arc=0pt,
@@ -158,9 +165,9 @@
   commentstyle=\color{m2tborder}\itshape,
 }
 
-% Suporte a código do Pandoc
 \DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
 \newenvironment{Shaded}{}{}
+\providecommand{\tightlist}{\setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 \newcommand{\passthrough}[1]{#1}
 \newcommand{\KeywordTok}[1]{\textcolor{m2tprimary}{\textbf{#1}}}
 \newcommand{\ControlFlowTok}[1]{\textcolor{m2tprimary}{\textbf{#1}}}
@@ -211,6 +218,60 @@
 \newcommand{\PATCH}{\texttt{\textbf{\textcolor{m2tlight}{PATCH}}}}
 
 % -------------------------------------------------------------------
+% ÍNDICE — estilo via tocloft (compatível com hyperref)
+% -------------------------------------------------------------------
+% Cores e fontes das entradas
+\renewcommand{\cftsecfont}{\bfseries\color{m2tdark}}
+\renewcommand{\cftsecpagefont}{\bfseries\color{m2tprimary}}
+\renewcommand{\cftsubsecfont}{\color{m2tdark}}
+\renewcommand{\cftsubsecpagefont}{\color{m2tprimary}}
+\renewcommand{\cftsubsubsecfont}{\color{m2tdark}}
+\renewcommand{\cftsubsubsecpagefont}{\color{m2tprimary}}
+
+% Fundo colorido nas seções: usamos \cftsetpnumwidth + etoolbox para
+% envolver cada linha de seção num \colorbox sem redefinir \contentsline
+\newlength{\m@tocpad}\setlength{\m@tocpad}{3pt}
+
+% Patch em \l@section para adicionar fundo teal-pálido
+\pretocmd{\l@section}{%
+  \setlength{\fboxsep}{\m@tocpad}%
+  \renewcommand{\cftsecfont}{\bfseries\color{m2tdark}}%
+}{}{}
+\apptocmd{\l@section}{}{}{}
+
+% Fundo via \cftsetindents + regra acima do item de seção
+\setlength{\cftbeforesecskip}{2pt}
+\setlength{\cftbeforesubsecskip}{1pt}
+\setlength{\cftbeforesubsubsecskip}{0pt}
+
+% Largura do número de página
+\setlength{\cftpnumwidth}{1.8em}
+
+% Líderes
+\renewcommand{\cftsecleader}{\color{m2tborder}\cftdotfill{\cftdotsep}}
+\renewcommand{\cftsubsecleader}{\color{m2tborder}\cftdotfill{\cftdotsep}}
+
+% Prefixo/sufixo de seção: colorbox completo na linha
+\renewcommand{\cftsecpresnum}{%
+  \leavevmode
+  \setlength{\fboxsep}{3pt}%
+  \colorbox{m2tpale}\bgroup\bfseries\color{m2tdark}%
+}
+\renewcommand{\cftsecaftersnum}{\egroup\hspace{0.4em}}
+% Ajuste de indentação para acomodar o colorbox
+\setlength{\cftsecindent}{0pt}
+\setlength{\cftsecnumwidth}{2.4em}
+
+\renewcommand{\cftsubsecpresnum}{%
+  \leavevmode
+  \setlength{\fboxsep}{2pt}%
+  \colorbox{m2tlightgray}\bgroup\color{m2tdark}%
+}
+\renewcommand{\cftsubsecaftersnum}{\egroup\hspace{0.3em}}
+\setlength{\cftsubsecindent}{1em}
+\setlength{\cftsubsecnumwidth}{2.8em}
+
+% -------------------------------------------------------------------
 \begin{document}
 \color{m2tdark}
 
@@ -221,20 +282,16 @@
 \newgeometry{margin=0pt}
 
 \begin{tikzpicture}[remember picture, overlay]
-  % Fundo escuro
   \fill[m2tdark] (current page.south west) rectangle (current page.north east);
 
-  % Bloco teal lateral esquerdo
   \fill[m2tprimary]
     (current page.south west) rectangle
     ([xshift=1.2cm]current page.north west);
 
-  % Faixa teal horizontal no terço superior
   \fill[m2tprimary!30]
     ([yshift=-8cm]current page.north west) rectangle
     ([yshift=-8.3cm]current page.north east);
 
-  % Logo (opcional)
   $if(logo)$
   \node[anchor=north west, inner sep=0pt]
     at ([xshift=1.8cm, yshift=-1.5cm]current page.north west) {
@@ -246,14 +303,12 @@
     {Mark2TeX};
   $endif$
 
-  % Título
   \node[anchor=north, align=center, text width=14cm]
     at ([yshift=-10cm]current page.north) {
       {\fontsize{30}{36}\selectfont\bfseries\textcolor{white}{$title$}}
       $if(subtitle)$\\[0.6em]{\fontsize{16}{20}\selectfont\textcolor{m2tprimary}{$subtitle$}}$endif$
     };
 
-  % Metadados inferiores
   \node[anchor=south, align=center]
     at ([yshift=3cm]current page.south) {
       {\large\textcolor{m2tpale}{%
@@ -268,9 +323,6 @@
 \clearpage
 \restoregeometry
 
-% =====================================================================
-% PÁGINA DE CONFIDENCIALIDADE / AVISO LEGAL  (opcional)
-% =====================================================================
 $if(confidentiality)$
 \thispagestyle{fancy}
 \newgeometry{left=2.5cm,right=1.5cm,top=2cm,bottom=1cm}
@@ -285,9 +337,6 @@ $if(confidentiality)$
 \restoregeometry
 $endif$
 
-% =====================================================================
-% SOBRE  (opcional)
-% =====================================================================
 $if(about)$
 \thispagestyle{fancy}
 \begin{center}
@@ -303,9 +352,6 @@ $about$
 \clearpage
 $endif$
 
-% =====================================================================
-% INTRODUÇÃO  (opcional)
-% =====================================================================
 $if(preface)$
 \thispagestyle{fancy}
 \begin{center}
@@ -321,9 +367,6 @@ $preface$
 \clearpage
 $endif$
 
-% =====================================================================
-% SUMÁRIO (com estilo visual Mark2TeX)
-% =====================================================================
 \thispagestyle{empty}
 \renewcommand{\contentsname}{}
 {
@@ -331,61 +374,16 @@ $endif$
     {\fontsize{26}{32}\selectfont\bfseries\color{m2tprimary}
      $if(toc-title)$$toc-title$$else$Índice$endif$}
   \end{center}
-
-  % Fontes do TOC
-  \renewcommand{\cftsecfont}{\bfseries\color{m2tdark}}
-  \renewcommand{\cftsecpagefont}{\bfseries\color{m2tprimary}}
-  \renewcommand{\cftsubsecfont}{\color{m2tdark}}
-  \renewcommand{\cftsubsecpagefont}{\color{m2tprimary}}
-  \renewcommand{\cftsubsubsecfont}{\color{m2tdark}}
-  \renewcommand{\cftsubsubsecpagefont}{\color{m2tprimary}}
-
-  % Linhas do TOC com fundo teal pálido
-  \newlength{\tochpad}\setlength{\tochpad}{6pt}
-  \newlength{\tocvpad}\setlength{\tocvpad}{2pt}
-  \newlength{\tocgap}\setlength{\tocgap}{4pt}
-
-  \let\originalcontentsline\contentsline
-  \renewcommand{\contentsline}[4]{%
-    \ifnum\pdfstrcmp{##1}{section}=0
-      \vspace{\tocgap}%
-      {\setlength{\fboxsep}{\tocvpad}%
-      \noindent\colorbox{m2tpale}{%
-        \hspace{\tochpad}%
-        \parbox{\dimexpr\linewidth-2\fboxsep-2\tochpad\relax}{%
-          \originalcontentsline{##1}{##2}{##3}{##4}}%
-        \hspace{\tochpad}%
-      }}\par\nointerlineskip
-    \else\ifnum\pdfstrcmp{##1}{subsection}=0
-      \vspace{\tocgap}%
-      {\setlength{\fboxsep}{\tocvpad}%
-      \noindent\colorbox{m2tlightgray}{%
-        \hspace{\tochpad}%
-        \parbox{\dimexpr\linewidth-2\fboxsep-2\tochpad\relax}{%
-          \originalcontentsline{##1}{##2}{##3}{##4}}%
-        \hspace{\tochpad}%
-      }}\par\nointerlineskip
-    \else
-      \originalcontentsline{##1}{##2}{##3}{##4}%
-    \fi\fi
-  }
-
   \addtocontents{toc}{\protect\thispagestyle{empty}}
   \tableofcontents
 }
 \clearpage
 
-% =====================================================================
-% CONTEÚDO TEXTUAL (Pandoc)
-% =====================================================================
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{0.5em}
 
 $body$
 
-% =====================================================================
-% PÁGINA FINAL  (opcional)
-% =====================================================================
 $if(closing)$
 \clearpage
 \thispagestyle{empty}

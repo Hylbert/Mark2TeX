@@ -10,7 +10,27 @@
 % --- CODIFICAÇÃO ---
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
-\usepackage{times}
+
+% -------------------------------------------------------------------
+% FONTE  —  controlada por flags booleanas geradas pelo build.sh
+%
+%   font-arial     → Liberation Sans   (métricas idênticas à Arial)
+%   font-helvetica → Nimbus Sans       (Helvetica livre, URW)
+%   font-ubuntu    → Ubuntu            (família clássica, estáticas disponíveis)
+%   font-times     → Liberation Serif  (métricas idênticas à Times New Roman)
+%
+% Padrão (nenhuma flag): Liberation Serif  — ABNT NBR 14724 recomendada
+% -------------------------------------------------------------------
+\usepackage{fontspec}
+$if(font-arial)$
+  \setmainfont{Liberation Sans}
+$else$$if(font-helvetica)$
+  \setmainfont{Nimbus Sans}
+$else$$if(font-ubuntu)$
+  \setmainfont{Ubuntu}
+$else$
+  \setmainfont{Liberation Serif}
+$endif$$endif$$endif$
 
 % --- MARGENS (ABNT NBR 14724) ---
 \usepackage[a4paper,top=3cm,left=3cm,right=2cm,bottom=2cm]{geometry}
@@ -51,7 +71,7 @@
 \newcommand{\OtherTok}[1]{#1}
 \newcommand{\ErrorTok}[1]{\textcolor{red}{#1}}
 \newcommand{\DataTypeTok}[1]{\textcolor{purple}{#1}}
-\newcommand{\DecValTok}[1]{\textcolor{red}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor{orange}{#1}}
 \newcommand{\AttributeTok}[1]{\textcolor{orange}{#1}}
 \newcommand{\BuiltInTok}[1]{\textcolor{purple}{#1}}
 \newcommand{\ImportTok}[1]{\textcolor{teal}{#1}}
@@ -85,8 +105,6 @@
 
 % -------------------------------------------------------------------
 % NORMALIZAÇÃO DOS TÍTULOS PRÉ/PÓS-TEXTUAIS
-% O abntex2 com chapter=TITLE usa fonte grande nesses ambientes.
-% Redefine para seguir ABNT: negrito, 12pt, maiúsculas, centralizado.
 % -------------------------------------------------------------------
 \renewcommand{\ABNTEXchapterfont}{\bfseries}
 \renewcommand{\ABNTEXchapterfontsize}{\normalsize}
@@ -221,6 +239,7 @@ $if(acknowledgements)$
 \begin{center}{\ABNTEXchapterfont\bfseries\normalsize AGRADECIMENTOS}\end{center}
 \vspace{\onelineskip}
 $acknowledgements$
+\clearpage
 $endif$
 
 $if(epigraph)$
@@ -234,6 +253,8 @@ $if(epigraph)$
 $endif$
 
 $if(abstract-pt)$
+\newpage
+\thispagestyle{empty}
 \begin{resumoumacoluna}
 \noindent\textbf{RESUMO:}\vspace{\onelineskip}
 
@@ -242,9 +263,12 @@ $abstract-pt$
 \vspace{\onelineskip}
 \noindent\textbf{Palavras-chave}: $if(keywords-pt)$$keywords-pt$$endif$.
 \end{resumoumacoluna}
+\clearpage
 $endif$
 
 $if(abstract-en)$
+\newpage
+\thispagestyle{empty}
 \renewcommand{\resumoname}{Abstract}
 \begin{resumoumacoluna}
 \noindent\textbf{ABSTRACT:}\vspace{\onelineskip}
@@ -254,6 +278,7 @@ $abstract-en$
 \vspace{\onelineskip}
 \noindent\textbf{Keywords}: $if(keywords-en)$$keywords-en$$endif$.
 \end{resumoumacoluna}
+\clearpage
 $endif$
 
 $if(list-of-figures)$

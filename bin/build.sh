@@ -3,12 +3,27 @@ export PYTHONUNBUFFERED=1
 
 INPUT_FILE="$1"
 TEMPLATE_TYPE="$2"
+FONT_VALUE=""
 OUTPUT_NAME="${INPUT_FILE%.*}"
 TEMPLATE_BASE="${MARK2TEX_TEMPLATE_DIR:-/app/templates}"
 
+# Parse optional --font <value> argument
+shift 2
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --font)
+            FONT_VALUE="$2"
+            shift 2
+            ;;
+        *)
+            shift
+            ;;
+    esac
+done
+
 if [[ -z "$INPUT_FILE" ]]; then
     echo "❌ Error: Input file is required."
-    echo "Usage: $0 <file.md> <template>"
+    echo "Usage: $0 <file.md> <template> [--font <font>]"
     exit 1
 fi
 
@@ -22,7 +37,7 @@ if [[ ! -f "$INPUT_FILE" ]]; then
     exit 1
 fi
 
-# Discover valid templates dynamically from the templates directory
+# Discover valid templates dynamically
 ALLOWED_TEMPLATES=()
 while IFS= read -r -d '' dir; do
     name=$(basename "$dir")
@@ -64,12 +79,24 @@ if [[ -f "referencias.bib" ]]; then
     BIB_ARGS="--bibliography=referencias.bib --citeproc"
 fi
 
+# Converte --font em flag booleana para o Pandoc.
+# Pandoc NÃO suporta comparação de strings em templates ($if(var == "x")$).
+# Valores aceitos: times | arial | helvetica | ubuntu
+FONT_ARGS=""
+case "$FONT_VALUE" in
+    arial)     FONT_ARGS="--metadata=font-arial:true" ;;
+    helvetica) FONT_ARGS="--metadata=font-helvetica:true" ;;
+    ubuntu)    FONT_ARGS="--metadata=font-ubuntu:true" ;;
+    times)     FONT_ARGS="--metadata=font-times:true" ;;
+esac
+
 TEMPLATE_PATH="$TEMPLATE_BASE/$TEMPLATE_TYPE/template.tex"
 
 pandoc "$INPUT_FILE" \
     --template="$TEMPLATE_PATH" \
     --pdf-engine=xelatex \
     $BIB_ARGS \
+    $FONT_ARGS \
     --wrap=preserve \
     --listings \
     -o "$OUTPUT_NAME.tex"

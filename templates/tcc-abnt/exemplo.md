@@ -15,6 +15,19 @@ state: "UF"
 lang: "portuguese"
 
 # =============================================================
+# FONTE  —  escolha a tipografia do documento
+# =============================================================
+#
+# Valores aceitos:
+#   times       → Liberation Serif  (métricas idênticas à Times New Roman) [ABNT NBR 14724 — padrão]
+#   arial       → Liberation Sans   (métricas pixel-a-pixel idênticas à Arial)  [ABNT NBR 14724 — aceito]
+#   helvetica   → Nimbus Sans       (Helvetica livre, URW)
+#   ubuntu-sans → Ubuntu Sans       (fonte da doc. técnica Mark2TeX)
+#
+# Padrão: times (Liberation Serif)
+# font: "times"
+
+# =============================================================
 # DADOS INSTITUCIONAIS
 # =============================================================
 institution: "Nome da Instituição de Ensino"

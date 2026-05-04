@@ -9,6 +9,19 @@ date: "Maio 2026"
 version: "1.0.0"
 
 # =============================================================
+# FONTE  —  escolha a tipografia do documento
+# =============================================================
+#
+# Valores aceitos:
+#   ubuntu-sans → Ubuntu Sans      (fonte padrão da doc. técnica Mark2TeX)
+#   arial       → Liberation Sans  (métricas idênticas à Arial)
+#   helvetica   → Nimbus Sans      (Helvetica livre, URW)
+#   times       → Liberation Serif (métricas idênticas à Times New Roman)
+#
+# Padrão: ubuntu-sans
+# font: "ubuntu-sans"
+
+# =============================================================
 # ASSETS  —  mesma pasta que este .md (ou subpastas)
 # =============================================================
 #
