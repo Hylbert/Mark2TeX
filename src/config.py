@@ -13,18 +13,9 @@ SUPPORTED_LANGUAGES: dict[str, str] = {
     "en_US": "English",
 }
 
-# Temas: chave interna -> nome exibido
-SUPPORTED_THEMES: dict[str, str] = {
-    "default": "Default",
-    "nord":    "Nord",
-    "dracula": "Dracula",
-    "solarized": "Solarized",
-    "gruvbox": "Gruvbox",
-}
-
 DEFAULTS: dict = {
     "language": "pt_BR",
-    "theme":    "default",
+    "theme":    "textual-dark",
 }
 
 

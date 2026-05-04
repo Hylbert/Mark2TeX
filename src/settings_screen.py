@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any
 
 from textual import on
 from textual.app import ComposeResult
@@ -12,23 +11,16 @@ from textual.screen import ModalScreen
 from textual.widgets import Label, ListItem, ListView, Static
 
 from . import config as cfg
-from .config import SUPPORTED_LANGUAGES, SUPPORTED_THEMES
-from .i18n import get_language, set_language, t
+from .config import SUPPORTED_LANGUAGES
+from .i18n import set_language, t
 
 
 # ---------------------------------------------------------------------------
-# Mensagem pública — o app escuta e atualiza os labels
+# Mensagens públicas
 # ---------------------------------------------------------------------------
 
 class LanguageChanged(Message):
     """Postada quando o idioma é alterado."""
-
-
-class ThemeChanged(Message):
-    """Postada quando o tema é alterado."""
-    def __init__(self, theme_key: str) -> None:
-        super().__init__()
-        self.theme_key = theme_key
 
 
 # ---------------------------------------------------------------------------
@@ -37,11 +29,10 @@ class ThemeChanged(Message):
 
 @dataclass
 class _SettingDef:
-    key:        str
-    value_key:  str
-    choices:    list[str] = field(default_factory=list)
+    key:       str
+    value_key: str
+    choices:   list[str] = field(default_factory=list)
 
-    # resolvidos em tempo de execução via t()
     @property
     def label(self) -> str:
         return t(f"settings.opt_{self.key}")
@@ -51,7 +42,7 @@ class _SettingDef:
         return t(f"settings.desc_{self.key}")
 
 
-def _make_defs() -> list[_SettingDef]:
+def _make_defs(available_themes: list[str]) -> list[_SettingDef]:
     return [
         _SettingDef(
             key="language",
@@ -61,36 +52,29 @@ def _make_defs() -> list[_SettingDef]:
         _SettingDef(
             key="theme",
             value_key="theme",
-            choices=list(SUPPORTED_THEMES.values()),
+            choices=available_themes,
         ),
     ]
 
 
 # ---------------------------------------------------------------------------
-# Widget: uma opção com controle ← valor → embutido
+# Widget: linha de opção com controle ← valor →
 # ---------------------------------------------------------------------------
 
 class _OptionRow(ListItem):
-    """
-    Linha de opção na coluna esquerda:
-        Nome da opção
-      ← valor atual →
-    """
-
     def __init__(self, definition: _SettingDef, current_label: str) -> None:
         super().__init__(id=f"opt-row-{definition.key}")
         self._def   = definition
         self._label = current_label
 
     def compose(self) -> ComposeResult:
-        yield Static(self._def.label, id=f"opt-name-{self._def.key}",  classes="opt-name")
+        yield Static(self._def.label, id=f"opt-name-{self._def.key}", classes="opt-name")
         yield Static(
             self._arrow_line(self._label),
             id=f"opt-ctrl-{self._def.key}",
             classes="opt-ctrl",
         )
 
-    # ------------------------------------------------------------------
     def _arrow_line(self, val: str) -> str:
         return f"← {val} →"
 
@@ -104,7 +88,6 @@ class _OptionRow(ListItem):
             pass
 
     def refresh_label(self) -> None:
-        """Re-renderiza o nome traduzido (chamado após mudança de idioma)."""
         try:
             self.query_one(f"#opt-name-{self._def.key}", Static).update(self._def.label)
         except Exception:
@@ -129,17 +112,10 @@ class _OptionRow(ListItem):
 # ---------------------------------------------------------------------------
 
 class SettingsScreen(ModalScreen):
-    """
-    Tela de ajustes:
-    - Coluna esquerda: lista de opções, cada uma com  ← valor →  abaixo do nome
-    - Coluna direita:  descrição da opção em foco
-    - ← →  ou Enter cicla o valor imediatamente
-    """
-
     BINDINGS = [
-        Binding("escape", "close",      "Fechar"),
-        Binding("left",   "prev_value", "Valor anterior", show=False),
-        Binding("right",  "next_value", "Próximo valor",  show=False),
+        Binding("escape", "close",       "Fechar"),
+        Binding("left",   "prev_value",  "Valor anterior", show=False),
+        Binding("right",  "next_value",  "Próximo valor",  show=False),
         Binding("1",      "tab_general", show=False),
     ]
 
@@ -151,35 +127,49 @@ class SettingsScreen(ModalScreen):
         super().__init__()
         self._config  = cfg.load()
         self._active  = "general"
-        self._defs    = _make_defs()
         self._sel_idx = 0
+        # Listagem dos temas nativos do Textual — resolvida após mount
+        self._defs: list[_SettingDef] = []
 
     # ------------------------------------------------------------------
-    # Helpers de conversão valor interno ↔ rótulo
+    # on_mount: resolve temas disponíveis via app.available_themes
+    # ------------------------------------------------------------------
+
+    def on_mount(self) -> None:
+        available_themes = sorted(self.app.available_themes.keys())
+        self._defs = _make_defs(available_themes)
+        self._rebuild_option_list()
+        self.query_one("#sw-option-list", ListView).focus()
+        self._update_description(0)
+
+    def _rebuild_option_list(self) -> None:
+        lv = self.query_one("#sw-option-list", ListView)
+        lv.clear()
+        for d in self._defs:
+            lv.append(_OptionRow(d, self._raw_to_label(d)))
+
+    # ------------------------------------------------------------------
+    # Helpers valor interno ↔ rótulo
     # ------------------------------------------------------------------
 
     def _raw_to_label(self, d: _SettingDef) -> str:
         raw = self._config.get(d.value_key, "")
         if d.value_key == "language":
             return SUPPORTED_LANGUAGES.get(raw, raw)
-        if d.value_key == "theme":
-            return SUPPORTED_THEMES.get(raw, raw)
-        return str(raw)
+        # tema: o nome interno é o próprio rótulo
+        return raw
 
     def _label_to_raw(self, d: _SettingDef, label: str) -> str:
         if d.value_key == "language":
             return next((k for k, v in SUPPORTED_LANGUAGES.items() if v == label), label)
-        if d.value_key == "theme":
-            return next((k for k, v in SUPPORTED_THEMES.items() if v == label), label)
         return label
 
     # ------------------------------------------------------------------
-    # Compose
+    # Compose (estrutura vazia — lista populada em on_mount)
     # ------------------------------------------------------------------
 
     def compose(self) -> ComposeResult:
         with Vertical(id="sw-window"):
-            # Linha de abas
             with Horizontal(id="sw-tabbar"):
                 yield Label(" tab→ ", id="sw-tab-hint")
                 for num, key, i18n_key in self._TABS:
@@ -190,45 +180,26 @@ class SettingsScreen(ModalScreen):
                         classes="sw-tab sw-tab-active" if active else "sw-tab",
                     )
 
-            # Corpo
             with Horizontal(id="sw-body"):
-                # Coluna esquerda
                 with Vertical(id="sw-left"):
-                    yield ListView(
-                        *[
-                            _OptionRow(d, self._raw_to_label(d))
-                            for d in self._defs
-                        ],
-                        id="sw-option-list",
-                    )
-
-                # Coluna direita — só descrição
+                    yield ListView(id="sw-option-list")
                 with Vertical(id="sw-right"):
                     yield Static("", id="sw-description")
 
-            # Rodapé
             yield Label(
                 f" {t('settings.saved_at')} {cfg.CONFIG_FILE} ",
                 id="sw-footer",
             )
 
     # ------------------------------------------------------------------
-    # on_mount — foca lista e atualiza descrição inicial
-    # ------------------------------------------------------------------
-
-    def on_mount(self) -> None:
-        lv = self.query_one("#sw-option-list", ListView)
-        lv.focus()
-        self._update_description(0)
-
-    # ------------------------------------------------------------------
-    # Atualiza coluna direita
+    # Coluna direita: descrição
     # ------------------------------------------------------------------
 
     def _update_description(self, idx: int) -> None:
+        if not self._defs:
+            return
         self._sel_idx = idx
-        d = self._defs[idx]
-        self.query_one("#sw-description", Static).update(d.description)
+        self.query_one("#sw-description", Static).update(self._defs[idx].description)
 
     def on_list_view_highlighted(self, event: ListView.Highlighted) -> None:
         if event.list_view.id != "sw-option-list" or event.item is None:
@@ -238,7 +209,7 @@ class SettingsScreen(ModalScreen):
         self._update_description(idx)
 
     # ------------------------------------------------------------------
-    # Ciclar valor: ← → e Enter
+    # Ciclar valor
     # ------------------------------------------------------------------
 
     def action_prev_value(self) -> None:
@@ -252,9 +223,13 @@ class SettingsScreen(ModalScreen):
         self._cycle(1)
 
     def _cycle(self, direction: int) -> None:
+        if not self._defs:
+            return
         d       = self._defs[self._sel_idx]
         cur_lbl = self._raw_to_label(d)
         choices = d.choices
+        if not choices:
+            return
         cur_i   = choices.index(cur_lbl) if cur_lbl in choices else 0
         new_lbl = choices[(cur_i + direction) % len(choices)]
         new_raw = self._label_to_raw(d, new_lbl)
@@ -262,29 +237,26 @@ class SettingsScreen(ModalScreen):
         self._config[d.value_key] = new_raw
         cfg.save(self._config)
 
-        # Atualiza o widget da linha
         try:
-            row = self.query_one(f"#opt-row-{d.key}", _OptionRow)
-            row.update_value(new_lbl)
+            self.query_one(f"#opt-row-{d.key}", _OptionRow).update_value(new_lbl)
         except Exception:
             pass
 
         # Efeitos colaterais
         if d.value_key == "language":
             set_language(new_raw)
-            # Re-renderiza os nomes das opções na coluna esquerda
             for row_d in self._defs:
                 try:
                     self.query_one(f"#opt-row-{row_d.key}", _OptionRow).refresh_label()
                 except Exception:
                     pass
-            # Atualiza descrição e aba
             self._update_description(self._sel_idx)
             self._refresh_tabbar()
             self.app.post_message(LanguageChanged())
 
         if d.value_key == "theme":
-            self.app.post_message(ThemeChanged(new_raw))
+            # Aplica o tema nativo do Textual diretamente
+            self.app.theme = new_raw
 
     def _refresh_tabbar(self) -> None:
         for num, key, i18n_key in self._TABS:
@@ -297,16 +269,8 @@ class SettingsScreen(ModalScreen):
             except Exception:
                 pass
 
-    # ------------------------------------------------------------------
-    # Aba
-    # ------------------------------------------------------------------
-
     def action_tab_general(self) -> None:
         self._active = "general"
-
-    # ------------------------------------------------------------------
-    # Fechar
-    # ------------------------------------------------------------------
 
     def action_close(self) -> None:
         self.dismiss()

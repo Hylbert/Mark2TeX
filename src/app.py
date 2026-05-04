@@ -110,16 +110,19 @@ class Mark2TeXApp(App):
 
     BINDINGS = [
         ("escape", "show_global_menu", "Menu Global"),
-        ("q", "show_global_menu", "Menu Global"),
-        ("f1", "show_help_menu", "Ajuda"),
+        ("q",      "show_global_menu", "Menu Global"),
+        ("f1",     "show_help_menu",   "Ajuda"),
         ("question_mark", "show_help_menu", "Ajuda"),
-        ("c", "compile_document", "Compilar"),
-        ("w", "toggle_watch", "Watch Mode"),
+        ("c",      "compile_document", "Compilar"),
+        ("w",      "toggle_watch",     "Watch Mode"),
     ]
 
     def on_load(self) -> None:
         settings = cfg.load()
         set_language(settings.get("language", "pt_BR"))
+        # Aplica o tema salvo antes do compose
+        saved_theme = settings.get("theme", "textual-dark")
+        self.theme = saved_theme
 
     def compose(self) -> ComposeResult:
         yield Header()
