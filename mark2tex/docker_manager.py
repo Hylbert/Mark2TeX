@@ -11,9 +11,8 @@ IMAGE_NAME = "mark2tex:latest"
 
 
 def _get_package_path() -> Path:
-    """Return the root of the installed src/ package (works both in dev and pipx)."""
-    with resources.path("src", "__init__.py") as p:
-        return p.parent
+    """Return the root of the installed package (works in dev and pipx, Python 3.9+)."""
+    return Path(str(resources.files("mark2tex")))
 
 
 class DockerManager:

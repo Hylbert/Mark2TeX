@@ -27,13 +27,13 @@ jobs:
         run: pip install -e .
 
       - name: Lint — ruff
-        run: ruff check src/
+        run: ruff check mark2tex/
 
       - name: Verificação de tipos — mypy
-        run: mypy src/ --ignore-missing-imports
+        run: mypy mark2tex/ --ignore-missing-imports
 
       - name: Testes com cobertura
-        run: pytest tests/ -v --tb=short --cov=src --cov-report=term-missing --cov-fail-under=50
+        run: pytest tests/ -v --tb=short --cov=mark2tex --cov-report=term-missing --cov-fail-under=50
 
       - name: Upload cobertura para Codecov
         uses: codecov/codecov-action@v4

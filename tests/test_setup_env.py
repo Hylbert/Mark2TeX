@@ -1,6 +1,6 @@
 import pytest
 
-from src.setup_env import ensure_environment
+from mark2tex.setup_env import ensure_environment
 
 
 def test_ensure_environment_check_only_does_not_raise():

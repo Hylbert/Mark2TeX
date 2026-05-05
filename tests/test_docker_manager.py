@@ -3,7 +3,7 @@ import tempfile
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-from src.docker_manager import DockerManager
+from mark2tex.docker_manager import DockerManager
 
 
 def test_manager_instantiates():
@@ -27,7 +27,7 @@ def test_compile_missing_file_yields_error():
     assert any("\u274c" in line for line in result)
 
 
-@patch("src.docker_manager.subprocess.Popen")
+@patch("mark2tex.docker_manager.subprocess.Popen")
 def test_compile_builds_correct_command(mock_popen):
     mock_proc = MagicMock()
     mock_proc.stdout = iter(["PROGRESS:50%\n"])
@@ -51,11 +51,11 @@ def test_compile_builds_correct_command(mock_popen):
     os.unlink(tmpfile)
 
 
-@patch("src.docker_manager.docker.from_env")
+@patch("mark2tex.docker_manager.docker.from_env")
 def test_uninstall_when_image_not_found(mock_docker):
     from docker.errors import ImageNotFound
 
-    from src.docker_manager import uninstall_docker_assets
+    from mark2tex.docker_manager import uninstall_docker_assets
 
     mock_client = MagicMock()
     mock_client.images.get.side_effect = ImageNotFound("not found")

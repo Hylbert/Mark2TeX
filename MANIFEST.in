@@ -1,6 +1,6 @@
 include README.md
-include src/Dockerfile
+include mark2tex/Dockerfile
 include referencias.bib
-recursive-include src/templates *
-recursive-include src/bin *.sh
-recursive-include src *.tcss
+recursive-include mark2tex/templates *
+recursive-include mark2tex/bin *.sh
+recursive-include mark2tex *.tcss
