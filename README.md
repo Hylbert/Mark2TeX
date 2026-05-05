@@ -58,6 +58,11 @@ mark2tex
 > locally from the bundled `Dockerfile` (spinner shown during build steps).
 > You can also run `make build-image` manually at any time.
 
+> **Welcome screen:** On the very first launch, a welcome screen guides you through the
+> workflow. Click **"Initialise project here"** to copy a ready-to-edit example `.md` file
+> directly into your current directory — no need to leave the app. You can also run
+> `mark2tex init` from the terminal at any time to do the same thing.
+
 ## CLI Commands
 
 | Command | Description |
@@ -116,6 +121,7 @@ Exit code `0` when no errors are found; exit code `1` when at least one error pr
 
 - **Dockerized builds** — zero local LaTeX installation; identical output on every machine.
 - **Interactive TUI** — file browser, template selector, real-time log console, and progress bar built with [Textual](https://github.com/Textualize/textual).
+- **First-run onboarding** — welcome screen shown on the first launch with a built-in "Initialise project here" button that copies an example `.md` into your current directory without leaving the app.
 - **Watch mode** — automatic recompilation on every file save.
 - **Human-readable logs** — raw XeLaTeX output is parsed and translated into plain-language messages.
 - **Font selection** — choose between Liberation Sans (Arial-compatible), Nimbus Sans (Helvetica), Liberation Serif (Times-compatible), and Ubuntu per document.
@@ -138,7 +144,8 @@ Exit code `0` when no errors are found; exit code `1` when at least one error pr
 
 - [x] System health check (`mark2tex check`)
 - [x] First-run onboarding with Rich progress for Docker image pull
-- [ ] `mark2tex init` — scaffold a template into the current directory
+- [x] Welcome screen with guided workflow and "Initialise project here" button
+- [x] `mark2tex init` — scaffold a template into the current directory
 - [ ] Auto-inject YAML frontmatter for files without it (with backup & restore)
 - [ ] Additional ABNT templates (dissertation, presentation)
 - [ ] Windows-native installer

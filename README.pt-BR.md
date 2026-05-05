@@ -58,6 +58,11 @@ mark2tex
 > localmente a partir do `Dockerfile` incluído no pacote (spinner exibido durante os steps).
 > Você também pode executar `make build-image` manualmente a qualquer momento.
 
+> **Tela de boas-vindas:** Na primeira abertura, uma tela de boas-vindas guia você pelo fluxo
+> de uso. Clique em **"Inicializar projeto aqui"** para copiar um arquivo `.md` de exemplo
+> pronto para editar diretamente no seu diretório atual — sem precisar sair do app. Você também
+> pode rodar `mark2tex init` no terminal a qualquer momento para fazer o mesmo.
+
 ## Comandos CLI
 
 | Comando | Descrição |
@@ -116,6 +121,7 @@ Código de saída `0` quando não há erros; código `1` quando pelo menos uma v
 
 - **Builds Dockerizados** — sem instalação local de LaTeX; resultado idêntico em qualquer máquina.
 - **TUI interativa** — navegador de arquivos, seletor de template, console de log em tempo real e barra de progresso criados com [Textual](https://github.com/Textualize/textual).
+- **Onboarding no primeiro uso** — tela de boas-vindas exibida na primeira abertura com botão **"Inicializar projeto aqui"** que copia um `.md` de exemplo no diretório atual sem sair do app.
 - **Watch mode** — recompilação automática a cada salvamento do arquivo.
 - **Logs legíveis por humanos** — a saída bruta do XeLaTeX é analisada e traduzida para mensagens em linguagem simples.
 - **Seleção de fonte** — escolha entre Liberation Sans (Arial), Nimbus Sans (Helvetica), Liberation Serif (Times) e Ubuntu por documento.
@@ -138,7 +144,8 @@ Código de saída `0` quando não há erros; código `1` quando pelo menos uma v
 
 - [x] Diagnóstico do sistema (`mark2tex check`)
 - [x] Onboarding no primeiro uso com Rich Progress para pull da imagem Docker
-- [ ] `mark2tex init` — criar scaffold de template no diretório atual
+- [x] Tela de boas-vindas com fluxo guiado e botão "Inicializar projeto aqui"
+- [x] `mark2tex init` — criar scaffold de template no diretório atual
 - [ ] Injeção automática de YAML frontmatter em arquivos sem cabeçalho (com backup e restore)
 - [ ] Templates ABNT adicionais (dissertação, apresentação)
 - [ ] Instalador nativo para Windows
