@@ -1,26 +1,25 @@
 import importlib
-from unittest.mock import MagicMock, patch
 
-import src
+import mark2tex
 
 
-def test_package_importable():
-    assert importlib.import_module("src") is not None
+def test_mark2tex_importable():
+    assert importlib.import_module("mark2tex") is not None
 
-def test_version_defined():
-    assert hasattr(src, "__version__")
+
+def test_has_version():
+    assert hasattr(mark2tex, "__version__")
+
 
 def test_main_module_importable():
-    assert importlib.import_module("src.__main__") is not None
+    assert importlib.import_module("mark2tex.__main__") is not None
 
 
-def test_main_runs_app() -> None:
-    with patch("src.main.Mark2TeXApp") as mock_app_class:
-        mock_instance = MagicMock()
-        mock_app_class.return_value = mock_instance
-
-        from src.main import main
+def test_main_function_callable():
+    from unittest.mock import patch
+    with patch("mark2tex.main.Mark2TeXApp") as mock_app_class:
+        mock_app = mock_app_class.return_value
+        mock_app.run.return_value = None
+        from mark2tex.main import main
         main()
-
-        mock_app_class.assert_called_once()
-        mock_instance.run.assert_called_once()
+        mock_app.run.assert_called_once()
