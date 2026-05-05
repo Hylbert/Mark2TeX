@@ -25,6 +25,7 @@ from . import config as cfg
 from .docker_manager import DockerManager
 from .i18n import set_language, t
 from .log_translator import log_translator
+from .onboarding import OnboardingScreen, is_first_run
 from .settings_screen import LanguageChanged, SettingsScreen
 from .utils.visuals import M2TBannerWidget, M2TMenuOption
 from .watcher import WatcherManager
@@ -64,7 +65,7 @@ def _copy_to_clipboard(text: str) -> None:
         import pyperclip
         pyperclip.copy(text)
         return
-    except Exception:
+    except Exception:  # noqa: BLE001
         pass
 
     for cmd in (
@@ -76,7 +77,7 @@ def _copy_to_clipboard(text: str) -> None:
             try:
                 subprocess.run(cmd, input=text.encode(), check=True, timeout=3)
                 return
-            except Exception:
+            except Exception:  # noqa: BLE001
                 continue
 
     raise RuntimeError(
@@ -214,6 +215,9 @@ class Mark2TeXApp(App):
         self._populate_templates()
         self._populate_fonts()
         self._populate_files()
+        # Show onboarding on first run
+        if is_first_run():
+            self.call_after_refresh(self.push_screen, OnboardingScreen())
 
     def _populate_templates(self) -> None:
         template_list = self.query_one("#template-list", ListView)
@@ -408,7 +412,7 @@ class Mark2TeXApp(App):
                 if result.startswith(("⚠️", "⚠", "❌", "🔄")):
                     ui("progress_bump", None)
                 ui("console", (result, "white"))
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             ui("console", (f"{t('compile.error')}: {exc}", "#e05c5c"))
 
     def _apply_ui_update(self, action: str, value=None) -> None:
@@ -424,7 +428,7 @@ class Mark2TeXApp(App):
             elif action == "console":
                 message, style = value
                 self._log_console(message, style=style)
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             print(f"[UI Error] {action}: {exc}")
 
 

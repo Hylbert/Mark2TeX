@@ -408,3 +408,91 @@ SettingsScreen {
     border-top: solid #03656b;
     padding: 0 1;
 }
+
+/* ════════════════════════════════════════════════════════════
+   OnboardingScreen
+   ════════════════════════════════════════════════════════════ */
+
+OnboardingScreen {
+    align: center middle;
+    background: rgba(0,0,0,0.72);
+}
+
+#ob-window {
+    width: 68;
+    height: auto;
+    background: rgb(22,26,30);
+    border: round #03656b;
+    padding: 0;
+}
+
+#ob-title {
+    background: #03656b;
+    color: white;
+    text-style: bold;
+    text-align: center;
+    width: 100%;
+    padding: 0 2;
+    content-align: center middle;
+}
+
+#ob-welcome {
+    color: #fafafa;
+    text-style: bold;
+    padding: 1 3 0 3;
+    width: 100%;
+}
+
+#ob-what {
+    color: rgb(180,185,190);
+    padding: 0 3;
+    width: 100%;
+}
+
+#ob-steps {
+    color: #4caf87;
+    padding: 0 3;
+    width: 100%;
+}
+
+#ob-hint {
+    color: #e0a24a;
+    padding: 0 3;
+    width: 100%;
+    text-style: italic;
+}
+
+#ob-spacer1, #ob-spacer2, #ob-spacer3, #ob-spacer4 {
+    height: 1;
+}
+
+#ob-btn-start {
+    width: auto;
+    margin: 0 3 1 3;
+    background: #03656b;
+    color: white;
+    border: tall #4caf87;
+    text-style: bold;
+}
+
+#ob-btn-start:hover {
+    background: #4caf87;
+    color: rgb(22,26,30);
+    border: tall #4caf87;
+}
+
+#ob-btn-start:focus {
+    background: #024d52;
+    color: white;
+    border: tall #4caf87;
+}
+
+#ob-footer {
+    color: #555555;
+    text-style: italic;
+    text-align: center;
+    width: 100%;
+    padding: 0 2 1 2;
+    border-top: solid #03656b 20%;
+    content-align: center middle;
+}

@@ -87,6 +87,25 @@ _STRINGS: dict[str, dict[str, str]] = {
         "log.bib_errors": "✗ {msg}",
         "log.refs_empty": "⚠️ Seção de referências vazia",
         "log.latexmk_generic": "🔧 Latexmk: {msg}",
+        # Onboarding
+        "onboarding.title": " 👋  Bem-vindo ao Mark2TeX ",
+        "onboarding.welcome": "Parece que é a primeira vez que você executa o Mark2TeX.",
+        "onboarding.what": (
+            "O Mark2TeX converte arquivos Markdown em PDFs profissionais\n"
+            "usando templates LaTeX — tudo rodando dentro de um container Docker."
+        ),
+        "onboarding.steps": (
+            "  1. Selecione ou crie um arquivo .md no painel de arquivos\n"
+            "  2. Escolha um template (TCC, Artigo IEEE, Documento Técnico…)\n"
+            "  3. Pressione [c] ou clique em COMPILAR\n"
+            "  4. O PDF gerado aparecerá no diretório atual"
+        ),
+        "onboarding.hint_init": (
+            "💡 Dica: rode  mark2tex init  para copiar um template de exemplo"
+            " para o diretório atual."
+        ),
+        "onboarding.btn_start": "  Entendi, vamos começar!  ",
+        "onboarding.footer": "ESC / Enter — fechar esta tela",
     },
     "en_US": {
         # Menu Global
@@ -172,6 +191,25 @@ _STRINGS: dict[str, dict[str, str]] = {
         "log.bib_errors": "✗ {msg}",
         "log.refs_empty": "⚠️ Empty bibliography section",
         "log.latexmk_generic": "🔧 Latexmk: {msg}",
+        # Onboarding
+        "onboarding.title": " 👋  Welcome to Mark2TeX ",
+        "onboarding.welcome": "This looks like your first time running Mark2TeX.",
+        "onboarding.what": (
+            "Mark2TeX converts Markdown files into professional PDFs\n"
+            "using LaTeX templates — everything runs inside a Docker container."
+        ),
+        "onboarding.steps": (
+            "  1. Select or create a .md file in the file panel\n"
+            "  2. Choose a template (TCC, IEEE Article, Technical Doc…)\n"
+            "  3. Press [c] or click COMPILE\n"
+            "  4. The generated PDF will appear in the current directory"
+        ),
+        "onboarding.hint_init": (
+            "💡 Tip: run  mark2tex init  to copy a starter template"
+            " into the current directory."
+        ),
+        "onboarding.btn_start": "  Got it, let's start!  ",
+        "onboarding.footer": "ESC / Enter — close this screen",
     },
 }
 
