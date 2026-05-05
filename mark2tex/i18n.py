@@ -107,10 +107,10 @@ _STRINGS: dict[str, dict[str, str]] = {
         ),
         "onboarding.btn_start": "  Entendi, vamos começar!  ",
         "onboarding.btn_init":  "  Inicializar projeto aqui  ",
-        "onboarding.init_done": "✔ Template '{template}' copiado ({n} arquivo(s)) — abrindo o editor…",
+        "onboarding.init_done": "✔ Pronto! Template '{template}' copiado — selecione o arquivo e compile.",
         "onboarding.init_done_renamed": (
-            "✔ Template '{template}' copiado ({n} arquivo(s)). "
-            "Já havia um arquivo com o mesmo nome — o exemplo foi salvo como '{renamed}'."
+            "✔ Pronto! Exemplo salvo como '{renamed}'\n"
+            "(seu arquivo original foi preservado)."
         ),
         "onboarding.init_nothing": "⚠ Nenhum arquivo novo copiado — arquivos já existem no diretório.",
         "onboarding.init_error": "✗ Falha ao inicializar: {msg}",
@@ -220,10 +220,10 @@ _STRINGS: dict[str, dict[str, str]] = {
         ),
         "onboarding.btn_start": "  Got it, let's start!  ",
         "onboarding.btn_init":  "  Initialise project here  ",
-        "onboarding.init_done": "✔ Template '{template}' copied ({n} file(s)) — opening the editor…",
+        "onboarding.init_done": "✔ Done! Template '{template}' copied — select the file and compile.",
         "onboarding.init_done_renamed": (
-            "✔ Template '{template}' copied ({n} file(s)). "
-            "A file with the same name already existed — the example was saved as '{renamed}'."
+            "✔ Done! Example saved as '{renamed}'\n"
+            "(your original file was preserved)."
         ),
         "onboarding.init_nothing": "⚠ Nothing new to copy — files already exist in this directory.",
         "onboarding.init_error": "✗ Failed to initialise: {msg}",
