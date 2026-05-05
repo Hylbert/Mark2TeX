@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mark2tex"
-version = "0.2.0rc1"
+version = "0.2.0"
 description = "Markdown to TeX/PDF with TUI and Docker"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -48,7 +48,7 @@ pythonpath = ["."]
 addopts = "-v --tb=short"
 asyncio_mode = "auto"
 
-# ── Coverage ──────────────────────────────────────────────────────────────────────────────────────
+# ── Coverage ────────────────────────────────────────────────────────────────────────────────────────
 [tool.coverage.run]
 source = ["src"]
 omit = [
@@ -62,7 +62,7 @@ omit = [
 show_missing = true
 fail_under = 40
 
-# ── Ruff ────────────────────────────────────────────────────────────────────────────────────────
+# ── Ruff ──────────────────────────────────────────────────────────────────────────────────────────
 [tool.ruff]
 line-length = 100
 target-version = "py310"
@@ -71,7 +71,7 @@ target-version = "py310"
 select = ["E", "F", "W", "I", "UP"]
 ignore = ["E501"]
 
-# ── Mypy ──────────────────────────────────────────────────────────────────────────────────────────
+# ── Mypy ────────────────────────────────────────────────────────────────────────────────────────────
 [tool.mypy]
 python_version = "3.10"
 warn_return_any = true
