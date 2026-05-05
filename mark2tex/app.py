@@ -29,6 +29,8 @@ from .onboarding import OnboardingScreen, is_first_run
 from .settings_screen import LanguageChanged, SettingsScreen
 from .utils.visuals import M2TBannerWidget, M2TMenuOption
 from .watcher import WatcherManager
+from .yaml_injector import has_frontmatter, inject_frontmatter
+from .yaml_inject_screen import YamlInjectScreen
 
 # ---------------------------------------------------------------------------
 # Fontes disponíveis: (id interno, rótulo exibido na TUI)
@@ -113,7 +115,7 @@ class HelpScreen(ModalScreen):
                 yield Label("? / F1       — " + t("menu.help").capitalize())
                 yield Label("c            — " + t("btn.compile").capitalize())
                 yield Label("w            — " + t("btn.watch_on") + " / " + t("btn.watch_off"))
-                yield Label("Tab          — " + ("À navigation panels" if t("menu.exit") == "EXIT" else "Navegar entre painéis"))
+                yield Label("Tab          — " + ("Navigate panels" if t("menu.exit") == "EXIT" else "Navegar entre painéis"))
                 yield Label("↑ ↓          — " + ("Navigate lists" if t("menu.exit") == "EXIT" else "Navegar nas listas"))
                 yield Label("")
                 yield Label(t("help.flow_title"), id="help-commands-title")
@@ -246,7 +248,10 @@ class Mark2TeXApp(App):
         file_list = self.query_one("#file-list", ListView)
         file_list.clear()
         for f in md_files:
-            file_list.append(OptionItem(f))
+            item = OptionItem(f)
+            if not has_frontmatter(f):
+                item.add_class("file-item--no-yaml")
+            file_list.append(item)
 
     def _refresh_ui_labels(self) -> None:
         self.query_one("#file-explorer").border_title  = t("panel.files")
@@ -283,12 +288,21 @@ class Mark2TeXApp(App):
             self.selected_file = item.label_text
             self.query_one("#status-file", Label).update(f"Arquivo  : {self.selected_file}")
             self._update_preview(item.label_text)
+            # Show amber colour on file item if no frontmatter detected
+            self._check_yaml_badge(item)
         elif event.list_view.id == "template-list" and isinstance(item, OptionItem):
             self.selected_template = item.label_text
             self.query_one("#status-template", Label).update(f"Template : {self.selected_template}")
         elif event.list_view.id == "font-list" and isinstance(item, FontItem):
             self.selected_font = item.font_id
             self.query_one("#status-font", Label).update(f"Fonte    : {item.display_label}")
+
+    def _check_yaml_badge(self, item: OptionItem) -> None:
+        """Add/remove the no-yaml CSS class based on frontmatter presence."""
+        if not has_frontmatter(item.label_text):
+            item.add_class("file-item--no-yaml")
+        else:
+            item.remove_class("file-item--no-yaml")
 
     def _update_preview(self, filename: str) -> None:
         try:
@@ -377,7 +391,38 @@ class Mark2TeXApp(App):
         if not selected_file or not selected_template:
             self._log_console(t("compile.select_file"), style="#e05c5c")
             return
+        # If the file lacks YAML frontmatter, prompt the user before compiling
+        if not has_frontmatter(selected_file):
+            self.push_screen(
+                YamlInjectScreen(selected_file, selected_template),
+                lambda confirmed: self._on_yaml_inject_dismissed(
+                    confirmed, selected_file, selected_template, selected_font
+                ),
+            )
+            return
         self.compile_specific_document(selected_file, selected_template, selected_font)
+
+    def _on_yaml_inject_dismissed(
+        self,
+        confirmed: bool,
+        selected_file: str,
+        selected_template: str,
+        selected_font: str | None,
+    ) -> None:
+        """Called when YamlInjectScreen closes."""
+        if not confirmed:
+            return
+        ok = inject_frontmatter(selected_file, selected_template)
+        if ok:
+            self._log_console(t("yaml.injected_ok"), style="#4caf87")
+            # Refresh file list so badge is removed for this file
+            self._populate_files()
+            self.compile_specific_document(selected_file, selected_template, selected_font)
+        else:
+            self._log_console(
+                t("yaml.injected_err").format(msg="permission denied or I/O error"),
+                style="#e05c5c",
+            )
 
     def compile_specific_document(
         self,
