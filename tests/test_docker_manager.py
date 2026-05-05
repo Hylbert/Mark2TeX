@@ -61,3 +61,32 @@ def test_uninstall_when_image_not_found(mock_docker):
     mock_client.images.get.side_effect = ImageNotFound("not found")
     mock_docker.return_value = mock_client
     uninstall_docker_assets()  # Should not raise
+
+@patch("mark2tex.docker_manager.subprocess.Popen")
+def test_compile_docker_process_error(mock_popen):
+    mock_proc = MagicMock()
+    mock_proc.stdout = iter(["Error in build process\n"])
+    mock_proc.returncode = 1
+    mock_popen.return_value = mock_proc
+
+    with tempfile.NamedTemporaryFile(suffix=".md", delete=False) as f:
+        f.write(b"# Test")
+        tmpfile = f.name
+
+    dm = DockerManager()
+    with patch.object(Path, "exists", return_value=True):
+        result = list(dm.compile(tmpfile, "tcc-abnt"))
+
+    assert any("\u274c Error: Docker process exited with code 1" in line for line in result)
+    os.unlink(tmpfile)
+
+@patch("mark2tex.docker_manager.docker.from_env")
+def test_uninstall_docker_exception(mock_docker):
+    from docker.errors import DockerException
+
+    from mark2tex.docker_manager import uninstall_docker_assets
+    mock_client = MagicMock()
+    mock_client.images.get.side_effect = DockerException("Connection error")
+    mock_docker.return_value = mock_client
+    uninstall_docker_assets()  # Should not raise
+
