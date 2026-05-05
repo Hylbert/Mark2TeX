@@ -5,9 +5,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # Install essential tools and LaTeX distribution
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    ca-certificates \
     curl \
-    fontconfig \
     texlive-xetex \
     texlive-latex-extra \
     texlive-publishers \

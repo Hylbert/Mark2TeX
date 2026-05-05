@@ -23,7 +23,15 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-buildx-
 
-      - name: Build da imagem mark2tex:latest
+      - name: Login no Docker Hub
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build da imagem (develop/PR — load local)
+        if: github.ref != 'refs/heads/main' || github.event_name != 'push'
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -33,16 +41,31 @@ jobs:
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
+      - name: Build da imagem (main — push Docker Hub)
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/mark2tex:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/mark2tex:${{ github.sha }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
+
       - name: Mover cache (evita crescimento infinito)
         run: |
           rm -rf /tmp/.buildx-cache
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
       - name: Smoke test — pdflatex disponível
+        if: github.ref != 'refs/heads/main' || github.event_name != 'push'
         run: docker run --rm mark2tex:latest bash -c "which pdflatex && pdflatex --version"
 
       - name: Smoke test — xelatex disponível
+        if: github.ref != 'refs/heads/main' || github.event_name != 'push'
         run: docker run --rm mark2tex:latest bash -c "which xelatex && xelatex --version"
 
       - name: Smoke test — pandoc disponível
+        if: github.ref != 'refs/heads/main' || github.event_name != 'push'
         run: docker run --rm mark2tex:latest bash -c "which pandoc && pandoc --version"
