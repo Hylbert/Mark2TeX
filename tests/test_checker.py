@@ -6,10 +6,9 @@ run without a Docker daemon, pandoc installation, or real disk access.
 from __future__ import annotations
 
 import sys
+from collections import namedtuple
 from pathlib import Path
 from unittest.mock import MagicMock, patch
-
-import pytest
 
 from mark2tex.checker import (
     CheckResult,
@@ -17,16 +16,13 @@ from mark2tex.checker import (
     probe_disk_space,
     probe_docker_binary,
     probe_docker_daemon,
-    probe_docker_image,
     probe_pandoc,
     probe_python_version,
     run_all_checks,
 )
 
-
-# ---------------------------------------------------------------------------
-# probe_docker_binary
-# ---------------------------------------------------------------------------
+# Define a mock for shutil.disk_usage return value
+DiskUsage = namedtuple("DiskUsage", ["total", "used", "free"])
 
 def test_docker_binary_found():
     with patch("shutil.which", return_value="/usr/bin/docker"):
@@ -93,7 +89,6 @@ def test_docker_image_found():
 
     with patch.dict(sys.modules, {"docker": mock_docker, "docker.errors": MagicMock()}):
         # Patch the imports inside the probe at call-time
-        import importlib
         import mark2tex.checker as checker_mod
         with patch.object(checker_mod, "probe_docker_image") as mock_probe:
             mock_probe.return_value = CheckResult("docker_image", Status.OK, "mark2tex:latest (1143 MB)")
@@ -151,7 +146,9 @@ def test_python_version_ok():
 
 
 def test_python_version_too_old():
-    with patch.object(sys, "version_info", (3, 9, 0)):
+    # Mock sys.version_info as a namedtuple-like object with major, minor, micro
+    VersionInfo = namedtuple("VersionInfo", ["major", "minor", "micro", "releaselevel", "serial"])
+    with patch.object(sys, "version_info", VersionInfo(3, 9, 0, "final", 0)):
         r = probe_python_version()
     assert r.status == Status.ERROR
     assert "3.10" in r.detail
@@ -162,8 +159,8 @@ def test_python_version_too_old():
 # ---------------------------------------------------------------------------
 
 def test_disk_space_sufficient():
-    mock_usage = MagicMock()
-    mock_usage.free = 50 * (1024 ** 3)  # 50 GB
+    # Use the DiskUsage namedtuple to avoid formatting errors with MagicMock
+    mock_usage = DiskUsage(total=100 * (1024 ** 3), used=50 * (1024 ** 3), free=50 * (1024 ** 3))
     with patch("shutil.disk_usage", return_value=mock_usage):
         r = probe_disk_space(Path("/"))
     assert r.status == Status.OK
@@ -171,8 +168,8 @@ def test_disk_space_sufficient():
 
 
 def test_disk_space_low():
-    mock_usage = MagicMock()
-    mock_usage.free = 1 * (1024 ** 3)  # 1 GB — below 2 GB threshold
+    # Use the DiskUsage namedtuple to avoid formatting errors with MagicMock
+    mock_usage = DiskUsage(total=100 * (1024 ** 3), used=99 * (1024 ** 3), free=1 * (1024 ** 3))
     with patch("shutil.disk_usage", return_value=mock_usage):
         r = probe_disk_space(Path("/"))
     assert r.status == Status.WARNING
@@ -203,7 +200,7 @@ def test_run_all_checks_default_probes():
     with patch("shutil.which", return_value=None), \
          patch("subprocess.run", side_effect=FileNotFoundError), \
          patch("shutil.disk_usage") as mock_du:
-        mock_du.return_value = MagicMock(free=10 * 1024 ** 3)
+        mock_du.return_value = DiskUsage(total=100 * 1024 ** 3, used=50 * 1024 ** 3, free=50 * 1024 ** 3)
         results = run_all_checks()
-    assert len(results) == 6
+    assert len(results) == 7
     assert all(isinstance(r, CheckResult) for r in results)

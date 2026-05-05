@@ -9,11 +9,11 @@ from __future__ import annotations
 import shutil
 import subprocess
 import sys
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Sequence
-
+from typing import Any
 
 # ---------------------------------------------------------------------------
 # Data model
