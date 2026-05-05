@@ -49,9 +49,14 @@ mark2tex check
 mark2tex
 ```
 
-> **Note:** On the first run, Mark2TeX will automatically pull the `mark2tex` image from Docker Hub. This requires an active internet connection and may take a few minutes depending on your connection speed. Subsequent runs reuse the cached image.
+> **First run:** Mark2TeX automatically pulls the `mark2tex` image from Docker Hub with a
+> **Rich visual progress bar** — one bar per image layer showing download speed, file size,
+> and estimated time remaining. Requires an active internet connection; may take a few minutes
+> depending on your speed. Subsequent runs reuse the cached image.
 >
-> **No internet?** If Docker Hub is unreachable, Mark2TeX will fall back to building the image locally from the bundled `Dockerfile`. You can also run `make build-image` manually at any time.
+> **No internet?** If Docker Hub is unreachable, Mark2TeX falls back to building the image
+> locally from the bundled `Dockerfile` (spinner shown during build steps).
+> You can also run `make build-image` manually at any time.
 
 ## CLI Commands
 
@@ -116,6 +121,7 @@ Exit code `0` when no errors are found; exit code `1` when at least one error pr
 - **Font selection** — choose between Liberation Sans (Arial-compatible), Nimbus Sans (Helvetica), Liberation Serif (Times-compatible), and Ubuntu per document.
 - **Bibliography support** — BibTeX via Pandoc + XeLaTeX; just drop a `referencias.bib` alongside your `.md`.
 - **System health check** — `mark2tex check` diagnoses your environment before you compile.
+- **Rich image pull progress** — per-layer progress bars with speed and ETA when pulling the Docker image on first run.
 - **ABNT-oriented workflow** — templates built around Brazilian academic standards.
 
 ## Available Templates
@@ -131,7 +137,7 @@ Exit code `0` when no errors are found; exit code `1` when at least one error pr
 ## Roadmap
 
 - [x] System health check (`mark2tex check`)
-- [ ] First-run onboarding with Rich progress for Docker image pull
+- [x] First-run onboarding with Rich progress for Docker image pull
 - [ ] `mark2tex init` — scaffold a template into the current directory
 - [ ] Auto-inject YAML frontmatter for files without it (with backup & restore)
 - [ ] Additional ABNT templates (dissertation, presentation)
