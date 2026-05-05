@@ -101,11 +101,12 @@ _STRINGS: dict[str, dict[str, str]] = {
             "  4. O PDF gerado aparecerá no diretório atual"
         ),
         "onboarding.hint_init": (
-            "💡 Dica: rode  mark2tex init  para copiar um template de exemplo"
-            " para o diretório atual."
+            "Ainda não tem um arquivo .md? Clique em \"Inicializar projeto aqui\" abaixo\n"
+            "e geraremos um exemplo pronto para editar. Ou, se preferir o terminal,\n"
+            "rode  mark2tex init  e o arquivo aparecerá automaticamente no painel."
         ),
         "onboarding.btn_start": "  Entendi, vamos começar!  ",
-        "onboarding.btn_init":  "  📂  Inicializar projeto aqui  ",
+        "onboarding.btn_init":  "  Inicializar projeto aqui  ",
         "onboarding.init_done": "✔ Template '{template}' copiado ({n} arquivo(s)) — abrindo o editor…",
         "onboarding.init_nothing": "⚠ Nenhum arquivo novo copiado — arquivos já existem no diretório.",
         "onboarding.init_error": "✗ Falha ao inicializar: {msg}",
@@ -209,11 +210,12 @@ _STRINGS: dict[str, dict[str, str]] = {
             "  4. The generated PDF will appear in the current directory"
         ),
         "onboarding.hint_init": (
-            "💡 Tip: run  mark2tex init  to copy a starter template"
-            " into the current directory."
+            "Don't have a .md file yet? Click \"Initialise project here\" below\n"
+            "and we'll generate a ready-to-edit example for you. Or, if you prefer\n"
+            "the terminal, run  mark2tex init  and the file will appear in the panel."
         ),
         "onboarding.btn_start": "  Got it, let's start!  ",
-        "onboarding.btn_init":  "  📂  Initialise project here  ",
+        "onboarding.btn_init":  "  Initialise project here  ",
         "onboarding.init_done": "✔ Template '{template}' copied ({n} file(s)) — opening the editor…",
         "onboarding.init_nothing": "⚠ Nothing new to copy — files already exist in this directory.",
         "onboarding.init_error": "✗ Failed to initialise: {msg}",

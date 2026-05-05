@@ -113,8 +113,8 @@ class HelpScreen(ModalScreen):
                 yield Label("? / F1       — " + t("menu.help").capitalize())
                 yield Label("c            — " + t("btn.compile").capitalize())
                 yield Label("w            — " + t("btn.watch_on") + " / " + t("btn.watch_off"))
-                yield Label("Tab          — " + ("Navegar entre painéis" if t("menu.exit") == "SAIR" else "Navigate between panels"))
-                yield Label("↑ ↓          — " + ("Navegar nas listas" if t("menu.exit") == "SAIR" else "Navigate lists"))
+                yield Label("Tab          — " + ("À navigation panels" if t("menu.exit") == "EXIT" else "Navegar entre painéis"))
+                yield Label("↑ ↓          — " + ("Navigate lists" if t("menu.exit") == "EXIT" else "Navegar nas listas"))
                 yield Label("")
                 yield Label(t("help.flow_title"), id="help-commands-title")
                 yield Label(t("help.flow_1"))
@@ -215,9 +215,19 @@ class Mark2TeXApp(App):
         self._populate_templates()
         self._populate_fonts()
         self._populate_files()
-        # Show onboarding on first run
+        # Show onboarding on first run; the callback refreshes the file panel
+        # if the user chose to initialise the project from within the screen.
         if is_first_run():
-            self.call_after_refresh(self.push_screen, OnboardingScreen())
+            self.call_after_refresh(
+                self.push_screen,
+                OnboardingScreen(),
+                self._on_onboarding_dismissed,
+            )
+
+    def _on_onboarding_dismissed(self, refresh_files: bool) -> None:
+        """Called automatically by Textual when OnboardingScreen.dismiss() fires."""
+        if refresh_files:
+            self._populate_files()
 
     def _populate_templates(self) -> None:
         template_list = self.query_one("#template-list", ListView)
@@ -234,6 +244,7 @@ class Mark2TeXApp(App):
     def _populate_files(self) -> None:
         md_files = sorted(f for f in os.listdir(".") if f.endswith(".md"))
         file_list = self.query_one("#file-list", ListView)
+        file_list.clear()
         for f in md_files:
             file_list.append(OptionItem(f))
 
