@@ -19,32 +19,35 @@ from typing import Any, Sequence
 # Data model
 # ---------------------------------------------------------------------------
 
+
 class Status(str, Enum):
-    OK      = "ok"
+    OK = "ok"
     WARNING = "warning"
-    ERROR   = "error"
+    ERROR = "error"
 
 
 @dataclass
 class CheckResult:
-    key:    str          # probe identifier, e.g. "docker_binary"
+    key: str  # probe identifier, e.g. "docker_binary"
     status: Status
-    detail: str          # human-readable one-liner
-    extra:  str = ""     # optional fix hint shown below the row
-    meta:   dict[str, Any] = field(default_factory=dict)  # structured data for renderer
+    detail: str  # human-readable one-liner
+    extra: str = ""  # optional fix hint shown below the row
+    meta: dict[str, Any] = field(default_factory=dict)  # structured data for renderer
 
 
 # ---------------------------------------------------------------------------
 # Individual probes
 # ---------------------------------------------------------------------------
 
+
 def probe_version() -> CheckResult:
     """Report the installed mark2tex package version."""
     try:
         from importlib.metadata import version
+
         ver = version("mark2tex")
         return CheckResult("version", Status.OK, ver)
-    except Exception:
+    except Exception:  # noqa: BLE001
         return CheckResult("version", Status.WARNING, "unknown")
 
 
@@ -86,15 +89,15 @@ def probe_docker_daemon() -> CheckResult:
 def probe_docker_image() -> CheckResult:
     """Check whether the mark2tex:latest image exists locally."""
     try:
-        import docker  # type: ignore
-        from docker.errors import DockerException, ImageNotFound  # type: ignore
+        import docker  # type: ignore[import-untyped]
+        from docker.errors import DockerException, ImageNotFound  # type: ignore[import-untyped]
 
         client = docker.from_env()
         try:
             img = client.images.get("mark2tex:latest")
             size_bytes = img.attrs.get("Size") or 0
-            size_mb    = size_bytes / (1024 ** 2)
-            size_str   = f"{size_mb:.0f} MB" if size_mb else "unknown size"
+            size_mb = size_bytes / (1024**2)
+            size_str = f"{size_mb:.0f} MB" if size_mb else "unknown size"
             return CheckResult(
                 "docker_image",
                 Status.OK,
@@ -111,12 +114,16 @@ def probe_docker_image() -> CheckResult:
             )
         except DockerException as exc:
             return CheckResult(
-                "docker_image", Status.WARNING, f"daemon error: {exc}",
+                "docker_image",
+                Status.WARNING,
+                f"daemon error: {exc}",
                 meta={"size_mb": 0},
             )
     except ImportError:
         return CheckResult(
-            "docker_image", Status.ERROR, "docker SDK not installed",
+            "docker_image",
+            Status.ERROR,
+            "docker SDK not installed",
             meta={"size_mb": 0},
         )
 
@@ -134,7 +141,7 @@ def probe_pandoc() -> CheckResult:
             )
             version_line = result.stdout.splitlines()[0] if result.stdout else ""
             return CheckResult("pandoc", Status.OK, version_line or path)
-        except Exception:
+        except Exception:  # noqa: BLE001
             return CheckResult("pandoc", Status.OK, path)
     return CheckResult(
         "pandoc",
@@ -161,14 +168,16 @@ def probe_disk_space(path: Path | None = None, threshold_gb: float = 2.0) -> Che
     """Check available disk space; also reports total used on the same partition."""
     check_path = path or Path.home()
     try:
-        usage    = shutil.disk_usage(check_path)
-        free_gb  = usage.free  / (1024 ** 3)
-        total_gb = usage.total / (1024 ** 3)
-        used_gb  = (usage.total - usage.free) / (1024 ** 3)
-        detail   = f"{free_gb:.1f} GB free  ({used_gb:.1f} GB used / {total_gb:.1f} GB total)"
+        usage = shutil.disk_usage(check_path)
+        free_gb = usage.free / (1024**3)
+        total_gb = usage.total / (1024**3)
+        used_gb = (usage.total - usage.free) / (1024**3)
+        detail = f"{free_gb:.1f} GB free  ({used_gb:.1f} GB used / {total_gb:.1f} GB total)"
         if free_gb >= threshold_gb:
             return CheckResult(
-                "disk_space", Status.OK, detail,
+                "disk_space",
+                Status.OK,
+                detail,
                 meta={"free_gb": free_gb, "used_gb": used_gb, "total_gb": total_gb},
             )
         return CheckResult(

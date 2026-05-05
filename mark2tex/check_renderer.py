@@ -14,62 +14,62 @@ from rich.text import Text
 from .checker import CheckResult, Status
 
 # Palette constants aligned with styles.tcss
-_TEAL   = "#03656b"
-_GREEN  = "#4caf87"
+_TEAL = "#03656b"
+_GREEN = "#4caf87"
 _YELLOW = "#e0a24a"
-_RED    = "#e05c5c"
-_MUTED  = "#888888"
-_WHITE  = "#fafafa"
+_RED = "#e05c5c"
+_MUTED = "#888888"
+_WHITE = "#fafafa"
 
 _STATUS_ICON: dict[Status, tuple[str, str]] = {
-    Status.OK:      ("✅", _GREEN),
+    Status.OK: ("✅", _GREEN),
     Status.WARNING: ("⚠️ ", _YELLOW),
-    Status.ERROR:   ("❌", _RED),
+    Status.ERROR: ("❌", _RED),
 }
 
 _CHECK_LABELS: dict[str, dict[str, str]] = {
     "pt_BR": {
-        "version":        "Mark2TeX",
-        "docker_binary":  "Docker (binário)",
-        "docker_daemon":  "Docker (daemon)",
-        "docker_image":   "Imagem mark2tex",
-        "pandoc":         "Pandoc",
+        "version": "Mark2TeX",
+        "docker_binary": "Docker (binário)",
+        "docker_daemon": "Docker (daemon)",
+        "docker_image": "Imagem mark2tex",
+        "pandoc": "Pandoc",
         "python_version": "Python",
-        "disk_space":     "Espaço em disco",
+        "disk_space": "Espaço em disco",
     },
     "en_US": {
-        "version":        "Mark2TeX",
-        "docker_binary":  "Docker binary",
-        "docker_daemon":  "Docker daemon",
-        "docker_image":   "Image mark2tex",
-        "pandoc":         "Pandoc",
+        "version": "Mark2TeX",
+        "docker_binary": "Docker binary",
+        "docker_daemon": "Docker daemon",
+        "docker_image": "Image mark2tex",
+        "pandoc": "Pandoc",
         "python_version": "Python",
-        "disk_space":     "Disk space",
+        "disk_space": "Disk space",
     },
 }
 
 _SUMMARY_LABELS: dict[str, dict[str, str]] = {
     "pt_BR": {
-        "title":      "Mark2TeX — Diagnóstico do Sistema",
-        "ok":         "OK",
-        "warning":    "aviso",
-        "error":      "erro",
-        "plural_w":   "avisos",
-        "plural_e":   "erros",
-        "hint_err":   "Corrija os itens marcados com ❌ antes de compilar.",
-        "hint_warn":  "Verifique os avisos acima antes de compilar.",
-        "all_ok":     "Tudo certo! Mark2TeX está pronto para uso.",
+        "title": "Mark2TeX — Diagnóstico do Sistema",
+        "ok": "OK",
+        "warning": "aviso",
+        "error": "erro",
+        "plural_w": "avisos",
+        "plural_e": "erros",
+        "hint_err": "Corrija os itens marcados com ❌ antes de compilar.",
+        "hint_warn": "Verifique os avisos acima antes de compilar.",
+        "all_ok": "Tudo certo! Mark2TeX está pronto para uso.",
     },
     "en_US": {
-        "title":      "Mark2TeX — System Check",
-        "ok":         "OK",
-        "warning":    "warning",
-        "error":      "error",
-        "plural_w":   "warnings",
-        "plural_e":   "errors",
-        "hint_err":   "Fix items marked with ❌ before compiling.",
-        "hint_warn":  "Review the warnings above before compiling.",
-        "all_ok":     "All good! Mark2TeX is ready to use.",
+        "title": "Mark2TeX — System Check",
+        "ok": "OK",
+        "warning": "warning",
+        "error": "error",
+        "plural_w": "warnings",
+        "plural_e": "errors",
+        "hint_err": "Fix items marked with ❌ before compiling.",
+        "hint_warn": "Review the warnings above before compiling.",
+        "all_ok": "All good! Mark2TeX is ready to use.",
     },
 }
 
@@ -88,8 +88,8 @@ def render_check_results(
     console: Console | None = None,
 ) -> int:
     """Render *results* to *console*. Returns exit code: 0 = OK/warn, 1 = error."""
-    con     = console or Console()
-    labels  = _CHECK_LABELS.get(lang, _CHECK_LABELS["en_US"])
+    con = console or Console()
+    labels = _CHECK_LABELS.get(lang, _CHECK_LABELS["en_US"])
     summary = _SUMMARY_LABELS.get(lang, _SUMMARY_LABELS["en_US"])
     version = _get_version(results)
 
@@ -102,9 +102,9 @@ def render_check_results(
     con.print()
 
     table = Table.grid(padding=(0, 2))
-    table.add_column(width=3)    # icon
-    table.add_column(width=20)   # label
-    table.add_column()           # detail
+    table.add_column(width=3)  # icon
+    table.add_column(width=20)  # label
+    table.add_column()  # detail
 
     # Collect image size to display alongside disk space
     image_mb: float = 0.0
@@ -118,17 +118,17 @@ def render_check_results(
             continue
 
         icon_char, icon_color = _STATUS_ICON[r.status]
-        label  = labels.get(r.key, r.key)
+        label = labels.get(r.key, r.key)
         detail = r.detail
 
         # Augment disk_space row with image footprint when image exists
         if r.key == "disk_space" and image_mb > 0:
-            detail = f"{detail}  ·  imagem: {image_mb:.0f} MB" if lang == "pt_BR" \
-                     else f"{detail}  ·  image: {image_mb:.0f} MB"
+            suffix = f"imagem: {image_mb:.0f} MB" if lang == "pt_BR" else f"image: {image_mb:.0f} MB"
+            detail = f"{detail}  ·  {suffix}"
 
-        icon_text   = Text(icon_char,  style=icon_color)
-        label_text  = Text(label,      style=f"bold {_WHITE}")
-        detail_text = Text(detail,     style=_MUTED)
+        icon_text = Text(icon_char, style=icon_color)
+        label_text = Text(label, style=f"bold {_WHITE}")
+        detail_text = Text(detail, style=_MUTED)
 
         table.add_row(icon_text, label_text, detail_text)
 
@@ -139,17 +139,20 @@ def render_check_results(
     con.print()
     con.print(Rule(style=_TEAL))
 
-    n_ok   = sum(1 for r in results if r.status == Status.OK)
+    n_ok = sum(1 for r in results if r.status == Status.OK)
     n_warn = sum(1 for r in results if r.status == Status.WARNING)
-    n_err  = sum(1 for r in results if r.status == Status.ERROR)
+    n_err = sum(1 for r in results if r.status == Status.ERROR)
 
     # Subtract version probe from OK count (not a real system check)
     version_ok = any(r.key == "version" and r.status == Status.OK for r in results)
     display_ok = n_ok - (1 if version_ok else 0)
 
-    ok_str   = f"[{_GREEN}]{display_ok} {summary['ok']}[/]"
-    warn_str = f"[{_YELLOW}]{n_warn} {summary['warning' if n_warn == 1 else 'plural_w']}[/]"
-    err_str  = f"[{_RED}]{n_err} {summary['error' if n_err == 1 else 'plural_e']}[/]"
+    warn_label = summary["warning"] if n_warn == 1 else summary["plural_w"]
+    err_label = summary["error"] if n_err == 1 else summary["plural_e"]
+
+    ok_str = f"[{_GREEN}]{display_ok} {summary['ok']}[/]"
+    warn_str = f"[{_YELLOW}]{n_warn} {warn_label}[/]"
+    err_str = f"[{_RED}]{n_err} {err_label}[/]"
     con.print(Padding(f"{ok_str}  ·  {warn_str}  ·  {err_str}", (0, 0, 0, 2)))
     con.print()
 
