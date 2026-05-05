@@ -40,16 +40,15 @@ Mark2TeX é uma ferramenta de linha de comando que converte arquivos Markdown em
 
 ```bash
 # 1 — instalar (requer Python 3.10+ e Docker)
-pipx install -e .
+pipx install mark2tex
 
-# 2 — construir a imagem Docker (apenas na primeira vez)
-make build-image
-
-# 3 — abrir a TUI dentro da pasta do seu projeto
+# 2 — executar (a imagem Docker é baixada automaticamente no primeiro uso)
 mark2tex
 ```
 
-> **Importante:** `make build-image` deve ser executado ao menos uma vez antes da primeira compilação. Ele constrói a imagem `mark2tex:latest` no Docker, que contém XeLaTeX, Pandoc e todas as fontes necessárias. Execuções posteriores reutilizam a imagem em cache, a menos que o `Dockerfile` seja alterado.
+> **Nota:** Na primeira execução, o Mark2TeX baixa automaticamente a imagem `mark2tex` do Docker Hub. Isso requer conexão com a internet e pode levar alguns minutos dependendo da sua velocidade. Execuções posteriores reutilizam a imagem em cache.
+>
+> **Sem internet?** Se o Docker Hub estiver inacessível, o Mark2TeX fará o build da imagem localmente a partir do `Dockerfile` incluído no pacote. Você também pode executar `make build-image` manualmente a qualquer momento.
 
 ## A TUI em destaque
 
