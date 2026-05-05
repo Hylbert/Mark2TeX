@@ -7,10 +7,10 @@
 % -------------------------------------------------------------------
 % FONTE  —  controlada por flags booleanas geradas pelo build.sh
 %
-%   font-arial     → Liberation Sans   (métricas idênticas à Arial)
-%   font-helvetica → Nimbus Sans       (Helvetica livre, URW)
-%   font-times     → Liberation Serif  (métricas idênticas à Times New Roman)
-%   font-ubuntu    → Ubuntu            (família clássica, estáticas disponíveis)
+%   font-arial     → Liberation Sans     (métricas idênticas à Arial)
+%   font-helvetica → Nimbus Sans         (Helvetica livre, URW)
+%   font-times     → TeX Gyre Termes     (clone livre do Times New Roman)
+%   font-ubuntu    → Ubuntu              (família clássica, estáticas disponíveis)
 %
 % Padrão (nenhuma flag): Ubuntu
 % -------------------------------------------------------------------
@@ -20,7 +20,7 @@ $if(font-arial)$
 $else$$if(font-helvetica)$
   \setmainfont{Nimbus Sans}
 $else$$if(font-times)$
-  \setmainfont{Liberation Serif}
+  \setmainfont{TeX Gyre Termes}
 $else$
   \setmainfont{Ubuntu}
 $endif$$endif$$endif$
@@ -220,7 +220,6 @@ $endif$$endif$$endif$
 % -------------------------------------------------------------------
 % ÍNDICE — estilo via tocloft (compatível com hyperref)
 % -------------------------------------------------------------------
-% Cores e fontes das entradas
 \renewcommand{\cftsecfont}{\bfseries\color{m2tdark}}
 \renewcommand{\cftsecpagefont}{\bfseries\color{m2tprimary}}
 \renewcommand{\cftsubsecfont}{\color{m2tdark}}
@@ -228,37 +227,29 @@ $endif$$endif$$endif$
 \renewcommand{\cftsubsubsecfont}{\color{m2tdark}}
 \renewcommand{\cftsubsubsecpagefont}{\color{m2tprimary}}
 
-% Fundo colorido nas seções: usamos \cftsetpnumwidth + etoolbox para
-% envolver cada linha de seção num \colorbox sem redefinir \contentsline
 \newlength{\m@tocpad}\setlength{\m@tocpad}{3pt}
 
-% Patch em \l@section para adicionar fundo teal-pálido
 \pretocmd{\l@section}{%
   \setlength{\fboxsep}{\m@tocpad}%
   \renewcommand{\cftsecfont}{\bfseries\color{m2tdark}}%
 }{}{}
 \apptocmd{\l@section}{}{}{}
 
-% Fundo via \cftsetindents + regra acima do item de seção
 \setlength{\cftbeforesecskip}{2pt}
 \setlength{\cftbeforesubsecskip}{1pt}
 \setlength{\cftbeforesubsubsecskip}{0pt}
 
-% Largura do número de página
 \setlength{\cftpnumwidth}{1.8em}
 
-% Líderes
 \renewcommand{\cftsecleader}{\color{m2tborder}\cftdotfill{\cftdotsep}}
 \renewcommand{\cftsubsecleader}{\color{m2tborder}\cftdotfill{\cftdotsep}}
 
-% Prefixo/sufixo de seção: colorbox completo na linha
 \renewcommand{\cftsecpresnum}{%
   \leavevmode
   \setlength{\fboxsep}{3pt}%
   \colorbox{m2tpale}\bgroup\bfseries\color{m2tdark}%
 }
 \renewcommand{\cftsecaftersnum}{\egroup\hspace{0.4em}}
-% Ajuste de indentação para acomodar o colorbox
 \setlength{\cftsecindent}{0pt}
 \setlength{\cftsecnumwidth}{2.4em}
 

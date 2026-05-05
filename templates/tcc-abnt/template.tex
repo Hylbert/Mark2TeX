@@ -14,12 +14,12 @@
 % -------------------------------------------------------------------
 % FONTE  —  controlada por flags booleanas geradas pelo build.sh
 %
-%   font-arial     → Liberation Sans   (métricas idênticas à Arial)
-%   font-helvetica → Nimbus Sans       (Helvetica livre, URW)
-%   font-ubuntu    → Ubuntu            (família clássica, estáticas disponíveis)
-%   font-times     → Liberation Serif  (métricas idênticas à Times New Roman)
+%   font-arial     → Liberation Sans     (métricas idênticas à Arial)
+%   font-helvetica → Nimbus Sans         (Helvetica livre, URW)
+%   font-ubuntu    → Ubuntu              (família clássica, estáticas disponíveis)
+%   font-times     → TeX Gyre Termes     (clone livre do Times New Roman)
 %
-% Padrão (nenhuma flag): Liberation Serif  — ABNT NBR 14724 recomendada
+% Padrão (nenhuma flag): TeX Gyre Termes — ABNT NBR 14724 recomendada
 % -------------------------------------------------------------------
 \usepackage{fontspec}
 $if(font-arial)$
@@ -29,7 +29,7 @@ $else$$if(font-helvetica)$
 $else$$if(font-ubuntu)$
   \setmainfont{Ubuntu}
 $else$
-  \setmainfont{Liberation Serif}
+  \setmainfont{TeX Gyre Termes}
 $endif$$endif$$endif$
 
 % --- MARGENS (ABNT NBR 14724) ---
@@ -79,9 +79,9 @@ $endif$$endif$$endif$
 \newcommand{\OperatorTok}[1]{#1}
 \newcommand{\ExtensionTok}[1]{#1}
 \newcommand{\SpecialCharTok}[1]{\textcolor{violet}{#1}}
-\newcommand{\DocumentationTok}[1]{\textcolor{gray}{\textit{#1}}}
+\newcommand{\DocumentationTok}[1]{\textcolor{gray}{\itshape #1}}
 \newcommand{\AnnotationTok}[1]{\textcolor{red}{\textbf{#1}}}
-\newcommand{\CommentVarTok}[1]{\textcolor{gray}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor{gray}{\itshape #1}}
 \newcommand{\ConstantTok}[1]{\textcolor{red}{#1}}
 \newcommand{\SpecialStringTok}[1]{\textcolor{violet}{#1}}
 \newcommand{\VerbatimStringTok}[1]{\textcolor{green}{#1}}
@@ -90,7 +90,7 @@ $endif$$endif$$endif$
 \newcommand{\FloatTok}[1]{\textcolor{orange}{#1}}
 \newcommand{\PreprocessorTok}[1]{\textcolor{purple}{\textbf{#1}}}
 \newcommand{\RegionMarkerTok}[1]{#1}
-\newcommand{\InformationTok}[1]{\textcolor{gray}{\textit{#1}}}
+\newcommand{\InformationTok}[1]{\textcolor{gray}{\itshape #1}}
 \newcommand{\WarningTok}[1]{\textcolor{red}{\textbf{#1}}}
 \newcommand{\AlertTok}[1]{\textcolor{red}{\textbf{#1}}}
 
