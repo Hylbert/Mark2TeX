@@ -105,6 +105,10 @@ _STRINGS: dict[str, dict[str, str]] = {
             " para o diretório atual."
         ),
         "onboarding.btn_start": "  Entendi, vamos começar!  ",
+        "onboarding.btn_init":  "  📂  Inicializar projeto aqui  ",
+        "onboarding.init_done": "✔ Template '{template}' copiado ({n} arquivo(s)) — abrindo o editor…",
+        "onboarding.init_nothing": "⚠ Nenhum arquivo novo copiado — arquivos já existem no diretório.",
+        "onboarding.init_error": "✗ Falha ao inicializar: {msg}",
         "onboarding.footer": "ESC / Enter — fechar esta tela",
     },
     "en_US": {
@@ -209,6 +213,10 @@ _STRINGS: dict[str, dict[str, str]] = {
             " into the current directory."
         ),
         "onboarding.btn_start": "  Got it, let's start!  ",
+        "onboarding.btn_init":  "  📂  Initialise project here  ",
+        "onboarding.init_done": "✔ Template '{template}' copied ({n} file(s)) — opening the editor…",
+        "onboarding.init_nothing": "⚠ Nothing new to copy — files already exist in this directory.",
+        "onboarding.init_error": "✗ Failed to initialise: {msg}",
         "onboarding.footer": "ESC / Enter — close this screen",
     },
 }
