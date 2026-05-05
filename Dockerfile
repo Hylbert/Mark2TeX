@@ -3,11 +3,8 @@ FROM ubuntu:22.04
 # Avoid interactive prompts during installation
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Accept Microsoft EULA for mscorefonts
-RUN echo "ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true" | debconf-set-selections
-
 # Install essential tools and LaTeX distribution
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     texlive-xetex \
     texlive-latex-extra \
@@ -16,10 +13,10 @@ RUN apt-get update && apt-get install -y \
     texlive-fonts-recommended \
     texlive-bibtex-extra \
     latexmk \
-    ttf-mscorefonts-installer \
     fonts-liberation \
     fonts-urw-base35 \
     fonts-ubuntu \
+    fonts-texgyre \
     make \
     bash \
     && rm -rf /var/lib/apt/lists/*
