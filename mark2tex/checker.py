@@ -12,7 +12,7 @@ import sys
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Sequence
+from typing import Any, Sequence
 
 
 # ---------------------------------------------------------------------------
@@ -27,15 +27,26 @@ class Status(str, Enum):
 
 @dataclass
 class CheckResult:
-    key:    str          # i18n key suffix, e.g. "docker_binary"
+    key:    str          # probe identifier, e.g. "docker_binary"
     status: Status
-    detail: str          # human-readable one-liner (already translated by caller)
-    extra:  str = ""     # optional second line (tip / fix hint)
+    detail: str          # human-readable one-liner
+    extra:  str = ""     # optional fix hint shown below the row
+    meta:   dict[str, Any] = field(default_factory=dict)  # structured data for renderer
 
 
 # ---------------------------------------------------------------------------
 # Individual probes
 # ---------------------------------------------------------------------------
+
+def probe_version() -> CheckResult:
+    """Report the installed mark2tex package version."""
+    try:
+        from importlib.metadata import version
+        ver = version("mark2tex")
+        return CheckResult("version", Status.OK, ver)
+    except Exception:
+        return CheckResult("version", Status.WARNING, "unknown")
+
 
 def probe_docker_binary() -> CheckResult:
     """Check whether the `docker` CLI is on PATH."""
@@ -81,21 +92,33 @@ def probe_docker_image() -> CheckResult:
         client = docker.from_env()
         try:
             img = client.images.get("mark2tex:latest")
-            # Report compressed size in MB
-            size_mb = (img.attrs.get("Size") or 0) / (1024 ** 2)
-            size_str = f"{size_mb:.0f} MB" if size_mb else "unknown size"
-            return CheckResult("docker_image", Status.OK, f"mark2tex:latest ({size_str})")
+            size_bytes = img.attrs.get("Size") or 0
+            size_mb    = size_bytes / (1024 ** 2)
+            size_str   = f"{size_mb:.0f} MB" if size_mb else "unknown size"
+            return CheckResult(
+                "docker_image",
+                Status.OK,
+                f"mark2tex:latest ({size_str})",
+                meta={"size_mb": size_mb},
+            )
         except ImageNotFound:
             return CheckResult(
                 "docker_image",
                 Status.WARNING,
                 "not found locally",
                 extra="Run `mark2tex` once to pull the image automatically.",
+                meta={"size_mb": 0},
             )
         except DockerException as exc:
-            return CheckResult("docker_image", Status.WARNING, f"daemon error: {exc}")
+            return CheckResult(
+                "docker_image", Status.WARNING, f"daemon error: {exc}",
+                meta={"size_mb": 0},
+            )
     except ImportError:
-        return CheckResult("docker_image", Status.ERROR, "docker SDK not installed")
+        return CheckResult(
+            "docker_image", Status.ERROR, "docker SDK not installed",
+            meta={"size_mb": 0},
+        )
 
 
 def probe_pandoc() -> CheckResult:
@@ -135,19 +158,25 @@ def probe_python_version() -> CheckResult:
 
 
 def probe_disk_space(path: Path | None = None, threshold_gb: float = 2.0) -> CheckResult:
-    """Check available disk space at *path* (defaults to home directory)."""
+    """Check available disk space; also reports total used on the same partition."""
     check_path = path or Path.home()
     try:
-        usage = shutil.disk_usage(check_path)
-        free_gb = usage.free / (1024 ** 3)
-        detail  = f"{free_gb:.1f} GB available"
+        usage    = shutil.disk_usage(check_path)
+        free_gb  = usage.free  / (1024 ** 3)
+        total_gb = usage.total / (1024 ** 3)
+        used_gb  = (usage.total - usage.free) / (1024 ** 3)
+        detail   = f"{free_gb:.1f} GB free  ({used_gb:.1f} GB used / {total_gb:.1f} GB total)"
         if free_gb >= threshold_gb:
-            return CheckResult("disk_space", Status.OK, detail)
+            return CheckResult(
+                "disk_space", Status.OK, detail,
+                meta={"free_gb": free_gb, "used_gb": used_gb, "total_gb": total_gb},
+            )
         return CheckResult(
             "disk_space",
             Status.WARNING,
             detail,
             extra=f"Less than {threshold_gb:.0f} GB free — Docker image may fail to pull.",
+            meta={"free_gb": free_gb, "used_gb": used_gb, "total_gb": total_gb},
         )
     except OSError as exc:
         return CheckResult("disk_space", Status.WARNING, f"could not check: {exc}")
@@ -158,6 +187,7 @@ def probe_disk_space(path: Path | None = None, threshold_gb: float = 2.0) -> Che
 # ---------------------------------------------------------------------------
 
 DEFAULT_PROBES = [
+    probe_version,
     probe_docker_binary,
     probe_docker_daemon,
     probe_docker_image,

@@ -42,13 +42,50 @@ Mark2TeX é uma ferramenta de linha de comando que converte arquivos Markdown em
 # 1 — instalar (requer Python 3.10+ e Docker)
 pipx install mark2tex
 
-# 2 — executar (a imagem Docker é baixada automaticamente no primeiro uso)
+# 2 — verificar o ambiente (recomendado na primeira instalação)
+mark2tex check
+
+# 3 — abrir a TUI (a imagem Docker é baixada automaticamente)
 mark2tex
 ```
 
 > **Nota:** Na primeira execução, o Mark2TeX baixa automaticamente a imagem `mark2tex` do Docker Hub. Isso requer conexão com a internet e pode levar alguns minutos dependendo da sua velocidade. Execuções posteriores reutilizam a imagem em cache.
 >
 > **Sem internet?** Se o Docker Hub estiver inacessível, o Mark2TeX fará o build da imagem localmente a partir do `Dockerfile` incluído no pacote. Você também pode executar `make build-image` manualmente a qualquer momento.
+
+## Comandos CLI
+
+| Comando | Descrição |
+|---|---|
+| `mark2tex` | Abre a TUI interativa (padrão) |
+| `mark2tex check` | Executa diagnóstico completo do sistema |
+| `mark2tex init [--template NOME]` | Copia um template + exemplo para o diretório atual |
+| `mark2tex uninstall` | Remove a imagem Docker e assets do Mark2TeX |
+| `mark2tex doctor` | Alias para `check` *(depreciado — use `check`)* |
+
+### `mark2tex check` — Relatório de Saúde do Sistema
+
+Executa seis verificações e exibe um relatório visual:
+
+```
+──────────── Mark2TeX — Diagnóstico do Sistema  v0.2.2 ────────────
+
+✅   Mark2TeX          0.2.2
+✅   Docker (binário)  /usr/bin/docker
+✅   Docker (daemon)   active
+✅   Imagem mark2tex   mark2tex:latest (1 143 MB)
+⚠️   Pandoc            not found (optional)
+                          Pandoc está na imagem Docker — instalação no host não é necessária.
+✅   Python            3.12.3
+✅   Espaço em disco   145.0 GB free (320.1 GB used / 465.1 GB total)  ·  imagem: 1 143 MB
+
+───────────────────────────────────────────────────────────────────
+  5 OK  ·  1 aviso  ·  0 erros
+
+  Verifique os avisos acima antes de compilar.
+```
+
+Código de saída `0` quando não há erros; código `1` quando pelo menos uma verificação crítica falha — compatível com scripts e pipelines CI.
 
 ## A TUI em destaque
 
@@ -57,8 +94,8 @@ mark2tex
 </p>
 
 1. Selecione um arquivo `.md` no painel esquerdo.
-2. Escolha um template (`tcc`, `artigo-ieee`, `doc-tecnica`, `projeto`, `apresentacao`).
-3. Opcionalmente escolha uma fonte (`--font arial | helvetica | times | ubuntu`).
+2. Escolha um template (`tcc-abnt`, `artigo-ieee`, `doc-tecnica`, `projeto`).
+3. Opcionalmente escolha uma fonte (`Liberation Serif`, `Liberation Sans`, `Nimbus Sans`, `Ubuntu`).
 4. Pressione **`c`** para compilar ou **`w`** para ativar o Watch Mode.
 
 ### Atalhos de teclado
@@ -76,25 +113,28 @@ mark2tex
 - **TUI interativa** — navegador de arquivos, seletor de template, console de log em tempo real e barra de progresso criados com [Textual](https://github.com/Textualize/textual).
 - **Watch mode** — recompilação automática a cada salvamento do arquivo.
 - **Logs legíveis por humanos** — a saída bruta do XeLaTeX é analisada e traduzida para mensagens em linguagem simples.
-- **Seleção de fonte** — escolha entre Liberation Sans (compatível com Arial), Nimbus Sans (Helvetica), Liberation Serif (compatível com Times) e Ubuntu por documento.
-- **Suporte a bibliografia** — BibTeX via Pandoc + XeLaTeX; basta adicionar um `referencias.bib` ao lado do seu `.md`.
+- **Seleção de fonte** — escolha entre Liberation Sans (Arial), Nimbus Sans (Helvetica), Liberation Serif (Times) e Ubuntu por documento.
+- **Suporte a bibliografia** — BibTeX via Pandoc + XeLaTeX; basta adicionar um `referencias.bib` ao lado do `.md`.
+- **Diagnóstico do sistema** — `mark2tex check` verifica o ambiente antes de compilar.
 - **Fluxo orientado à ABNT** — templates construídos segundo as normas acadêmicas brasileiras.
 
 ## Templates Disponíveis
 
 | Template | Finalidade |
 |---|---|
-| `tcc` | Trabalho de Conclusão de Curso (ABNT) |
+| `tcc-abnt` | Trabalho de Conclusão de Curso (ABNT) |
 | `artigo-ieee` | Artigo para conferência IEEE |
+| `artigo-abnt` | Artigo ABNT |
 | `doc-tecnica` | Documentação técnica |
 | `projeto` | Proposta de projeto |
-| `apresentacao` | Apresentação baseada em Beamer |
 
 ## Roadmap
 
-- [ ] Templates ABNT adicionais (artigo, dissertação)
-- [ ] Prévia visual de fonte e template
-- [ ] Comando `mark2tex new <template>` para criar scaffolds
+- [x] Diagnóstico do sistema (`mark2tex check`)
+- [ ] Onboarding no primeiro uso com Rich Progress para pull da imagem Docker
+- [ ] `mark2tex init` — criar scaffold de template no diretório atual
+- [ ] Injeção automática de YAML frontmatter em arquivos sem cabeçalho (com backup e restore)
+- [ ] Templates ABNT adicionais (dissertação, apresentação)
 - [ ] Instalador nativo para Windows
 - [ ] Integração com GitHub Actions para geração de PDF em CI
 
