@@ -42,13 +42,50 @@ Mark2TeX is a command-line tool that converts Markdown files into publication-re
 # 1 — install (requires Python 3.10+ and Docker)
 pipx install mark2tex
 
-# 2 — run (the Docker image is pulled automatically on first use)
+# 2 — check your environment (recommended on first install)
+mark2tex check
+
+# 3 — open the TUI dashboard (Docker image is pulled automatically)
 mark2tex
 ```
 
 > **Note:** On the first run, Mark2TeX will automatically pull the `mark2tex` image from Docker Hub. This requires an active internet connection and may take a few minutes depending on your connection speed. Subsequent runs reuse the cached image.
 >
 > **No internet?** If Docker Hub is unreachable, Mark2TeX will fall back to building the image locally from the bundled `Dockerfile`. You can also run `make build-image` manually at any time.
+
+## CLI Commands
+
+| Command | Description |
+|---|---|
+| `mark2tex` | Open the interactive TUI dashboard (default) |
+| `mark2tex check` | Run a full system health check |
+| `mark2tex init [--template NAME]` | Copy a template + example into the current directory |
+| `mark2tex uninstall` | Remove the Mark2TeX Docker image and assets |
+| `mark2tex doctor` | Alias for `check` *(deprecated — use `check`)* |
+
+### `mark2tex check` — System Health Report
+
+Runs six probes and prints a visual report:
+
+```
+──────────────── Mark2TeX — System Check  v0.2.2 ────────────────
+
+✅   Mark2TeX          0.2.2
+✅   Docker binary     /usr/bin/docker
+✅   Docker daemon     active
+✅   Image mark2tex    mark2tex:latest (1 143 MB)
+⚠️   Pandoc            not found (optional)
+                          Pandoc is bundled in the Docker image — host installation not required.
+✅   Python            3.12.3
+✅   Disk space        145.0 GB free (320.1 GB used / 465.1 GB total)  ·  image: 1 143 MB
+
+─────────────────────────────────────────────────────────────────
+  5 OK  ·  1 warning  ·  0 errors
+
+  Review the warnings above before compiling.
+```
+
+Exit code `0` when no errors are found; exit code `1` when at least one error probe fails — making it scriptable in CI pipelines.
 
 ## TUI at a Glance
 
@@ -57,8 +94,8 @@ mark2tex
 </p>
 
 1. Select a `.md` file from the left panel.
-2. Choose a template (`tcc`, `artigo-ieee`, `doc-tecnica`, `projeto`, `apresentacao`).
-3. Optionally pick a font (`--font arial | helvetica | times | ubuntu`).
+2. Choose a template (`tcc-abnt`, `artigo-ieee`, `doc-tecnica`, `projeto`).
+3. Optionally pick a font (`Liberation Serif`, `Liberation Sans`, `Nimbus Sans`, `Ubuntu`).
 4. Press **`c`** to compile or **`w`** to toggle Watch Mode.
 
 ### Keyboard shortcuts
@@ -78,23 +115,26 @@ mark2tex
 - **Human-readable logs** — raw XeLaTeX output is parsed and translated into plain-language messages.
 - **Font selection** — choose between Liberation Sans (Arial-compatible), Nimbus Sans (Helvetica), Liberation Serif (Times-compatible), and Ubuntu per document.
 - **Bibliography support** — BibTeX via Pandoc + XeLaTeX; just drop a `referencias.bib` alongside your `.md`.
+- **System health check** — `mark2tex check` diagnoses your environment before you compile.
 - **ABNT-oriented workflow** — templates built around Brazilian academic standards.
 
 ## Available Templates
 
 | Template | Purpose |
 |---|---|
-| `tcc` | Undergraduate thesis (ABNT) |
+| `tcc-abnt` | Undergraduate thesis (ABNT) |
 | `artigo-ieee` | IEEE conference paper |
+| `artigo-abnt` | ABNT journal article |
 | `doc-tecnica` | Technical documentation |
 | `projeto` | Project proposal |
-| `apresentacao` | Beamer-based presentation |
 
 ## Roadmap
 
-- [ ] Additional ABNT templates (article, dissertation)
-- [ ] GUI font and template preview
-- [ ] `mark2tex new <template>` scaffold command
+- [x] System health check (`mark2tex check`)
+- [ ] First-run onboarding with Rich progress for Docker image pull
+- [ ] `mark2tex init` — scaffold a template into the current directory
+- [ ] Auto-inject YAML frontmatter for files without it (with backup & restore)
+- [ ] Additional ABNT templates (dissertation, presentation)
 - [ ] Windows-native installer
 - [ ] GitHub Actions integration for CI PDF generation
 

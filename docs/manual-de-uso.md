@@ -1,356 +1,575 @@
 # Manual de Uso — Mark2TeX
 
-Este manual cobre **como escrever** documentos para o Mark2TeX: sintaxe Markdown suportada, inserção de imagens, tabelas, alertas, código, fórmulas e referências bibliográficas. Para instalação e execução, consulte o [README](../README.pt-BR.md).
-
----
+> **Sobre este documento**
+> O README cobre instalação, quickstart e visão geral.
+> Este manual cobre uso avançado: configuração detalhada de cada template,
+> Watch Mode, resolução de erros do XeLaTeX e integração em pipelines de CI.
 
 ## Índice
 
-1. [Estrutura básica de um documento](#1-estrutura-básica-de-um-documento)
-2. [Metadados YAML (frontmatter)](#2-metadados-yaml-frontmatter)
-3. [Texto e parágrafos](#3-texto-e-parágrafos)
-4. [Títulos e seções](#4-títulos-e-seções)
-5. [Listas](#5-listas)
-6. [Imagens](#6-imagens)
-7. [Tabelas](#7-tabelas)
-8. [Código](#8-código)
-9. [Fórmulas matemáticas](#9-fórmulas-matemáticas)
-10. [Caixas de destaque (alertas)](#10-caixas-de-destaque-alertas)
-11. [Links e referências cruzadas](#11-links-e-referências-cruzadas)
-12. [Bibliografia](#12-bibliografia)
-13. [Fontes disponíveis](#13-fontes-disponíveis)
-14. [Templates disponíveis](#14-templates-disponíveis)
+1. [Como o Mark2TeX funciona por dentro](#1-como-o-mark2tex-funciona-por-dentro)
+2. [O arquivo Markdown — referência completa do YAML](#2-o-arquivo-markdown--referência-completa-do-yaml)
+3. [Templates — guia por template](#3-templates--guia-por-template)
+4. [Fontes — quando usar cada uma](#4-fontes--quando-usar-cada-uma)
+5. [BibTeX — bibliografia passo a passo](#5-bibtex--bibliografia-passo-a-passo)
+6. [Watch Mode — como funciona](#6-watch-mode--como-funciona)
+7. [Docker internals — o que está na imagem](#7-docker-internals--o-que-está-na-imagem)
+8. [Diagnóstico do sistema (`mark2tex check`)](#8-diagnóstico-do-sistema-mark2tex-check)
+9. [Erros comuns do XeLaTeX — o que significam](#9-erros-comuns-do-xelatex--o-que-significam)
+10. [Integração com CI/CD](#10-integração-com-cicd)
 
 ---
 
-## 1. Estrutura básica de um documento
+## 1. Como o Mark2TeX funciona por dentro
 
-Um arquivo `.md` para o Mark2TeX é composto por um bloco de metadados YAML no topo (opcional, mas recomendado) seguido do conteúdo em Markdown:
+Entender o pipeline evita surpresas quando algo dá errado.
 
-```markdown
----
-title: Meu Documento
-author: Fulano de Tal
-date: 2026-05-04
-template: doc-tecnica
----
-
-## Introdução
-
-Texto do documento aqui.
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Host (sua máquina)                                             │
+│                                                                 │
+│  arquivo.md ──► mark2tex CLI ──► docker run mark2tex:latest     │
+│                     │                        │                  │
+│                     │            ┌───────────▼──────────────┐   │
+│                     │            │  Container               │   │
+│                     │            │  pandoc → arquivo.tex    │   │
+│                     │            │  xelatex (2×) → .pdf     │   │
+│                     │            │  biber (se .bib) → .bbl  │   │
+│                     └────────────►  saída copiada de volta   │   │
+│                                  └──────────────────────────┘   │
+│  arquivo.pdf ◄── mesmo diretório do .md                         │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
+**Por que o XeLaTeX roda duas vezes?**
+A primeira passagem gera referências internas (numeração de seções, figuras,
+tabelas). A segunda resolve essas referências no documento final. Com
+bibliografia, uma passagem do Biber é intercalada entre as duas.
+
+**Onde o PDF é gerado?**
+Sempre no mesmo diretório do arquivo `.md` de origem. Arquivos intermediários
+(`.aux`, `.log`, `.toc`) são descartados dentro do container; somente o `.pdf`
+final é copiado de volta para o host.
+
 ---
 
-## 2. Metadados YAML (frontmatter)
+## 2. O arquivo Markdown — referência completa do YAML
 
-O bloco entre `---` no início do arquivo configura o documento. Os campos variam por template, mas os mais comuns são:
+O cabeçalho YAML controla metadados, capa, sumário, norma e compilação.
+Ele deve estar entre `---` no início do arquivo, antes de qualquer conteúdo.
+
+### 2.1 Campos universais (todos os templates)
+
+| Campo | Tipo | Padrão | Descrição |
+|---|---|---|---|
+| `title` | string | — | Título principal; aparece na capa e nos metadados do PDF |
+| `author` | string | — | Nome completo do autor |
+| `date` | string | data atual | Data de entrega (`YYYY-MM-DD` ou texto livre) |
+| `lang` | string | `pt-BR` | Idioma; afeta hifenização e rótulos automáticos |
+| `bibliography` | string | — | Caminho relativo para o `.bib` (ex: `referencias.bib`) |
+| `font` | string | `liberation-serif` | Fonte tipográfica (ver [seção 4](#4-fontes--quando-usar-cada-uma)) |
+
+> **Dica:** Envolva valores com caracteres especiais LaTeX em aspas simples:
+> ```yaml
+> title: 'Análise de $\alpha$-cetoacidos em amostras clínicas'
+> ```
+
+### 2.2 Campos específicos — `tcc-abnt`
+
+| Campo | Obrigatório | Descrição |
+|---|---|---|
+| `institution` | Sim | Nome da instituição (capa) |
+| `campus` | Não | Campus ou unidade |
+| `department` | Não | Departamento ou curso |
+| `course` | Não | Nome do curso |
+| `advisor` | Sim | Nome do orientador |
+| `coadvisor` | Não | Nome do coorientador |
+| `city` | Sim | Cidade (capa e folha de rosto) |
+| `year` | Sim | Ano de defesa (entre aspas: `"2026"`) |
+| `abstract-pt` | Sim | Resumo em português (texto corrido, sem quebras de linha) |
+| `abstract-en` | Sim | Abstract em inglês |
+| `acknowledgments` | Não | Agradecimentos (texto corrido) |
+| `siglas` | Não | Lista de abreviaturas em LaTeX (ver exemplo abaixo) |
+| `simbolos` | Não | Lista de símbolos matemáticos em LaTeX |
+
+**Exemplo completo `tcc-abnt`:**
 
 ```yaml
 ---
-title: Título do Documento
-subtitle: Subtítulo opcional
-author:
-  - name: Fulano de Tal
-    affiliation: Universidade X
-date: 2026-05-04
-version: "1.0"
-logo: assets/logo.png        # caminho relativo à pasta do .md
+title: "Detecção de Anomalias em Sensores Industriais com Isolation Forest"
+author: "Hylbert Rodrigues"
+date: "2026-05-05"
+institution: Instituto de Desenvolvimento Tecnológico
+campus: Manaus
+department: Engenharia de Software
+course: Sistemas de Informação
+advisor: Prof. Dr. Fulano de Tal
+coadvisor: Prof. Me. Ciclano da Silva
+city: Manaus
+year: "2026"
+lang: pt-BR
+abstract-pt: 'Este trabalho propõe um sistema de detecção de anomalias...'
+abstract-en: 'This work proposes an anomaly detection system...'
+acknowledgments: 'Agradeço ao INDT pelo suporte durante a pesquisa.'
+siglas: \begin{description}
+  \item[INDT] Instituto de Desenvolvimento Tecnológico
+  \item[PDF]  Portable Document Format
+  \end{description}
 bibliography: referencias.bib
+font: liberation-serif
 ---
 ```
 
-> **Dica:** Para o template `tcc`, campos como `orientador`, `curso` e `instituicao` também são suportados. Consulte os arquivos `examples/` para ver exemplos completos por template.
+### 2.3 Campos específicos — `artigo-ieee`
 
----
-
-## 3. Texto e parágrafos
-
-Em Markdown, **uma quebra de linha simples não cria um novo parágrafo**. Para iniciar um novo parágrafo, deixe uma linha em branco entre os blocos de texto:
-
-```markdown
-Este é o primeiro parágrafo. Ele pode continuar
-nessa linha sem problema — ainda é o mesmo parágrafo.
-
-Este é o segundo parágrafo, separado por uma linha em branco.
-```
-
-Para forçar uma quebra de linha dentro do mesmo parágrafo (sem criar um novo), termine a linha com **dois espaços** ou use uma barra invertida `\`:
-
-```markdown
-Primeira linha com dois espaços no final  
-Segunda linha, mesmo parágrafo.
-```
-
-Formatação inline:
-
-| Sintaxe | Resultado |
-|---|---|
-| `**negrito**` | **negrito** |
-| `*itálico*` | *itálico* |
-| `` `código inline` `` | `código inline` |
-| `~~riscado~~` | ~~riscado~~ |
-
----
-
-## 4. Títulos e seções
-
-Use `#` para definir a hierarquia de seções. O número de `#` indica o nível:
-
-```markdown
-# Título principal (evite usar — o título já vem do frontmatter)
-## Seção
-### Subseção
-#### Subsubseção
-```
-
-> **Atenção:** Não pule níveis (ex.: de `##` direto para `####`). Isso pode causar inconsistências no índice gerado automaticamente.
-
----
-
-## 5. Listas
-
-**Lista não ordenada:**
-
-```markdown
-- Primeiro item
-- Segundo item
-- Terceiro item
-```
-
-**Lista ordenada:**
-
-```markdown
-1. Primeiro passo
-2. Segundo passo
-3. Terceiro passo
-```
-
-**Lista aninhada** (use 2 ou 4 espaços de indentação):
-
-```markdown
-- Item principal
-  - Subitem A
-  - Subitem B
-- Outro item principal
-```
-
----
-
-## 6. Imagens
-
-A sintaxe padrão do Markdown para imagens funciona em todos os templates:
-
-```markdown
-![Texto alternativo](caminho/para/imagem.png)
-```
-
-### Redimensionando imagens
-
-Para controlar o tamanho, use atributos Pandoc:
-
-```markdown
-![Legenda da imagem](imagem.png){ width=60% }
-```
-
-```markdown
-![Legenda da imagem](imagem.png){ width=8cm }
-```
-
-### Centralizando imagens
-
-O LaTeX centraliza imagens automaticamente quando a legenda está presente. Se quiser forçar centralização sem legenda:
-
-```markdown
-![](imagem.png){ width=50% }
-```
-
-### Referenciando imagens no texto
-
-Para referenciar uma figura pelo número (ex.: "veja a Figura 1"), adicione um label:
-
-```markdown
-![Diagrama de arquitetura](arquitetura.png){ #fig:arq width=80% }
-
-Como pode ser visto na @fig:arq, a arquitetura é composta por...
-```
-
-### Dicas práticas
-
-- Prefira **caminhos relativos** ao arquivo `.md` (ex.: `imagens/logo.png`).
-- Formatos suportados: PNG, JPEG, PDF, SVG (via conversão interna).
-- Para imagens lado a lado, use uma tabela sem bordas com imagens nas células.
-
----
-
-## 7. Tabelas
-
-Sintaxe de tabela Markdown com cabeçalho:
-
-```markdown
-| Coluna A | Coluna B | Coluna C |
-|----------|----------|----------|
-| Dado 1   | Dado 2   | Dado 3   |
-| Dado 4   | Dado 5   | Dado 6   |
-```
-
-**Alinhamento de colunas:**
-
-```markdown
-| Esquerda | Centro  | Direita |
-|:---------|:-------:|--------:|
-| texto    | texto   |   texto |
-```
-
-> **Dica:** Para tabelas longas que ocupam mais de uma página, o Mark2TeX usa `longtable` automaticamente via Pandoc.
-
----
-
-## 8. Código
-
-**Inline:** envolva com crases simples: `` `variavel` ``.
-
-**Bloco de código com realce de sintaxe:**
-
-````markdown
-```python
-def hello():
-    print("Olá, Mundo!")
-```
-````
-
-Linguagens suportadas para realce: `python`, `bash`, `javascript`, `typescript`, `java`, `c`, `cpp`, `go`, `rust`, `sql`, `json`, `yaml`, `latex`, entre outras.
-
----
-
-## 9. Fórmulas matemáticas
-
-**Inline** (dentro do parágrafo):
-
-```markdown
-A equação $E = mc^2$ foi proposta por Einstein.
-```
-
-**Bloco** (centralizado, em linha própria):
-
-```markdown
-$$
-\int_{a}^{b} f(x)\,dx = F(b) - F(a)
-$$
-```
-
-O motor XeLaTeX suporta toda a sintaxe LaTeX Math, incluindo os pacotes `amsmath` e `amssymb`.
-
----
-
-## 10. Caixas de destaque (alertas)
-
-Os templates Mark2TeX suportam caixas coloridas especiais via sintaxe de div fenced do Pandoc:
-
-```markdown
-::: infobox
-Informação importante aqui.
-:::
-
-::: warningbox
-Atenção: este passo é irreversível.
-:::
-
-::: dangerbox
-Erro crítico: verifique a configuração antes de prosseguir.
-:::
-
-::: successbox
-Operação concluída com sucesso!
-:::
-
-::: rulebox
-Regra ou definição formal do documento.
-:::
-```
-
-| Caixa | Cor | Uso recomendado |
+| Campo | Obrigatório | Descrição |
 |---|---|---|
-| `infobox` | Teal | Notas, dicas, informações adicionais |
-| `warningbox` | Âmbar | Avisos, cuidados, pontos de atenção |
-| `dangerbox` | Vermelho | Erros, riscos, ações destrutivas |
-| `successbox` | Verde | Confirmações, resultados esperados |
-| `rulebox` | Cinza | Definições, regras, normas |
+| `abstract` | Sim | Abstract do artigo (campo único, padrão IEEE) |
+| `keywords` | Não | Palavras-chave separadas por vírgula |
+
+### 2.4 Campos específicos — `artigo-abnt`
+
+Mesmos campos do `tcc-abnt`, com `abstract-pt` e `abstract-en`, mais:
+
+| Campo | Obrigatório | Descrição |
+|---|---|---|
+| `journal` | Não | Nome do periódico de destino |
+| `keywords-pt` | Não | Palavras-chave em português |
+| `keywords-en` | Não | Keywords em inglês |
+
+### 2.5 Campos específicos — `doc-tecnica` e `projeto`
+
+| Campo | Obrigatório | Descrição |
+|---|---|---|
+| `version` | Não | Versão do documento (ex: `"1.0.0"`) |
+| `status` | Não | Status (`Rascunho`, `Aprovado`, `Em revisão`) |
+| `team` | Não | Equipe ou setor responsável |
 
 ---
 
-## 11. Links e referências cruzadas
+## 3. Templates — guia por template
 
-**Link externo:**
+### `tcc-abnt`
 
-```markdown
-[Texto do link](https://exemplo.com)
+Produz um TCC completo segundo a ABNT NBR 14724. Inclui automaticamente:
+capa, folha de rosto, folha de aprovação (em branco), resumo, abstract,
+lista de siglas/símbolos, sumário, corpo do texto e referências bibliográficas.
+
+**Estrutura de diretório recomendada:**
+
+```
+projeto/
+├── meu-tcc.md
+├── referencias.bib
+└── figuras/
+    └── diagrama.png
 ```
 
-**Link para seção do mesmo documento:**
+**Inserindo figuras:**
 
 ```markdown
-[Veja a seção de Imagens](#6-imagens)
+![Legenda da figura](figuras/diagrama.png){width=80%}
 ```
 
-**Referência bibliográfica no texto:**
+O caminho é relativo ao `.md`. A largura aceita `%` (relativo à coluna de texto)
+ou `cm`.
+
+---
+
+### `artigo-ieee`
+
+Produz layout de duas colunas padrão IEEE. Não inclui sumário.
+Referências seguem o estilo numérico IEEE.
+
+**Citação no texto:**
 
 ```markdown
-Como descrito em @silva2023, os resultados indicam...
+Conforme demonstrado em \cite{liu2020isolation}, o algoritmo...
+```
+
+**Figuras em largura total (duas colunas):**
+
+Figuras largas precisam do ambiente `figure*` do LaTeX.
+Use um bloco raw para isso:
+
+```markdown
+```{=latex}
+\begin{figure*}[ht]
+  \centering
+  \includegraphics[width=\textwidth]{figuras/resultado.png}
+  \caption{Resultado geral do experimento.}
+\end{figure*}
+```
 ```
 
 ---
 
-## 12. Bibliografia
+### `artigo-abnt`
 
-Crie um arquivo `referencias.bib` na mesma pasta do seu `.md`:
+Layout de coluna única. Citações seguem ABNT NBR 6023 (autor-data).
+
+**Citação no texto:**
+
+```markdown
+# Citação simples
+A detecção de anomalias \cite{liu2020isolation} tem sido amplamente...
+
+# Com número de página
+Conforme (LIU, 2020, p. 42), o método...
+```
+
+---
+
+### `doc-tecnica`
+
+Indicado para READMEs internos, especificações e guias de implantação.
+Não exige campos de capa completos — basta `title`, `author` e `date`.
+Inclui cabeçalho com número de versão e status do documento.
+
+---
+
+### `projeto`
+
+Indicado para propostas de projeto, planos de trabalho e cronogramas.
+Suporta tabelas de cronograma em Markdown nativamente.
+
+---
+
+## 4. Fontes — quando usar cada uma
+
+O Mark2TeX usa fontes metricamente compatíveis com as exigidas por normas
+acadêmicas, distribuídas livremente sob licença open-source.
+
+| Valor `font` | Família real | Compatível com | Indicada para |
+|---|---|---|---|
+| `liberation-serif` | Liberation Serif | Times New Roman | TCC, artigos ABNT (padrão) |
+| `liberation-sans` | Liberation Sans | Arial | Apresentações, doc-tecnica |
+| `nimbus-sans` | Nimbus Sans | Helvetica | Artigos IEEE, publicações internacionais |
+| `ubuntu` | Ubuntu | — | Documentação técnica, projetos digitais |
+
+**Como especificar no YAML:**
+
+```yaml
+font: nimbus-sans
+```
+
+**Como sobrescrever via CLI (ignora o valor no YAML):**
+
+```bash
+mark2tex compile meu-artigo.md --template artigo-ieee --font nimbus-sans
+```
+
+> **Nota ABNT:** A NBR 14724 exige "Arial ou Times New Roman, tamanho 12".
+> Use `liberation-sans` (Arial) ou `liberation-serif` (Times) para conformidade.
+
+---
+
+## 5. BibTeX — bibliografia passo a passo
+
+### 5.1 Criando o arquivo `.bib`
+
+Crie `referencias.bib` no mesmo diretório do seu `.md`:
 
 ```bibtex
-@article{silva2023,
-  author  = {Silva, João},
-  title   = {Título do Artigo},
-  journal = {Nome do Periódico},
-  year    = {2023},
-  volume  = {10},
-  pages   = {1--15},
+@article{liu2020isolation,
+  author  = {Liu, Fei Tony and Ting, Kai Ming and Zhou, Zhi-Hua},
+  title   = {Isolation-Based Anomaly Detection},
+  journal = {ACM Transactions on Knowledge Discovery from Data},
+  year    = {2012},
+  volume  = {6},
+  number  = {1},
+  pages   = {1--39},
+  doi     = {10.1145/2133360.2133363},
+}
+
+@book{abnt2011nbr,
+  author    = {{Associação Brasileira de Normas Técnicas}},
+  title     = {{NBR 14724}: Informação e documentação},
+  year      = {2011},
+  address   = {Rio de Janeiro},
+  publisher = {ABNT},
 }
 ```
 
-No frontmatter YAML do seu `.md`, aponte para o arquivo:
+**Tipos de entrada mais usados:** `@article`, `@book`, `@inproceedings`,
+`@techreport`, `@misc` (para sites, com campos `url` e `urldate`).
+
+### 5.2 Declarando no YAML
 
 ```yaml
----
 bibliography: referencias.bib
----
 ```
 
-Cite no texto com `@chave` (narrativa) ou `[@chave]` (entre parênteses). O Mark2TeX processa as referências automaticamente via BibTeX quando o arquivo `.bib` está presente.
+O caminho é relativo ao arquivo `.md`. Se o `.bib` estiver em outro diretório:
+
+```yaml
+bibliography: ../shared/referencias.bib
+```
+
+### 5.3 Citando no texto
+
+```markdown
+# Citação simples
+O algoritmo proposto por \cite{liu2020isolation} apresenta...
+
+# Com número de página (ABNT)
+Segundo \citeonline{liu2020isolation} (p. 15), a isolação...
+
+# Múltiplas referências
+Vários estudos \cite{liu2020isolation,abnt2011nbr} demonstram...
+```
+
+### 5.4 Onde a lista de referências aparece
+
+O Mark2TeX insere as referências automaticamente ao final do documento,
+após o último capítulo. Não é necessário adicionar nenhuma seção manual.
+
+### 5.5 Fontes de entrada `.bib` confiáveis
+
+- **Google Scholar** → ❝ → BibTeX
+- **IEEE Xplore** → botão "Cite This" → BibTeX
+- **ACM Digital Library** → Export Citation → BibTeX
 
 ---
 
-## 13. Fontes disponíveis
+## 6. Watch Mode — como funciona
 
-Passe a flag `--font` ao compilar pela TUI ou pela linha de comando:
+Ao pressionar `w` na TUI (ou passar `--watch` na CLI), o Mark2TeX inicia
+um observador de arquivo baseado na biblioteca
+[watchdog](https://github.com/gorakhargosh/watchdog).
 
-| Flag | Fonte renderizada | Equivalente a |
-|---|---|---|
-| `--font arial` | Liberation Sans | Arial |
-| `--font helvetica` | Nimbus Sans | Helvetica |
-| `--font times` | Liberation Serif | Times New Roman |
-| `--font ubuntu` | Ubuntu | — (padrão) |
+**O que é monitorado:**
 
-Se nenhuma flag for passada, a fonte padrão é **Ubuntu**.
+- O arquivo `.md` selecionado
+- O arquivo `.bib` referenciado no YAML (se existir)
+- Arquivos de imagem no mesmo diretório referenciados no `.md`
+
+**Debounce de 800 ms:** múltiplos salvamentos rápidos geram apenas
+uma compilação. O valor é ajustável via variável de ambiente:
+
+```bash
+MARK2TEX_WATCH_DEBOUNCE=2000 mark2tex  # debounce de 2 s
+```
+
+**Editores com salvamento automático (VS Code `formatOnSave`, JetBrains
+`autosave`):** se o intervalo entre salvamentos for maior que 800 ms,
+cada salvamento dispara uma compilação. Desative o autosave agressivo
+ou aumente o debounce conforme acima.
+
+**Como parar o Watch Mode:**
+
+- Pressione `w` novamente na TUI
+- Ou `Ctrl+C` se estiver rodando via CLI
 
 ---
 
-## 14. Templates disponíveis
+## 7. Docker internals — o que está na imagem
 
-| Template | Finalidade | Norma |
+A imagem `mark2tex:latest` (~1,1 GB) contém:
+
+| Componente | Versão | Função |
 |---|---|---|
-| `tcc` | Trabalho de Conclusão de Curso | ABNT |
-| `artigo-ieee` | Artigo para conferência | IEEE |
-| `doc-tecnica` | Documentação técnica interna | — |
-| `projeto` | Proposta de projeto | — |
-| `apresentacao` | Slides (Beamer) | — |
+| Ubuntu 22.04 LTS | — | Base do container |
+| TeX Live (selecionado) | 2023 | Motor XeLaTeX + pacotes ABNT/IEEE |
+| Pandoc | 3.x | Conversão Markdown → LaTeX |
+| Biber | 2.x | Processamento de bibliography BibTeX |
+| Fontes Liberation | — | Equivalentes Arial/Times open-source |
+| Fontes Nimbus Sans | — | Equivalente Helvetica open-source |
+| Fonte Ubuntu | — | Fonte Ubuntu oficial |
 
-Para exemplos completos de cada template, consulte a pasta [`examples/`](../examples/).
+### 7.1 Build manual da imagem
+
+Necessário apenas se você modificou o `Dockerfile` ou está offline:
+
+```bash
+# Na raiz do repositório clonado
+make build-image
+
+# Ou diretamente
+docker build -t mark2tex:latest .
+```
+
+### 7.2 Inspecionar o que está instalado
+
+```bash
+# Abrir shell interativo dentro do container
+docker run --rm -it mark2tex:latest bash
+
+# Dentro do container:
+pandoc --version
+xelatex --version
+biber --version
+fc-list | grep -i liberation   # listar fontes Liberation disponíveis
+```
+
+### 7.3 Limpar a imagem
+
+```bash
+# Via CLI Mark2TeX
+mark2tex uninstall
+
+# Ou diretamente
+docker rmi mark2tex:latest
+```
+
+---
+
+## 8. Diagnóstico do sistema (`mark2tex check`)
+
+### 8.1 O que cada probe verifica
+
+| Probe | Severidade se falhar | O que analisa |
+|---|---|---|
+| **Mark2TeX** | Aviso | Versão instalada via `importlib.metadata` |
+| **Docker (binário)** | ❌ Erro crítico | `docker` no PATH via `shutil.which` |
+| **Docker (daemon)** | ❌ Erro crítico | `docker info` com timeout de 8 s |
+| **Imagem mark2tex** | ⚠️ Aviso | `docker images mark2tex:latest` via SDK Python |
+| **Pandoc** | ⚠️ Aviso | `pandoc` no PATH — opcional, já está na imagem |
+| **Python** | ❌ Erro crítico | `sys.version_info >= (3, 10)` |
+| **Espaço em disco** | ⚠️ Aviso | `shutil.disk_usage(Path.home())` — limiar 2 GB |
+
+### 8.2 Tabela de troubleshooting
+
+| Probe falhou | Causa mais comum | Solução |
+|---|---|---|
+| Docker (binário) ❌ | Docker não instalado | Instalar [Docker Engine](https://docs.docker.com/engine/install/) ou [Docker Desktop](https://docs.docker.com/desktop/) |
+| Docker (daemon) ❌ | Daemon parado | `sudo systemctl start docker` (Linux) ou abrir Docker Desktop |
+| Docker (daemon) ❌ | Usuário sem permissão | `sudo usermod -aG docker $USER` e reabrir o terminal |
+| Imagem mark2tex ⚠️ | Imagem não baixada | Executar `mark2tex` uma vez — a imagem é puxada automaticamente |
+| Imagem mark2tex ⚠️ | Imagem corrompida | `docker rmi mark2tex:latest && mark2tex` |
+| Pandoc ⚠️ | Não instalado no host | Ignorar — Pandoc está na imagem Docker |
+| Python ❌ | Python < 3.10 | Instalar Python 3.10+ via [python.org](https://python.org) ou `pyenv` |
+| Espaço em disco ⚠️ | < 2 GB livres | Liberar espaço; a imagem ocupa ~1,1 GB |
+
+### 8.3 Usando `check` em scripts e CI
+
+```bash
+# Abortar se houver erros críticos
+mark2tex check || { echo "Ambiente inválido — abortando."; exit 1; }
+
+# Silencioso — apenas código de saída
+mark2tex check > /dev/null 2>&1 && echo "OK" || echo "ERRO"
+```
+
+Código de saída `0` quando não há erros (pode haver avisos); `1` quando
+pelo menos uma probe crítica falha.
+
+---
+
+## 9. Erros comuns do XeLaTeX — o que significam
+
+O Mark2TeX traduz os logs do XeLaTeX para mensagens simples, mas quando
+a compilação falha o log completo aparece no console da TUI. Esta tabela
+ajuda a interpretar as mensagens mais frequentes.
+
+| Mensagem no log | Causa | Solução |
+|---|---|---|
+| `Font ... not found` | Fonte declarada no YAML não existe na imagem | Usar um dos quatro valores válidos de `font` |
+| `File '....sty' not found` | Pacote LaTeX ausente na imagem | Abrir issue no repositório para adicionar ao `Dockerfile` |
+| `Undefined control sequence` | Comando LaTeX inválido no corpo do `.md` | Verificar blocos raw `{=latex}` por erros de digitação |
+| `Missing $ inserted` | Símbolo matemático fora de `$...$` | Escapar o símbolo (`\$`) ou colocá-lo dentro de `$...$` |
+| `Overfull \hbox` | Linha muito longa para a coluna | Aviso não crítico — o PDF é gerado mesmo assim |
+| `I can't find file` | Imagem referenciada não existe no caminho informado | Verificar caminho e extensão do arquivo de imagem |
+| `Citation ... undefined` | Chave BibTeX não encontrada no `.bib` | Verificar a chave no `.bib` e o campo `bibliography` no YAML |
+| `Output loop --- too many` | Referências cruzadas em loop | Recompilar — quase sempre se resolve na segunda passagem |
+
+### 9.1 Encontrando a causa raiz no log
+
+1. Na TUI, role o console inferior até o final.
+2. Procure pela primeira linha que começa com `!` — essa é a causa raiz.
+3. As linhas seguintes começando com `l.NNN` indicam o número de linha no
+   `.tex` gerado (útil para localizar o trecho no `.md` original).
+
+---
+
+## 10. Integração com CI/CD
+
+### 10.1 GitHub Actions — gerar PDF a cada push
+
+Crie `.github/workflows/build-pdf.yml`:
+
+```yaml
+name: Build PDF
+
+on:
+  push:
+    paths:
+      - 'docs/**.md'
+      - 'referencias.bib'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Mark2TeX
+        run: pip install mark2tex
+
+      - name: Check environment
+        run: mark2tex check
+
+      - name: Build PDF
+        run: |
+          mark2tex compile docs/meu-tcc.md \
+            --template tcc-abnt \
+            --font liberation-serif
+
+      - name: Upload PDF
+        uses: actions/upload-artifact@v4
+        with:
+          name: documento-compilado
+          path: docs/meu-tcc.pdf
+          retention-days: 30
+```
+
+> O runner `ubuntu-latest` já tem Docker disponível.
+> O passo `mark2tex check` retorna código `1` em caso de erro crítico,
+> abortando o workflow antes da compilação.
+
+### 10.2 GitLab CI
+
+```yaml
+build-pdf:
+  image: python:3.12-slim
+  services:
+    - docker:dind
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+  before_script:
+    - pip install mark2tex
+    - mark2tex check
+  script:
+    - mark2tex compile docs/meu-tcc.md --template tcc-abnt
+  artifacts:
+    paths:
+      - docs/meu-tcc.pdf
+    expire_in: 1 week
+```
+
+### 10.3 Pre-commit hook local
+
+Para compilar automaticamente antes de cada commit:
+
+```bash
+# .git/hooks/pre-commit
+#!/usr/bin/env bash
+set -e
+echo "[mark2tex] Verificando ambiente..."
+mark2tex check || exit 1
+echo "[mark2tex] Compilando documentação..."
+mark2tex compile docs/meu-tcc.md --template tcc-abnt
+git add docs/meu-tcc.pdf
+```
+
+Torne o hook executável:
+
+```bash
+chmod +x .git/hooks/pre-commit
+```
