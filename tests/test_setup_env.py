@@ -6,7 +6,6 @@ and graceful fallback when Docker Hub is unreachable.
 """
 from __future__ import annotations
 
-import sys
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -17,7 +16,6 @@ from mark2tex.setup_env import (
     _pull_from_hub,
     ensure_environment,
 )
-
 
 # ---------------------------------------------------------------------------
 # Helpers
