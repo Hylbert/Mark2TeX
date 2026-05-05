@@ -1,6 +1,7 @@
 import os
 import platform
 import subprocess
+from importlib import resources
 from pathlib import Path
 
 import docker
@@ -9,14 +10,20 @@ from docker.errors import DockerException, ImageNotFound
 IMAGE_NAME = "mark2tex:latest"
 
 
+def _get_package_path() -> Path:
+    """Return the root of the installed src/ package (works both in dev and pipx)."""
+    with resources.path("src", "__init__.py") as p:
+        return p.parent
+
+
 class DockerManager:
     def __init__(self) -> None:
-        self.project_root  = Path(__file__).resolve().parents[1]
-        self.bin_dir       = self.project_root / "bin"
-        self.templates_dir = self.project_root / "templates"
+        pkg = _get_package_path()
+        self.bin_dir       = pkg / "bin"
+        self.templates_dir = pkg / "templates"
 
     def list_templates(self) -> list[str]:
-        """Return template names discovered from the local templates directory."""
+        """Return template names discovered from the bundled templates directory."""
         if not self.templates_dir.is_dir():
             return []
         return sorted(
@@ -37,7 +44,7 @@ class DockerManager:
         templates_dir = self.templates_dir.resolve()
 
         if not input_path.exists():
-            yield f"❌ Error: Input file '{input_file}' not found."
+            yield f"\u274c Error: Input file '{input_file}' not found."
             return
 
         command = [
@@ -74,7 +81,7 @@ class DockerManager:
 
         process.wait()
         if process.returncode != 0:
-            yield f"\n❌ Error: Docker process exited with code {process.returncode}"
+            yield f"\n\u274c Error: Docker process exited with code {process.returncode}"
 
 
 def uninstall_docker_assets() -> None:
@@ -84,6 +91,6 @@ def uninstall_docker_assets() -> None:
         client.images.remove(image.id, force=True)
         print(f"Imagem {IMAGE_NAME} removida com sucesso.")
     except ImageNotFound:
-        print("Imagem Docker do Mark2TeX não encontrada.")
+        print("Imagem Docker do Mark2TeX n\u00e3o encontrada.")
     except DockerException as exc:
         print(f"Erro ao remover imagem Docker: {exc}")

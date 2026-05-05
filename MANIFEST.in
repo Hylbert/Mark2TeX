@@ -1,7 +1,6 @@
 include README.md
-include Dockerfile
+include src/Dockerfile
 include referencias.bib
-recursive-include templates *
-recursive-include assets *
-recursive-include bin *.sh
+recursive-include src/templates *
+recursive-include src/bin *.sh
 recursive-include src *.tcss
