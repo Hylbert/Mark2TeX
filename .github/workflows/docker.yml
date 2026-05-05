@@ -30,12 +30,23 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build da imagem mark2tex:latest
+      - name: Build da imagem (develop/PR — load local)
+        if: github.ref != 'refs/heads/main' || github.event_name != 'push'
         uses: docker/build-push-action@v5
         with:
           context: .
-          push: ${{ github.ref == 'refs/heads/main' && github.event_name == 'push' }}
-          load: ${{ github.ref != 'refs/heads/main' || github.event_name != 'push' }}
+          push: false
+          load: true
+          tags: mark2tex:latest
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
+
+      - name: Build da imagem (main — push Docker Hub)
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/mark2tex:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/mark2tex:${{ github.sha }}
