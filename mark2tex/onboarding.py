@@ -125,12 +125,26 @@ def run_init(template: str | None = None) -> None:
     mark_onboarding_done()
 
 
+def _example_dest(dest_file: Path) -> Path:
+    """Return a conflict-free path by inserting '_example' before the extension.
+
+    E.g. main.md -> main_example.md, report.tex -> report_example.tex
+    If main_example.md also exists, tries main_example_1.md, _2, etc.
+    """
+    candidate = dest_file.with_stem(dest_file.stem + "_example")
+    counter = 1
+    while candidate.exists():
+        candidate = dest_file.with_stem(dest_file.stem + f"_example_{counter}")
+        counter += 1
+    return candidate
+
+
 def _run_init_headless(template: str | None = None) -> tuple[bool, str, str | None]:
     """Run init without Rich Console output; return (success, message, template_used).
 
-    Used when init is triggered from within the TUI so we can capture the
-    result and display it inside the Textual screen instead of writing to
-    stdout.
+    Always copies all template files. If a destination file already exists the
+    example is saved with an '_example' suffix so the user's work is preserved.
+    Used when init is triggered from within the TUI.
     """
     from importlib import resources
 
@@ -145,7 +159,6 @@ def _run_init_headless(template: str | None = None) -> tuple[bool, str, str | No
         return False, "No templates found in the package.", None
 
     if template is None:
-        # Pick the first available template automatically when called from TUI.
         template = available[0]
 
     if template not in available:
@@ -155,24 +168,31 @@ def _run_init_headless(template: str | None = None) -> tuple[bool, str, str | No
     dest_dir = Path.cwd()
 
     copied: list[str] = []
-    skipped: list[str] = []
+    renamed: list[str] = []
 
     for src_file in src_dir.rglob("*"):
         if not src_file.is_file():
             continue
         rel = src_file.relative_to(src_dir)
         dest_file = dest_dir / rel
-        if dest_file.exists():
-            skipped.append(str(rel))
-            continue
         dest_file.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(src_file, dest_file)
-        copied.append(str(rel))
 
-    if copied:
-        msg = t("onboarding.init_done").format(template=template, n=len(copied))
+        if dest_file.exists():
+            # User already has a file with this name — save example with suffix.
+            safe_dest = _example_dest(dest_file)
+            shutil.copy2(src_file, safe_dest)
+            renamed.append(safe_dest.name)
+        else:
+            shutil.copy2(src_file, dest_file)
+            copied.append(str(rel))
+
+    total = len(copied) + len(renamed)
+    if renamed:
+        msg = t("onboarding.init_done_renamed").format(
+            template=template, n=total, renamed=renamed[0]
+        )
     else:
-        msg = t("onboarding.init_nothing")
+        msg = t("onboarding.init_done").format(template=template, n=total)
 
     mark_onboarding_done()
     return True, msg, template
@@ -226,7 +246,6 @@ class OnboardingScreen(ModalScreen):
         self.dismiss(refresh_files)
 
     def _trigger_init(self) -> None:
-        """Disable buttons, show spinner, run init in a worker."""
         self.query_one("#ob-btn-start", Button).disabled = True
         self.query_one("#ob-btn-init",  Button).disabled = True
         self.query_one("#ob-loading",   LoadingIndicator).display = True
@@ -234,12 +253,10 @@ class OnboardingScreen(ModalScreen):
         self.app.run_worker(self._run_init_worker, exclusive=True, thread=True)
 
     def _run_init_worker(self) -> None:
-        """Worker: calls _run_init_headless and updates the UI via call_from_thread."""
         success, msg, _template = _run_init_headless()
         self.app.call_from_thread(self._on_init_done, success, msg)
 
     def _on_init_done(self, success: bool, msg: str) -> None:
-        """Called on the main thread once the worker finishes."""
         self.query_one("#ob-loading", LoadingIndicator).display = False
         status = self.query_one("#ob-init-status", Label)
         status.update(msg)
@@ -247,8 +264,6 @@ class OnboardingScreen(ModalScreen):
         status.display = True
 
         if success:
-            # Auto-dismiss after a short delay; pass refresh_files=True so the
-            # app knows to repopulate the file panel after the screen closes.
             self.set_timer(1.8, lambda: self._finish(refresh_files=True))
         else:
             self.query_one("#ob-btn-start", Button).disabled = False
