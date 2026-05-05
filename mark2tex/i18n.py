@@ -87,6 +87,34 @@ _STRINGS: dict[str, dict[str, str]] = {
         "log.bib_errors": "✗ {msg}",
         "log.refs_empty": "⚠️ Seção de referências vazia",
         "log.latexmk_generic": "🔧 Latexmk: {msg}",
+        # Onboarding
+        "onboarding.title": " 👋  Bem-vindo ao Mark2TeX ",
+        "onboarding.welcome": "Parece que é a primeira vez que você executa o Mark2TeX.",
+        "onboarding.what": (
+            "O Mark2TeX converte arquivos Markdown em PDFs profissionais\n"
+            "usando templates LaTeX — tudo rodando dentro de um container Docker."
+        ),
+        "onboarding.steps": (
+            "  1. Selecione ou crie um arquivo .md no painel de arquivos\n"
+            "  2. Escolha um template (TCC, Artigo IEEE, Documento Técnico…)\n"
+            "  3. Pressione [c] ou clique em COMPILAR\n"
+            "  4. O PDF gerado aparecerá no diretório atual"
+        ),
+        "onboarding.hint_init": (
+            "Ainda não tem um arquivo .md? Clique em \"Inicializar projeto aqui\" abaixo\n"
+            "e geraremos um exemplo pronto para editar. Ou, se preferir o terminal,\n"
+            "rode  mark2tex init  e o arquivo aparecerá automaticamente no painel."
+        ),
+        "onboarding.btn_start": "  Entendi, vamos começar!  ",
+        "onboarding.btn_init":  "  Inicializar projeto aqui  ",
+        "onboarding.init_done": "✔ Pronto! Template '{template}' copiado — selecione o arquivo e compile.",
+        "onboarding.init_done_renamed": (
+            "✔ Pronto! Exemplo salvo como '{renamed}'\n"
+            "(seu arquivo original foi preservado)."
+        ),
+        "onboarding.init_nothing": "⚠ Nenhum arquivo novo copiado — arquivos já existem no diretório.",
+        "onboarding.init_error": "✗ Falha ao inicializar: {msg}",
+        "onboarding.footer": "ESC / Enter — fechar esta tela",
     },
     "en_US": {
         # Menu Global
@@ -172,6 +200,34 @@ _STRINGS: dict[str, dict[str, str]] = {
         "log.bib_errors": "✗ {msg}",
         "log.refs_empty": "⚠️ Empty bibliography section",
         "log.latexmk_generic": "🔧 Latexmk: {msg}",
+        # Onboarding
+        "onboarding.title": " 👋  Welcome to Mark2TeX ",
+        "onboarding.welcome": "This looks like your first time running Mark2TeX.",
+        "onboarding.what": (
+            "Mark2TeX converts Markdown files into professional PDFs\n"
+            "using LaTeX templates — everything runs inside a Docker container."
+        ),
+        "onboarding.steps": (
+            "  1. Select or create a .md file in the file panel\n"
+            "  2. Choose a template (TCC, IEEE Article, Technical Doc…)\n"
+            "  3. Press [c] or click COMPILE\n"
+            "  4. The generated PDF will appear in the current directory"
+        ),
+        "onboarding.hint_init": (
+            "Don't have a .md file yet? Click \"Initialise project here\" below\n"
+            "and we'll generate a ready-to-edit example for you. Or, if you prefer\n"
+            "the terminal, run  mark2tex init  and the file will appear in the panel."
+        ),
+        "onboarding.btn_start": "  Got it, let's start!  ",
+        "onboarding.btn_init":  "  Initialise project here  ",
+        "onboarding.init_done": "✔ Done! Template '{template}' copied — select the file and compile.",
+        "onboarding.init_done_renamed": (
+            "✔ Done! Example saved as '{renamed}'\n"
+            "(your original file was preserved)."
+        ),
+        "onboarding.init_nothing": "⚠ Nothing new to copy — files already exist in this directory.",
+        "onboarding.init_error": "✗ Failed to initialise: {msg}",
+        "onboarding.footer": "ESC / Enter — close this screen",
     },
 }
 

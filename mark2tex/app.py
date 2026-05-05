@@ -25,6 +25,7 @@ from . import config as cfg
 from .docker_manager import DockerManager
 from .i18n import set_language, t
 from .log_translator import log_translator
+from .onboarding import OnboardingScreen, is_first_run
 from .settings_screen import LanguageChanged, SettingsScreen
 from .utils.visuals import M2TBannerWidget, M2TMenuOption
 from .watcher import WatcherManager
@@ -64,7 +65,7 @@ def _copy_to_clipboard(text: str) -> None:
         import pyperclip
         pyperclip.copy(text)
         return
-    except Exception:
+    except Exception:  # noqa: BLE001
         pass
 
     for cmd in (
@@ -76,7 +77,7 @@ def _copy_to_clipboard(text: str) -> None:
             try:
                 subprocess.run(cmd, input=text.encode(), check=True, timeout=3)
                 return
-            except Exception:
+            except Exception:  # noqa: BLE001
                 continue
 
     raise RuntimeError(
@@ -112,8 +113,8 @@ class HelpScreen(ModalScreen):
                 yield Label("? / F1       — " + t("menu.help").capitalize())
                 yield Label("c            — " + t("btn.compile").capitalize())
                 yield Label("w            — " + t("btn.watch_on") + " / " + t("btn.watch_off"))
-                yield Label("Tab          — " + ("Navegar entre painéis" if t("menu.exit") == "SAIR" else "Navigate between panels"))
-                yield Label("↑ ↓          — " + ("Navegar nas listas" if t("menu.exit") == "SAIR" else "Navigate lists"))
+                yield Label("Tab          — " + ("À navigation panels" if t("menu.exit") == "EXIT" else "Navegar entre painéis"))
+                yield Label("↑ ↓          — " + ("Navigate lists" if t("menu.exit") == "EXIT" else "Navegar nas listas"))
                 yield Label("")
                 yield Label(t("help.flow_title"), id="help-commands-title")
                 yield Label(t("help.flow_1"))
@@ -214,6 +215,19 @@ class Mark2TeXApp(App):
         self._populate_templates()
         self._populate_fonts()
         self._populate_files()
+        # Show onboarding on first run; the callback refreshes the file panel
+        # if the user chose to initialise the project from within the screen.
+        if is_first_run():
+            self.call_after_refresh(
+                self.push_screen,
+                OnboardingScreen(),
+                self._on_onboarding_dismissed,
+            )
+
+    def _on_onboarding_dismissed(self, refresh_files: bool) -> None:
+        """Called automatically by Textual when OnboardingScreen.dismiss() fires."""
+        if refresh_files:
+            self._populate_files()
 
     def _populate_templates(self) -> None:
         template_list = self.query_one("#template-list", ListView)
@@ -230,6 +244,7 @@ class Mark2TeXApp(App):
     def _populate_files(self) -> None:
         md_files = sorted(f for f in os.listdir(".") if f.endswith(".md"))
         file_list = self.query_one("#file-list", ListView)
+        file_list.clear()
         for f in md_files:
             file_list.append(OptionItem(f))
 
@@ -408,7 +423,7 @@ class Mark2TeXApp(App):
                 if result.startswith(("⚠️", "⚠", "❌", "🔄")):
                     ui("progress_bump", None)
                 ui("console", (result, "white"))
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             ui("console", (f"{t('compile.error')}: {exc}", "#e05c5c"))
 
     def _apply_ui_update(self, action: str, value=None) -> None:
@@ -424,7 +439,7 @@ class Mark2TeXApp(App):
             elif action == "console":
                 message, style = value
                 self._log_console(message, style=style)
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             print(f"[UI Error] {action}: {exc}")
 
 
