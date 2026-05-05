@@ -4,15 +4,12 @@ from __future__ import annotations
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-import pytest
-
 from mark2tex.onboarding import (
     is_first_run,
     mark_onboarding_done,
     reset_onboarding,
     run_init,
 )
-
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -108,7 +105,7 @@ def test_run_init_copies_template_files(tmp_path: Path) -> None:
     with (
         patch("mark2tex.onboarding._flag_path", return_value=flag),
         patch(
-            "mark2tex.onboarding.resources.files",
+            "importlib.resources.files",
             return_value=MagicMock(
                 joinpath=lambda *_: MagicMock(__str__=lambda s: str(tpl_root))
             ),
@@ -139,7 +136,7 @@ def test_run_init_skips_existing_files(tmp_path: Path) -> None:
     with (
         patch("mark2tex.onboarding._flag_path", return_value=flag),
         patch(
-            "mark2tex.onboarding.resources.files",
+            "importlib.resources.files",
             return_value=MagicMock(
                 joinpath=lambda *_: MagicMock(__str__=lambda s: str(tpl_root))
             ),
@@ -161,7 +158,7 @@ def test_run_init_invalid_template(tmp_path: Path) -> None:
     with (
         patch("mark2tex.onboarding._flag_path", return_value=flag),
         patch(
-            "mark2tex.onboarding.resources.files",
+            "importlib.resources.files",
             return_value=MagicMock(
                 joinpath=lambda *_: MagicMock(__str__=lambda s: str(tpl_root))
             ),
@@ -187,7 +184,7 @@ def test_run_init_no_templates_available(tmp_path: Path) -> None:
     with (
         patch("mark2tex.onboarding._flag_path", return_value=flag),
         patch(
-            "mark2tex.onboarding.resources.files",
+            "importlib.resources.files",
             return_value=MagicMock(
                 joinpath=lambda *_: MagicMock(__str__=lambda s: str(tpl_root))
             ),
@@ -199,6 +196,6 @@ def test_run_init_no_templates_available(tmp_path: Path) -> None:
 def test_run_init_resources_error(tmp_path: Path) -> None:
     """run_init must handle importlib.resources failures gracefully."""
     with patch(
-        "mark2tex.onboarding.resources.files", side_effect=Exception("pkg missing")
+        "importlib.resources.files", side_effect=Exception("pkg missing")
     ):
         run_init(template="artigo-ieee")  # must not raise
