@@ -75,7 +75,7 @@ class DockerManager:
 
         command = [
             "docker", "run", "--rm", "-i",
-            "--env", f"M2T_CACHE_DIR=/m2t-cache",
+            "--env", "M2T_CACHE_DIR=/m2t-cache",
             "--mount", f"type=bind,src={cwd},dst=/app",
             "--mount", f"type=bind,src={build_sh},dst=/opt/mark2tex/build.sh,readonly",
             "--mount", f"type=bind,src={templates_dir},dst=/app/templates,readonly",
