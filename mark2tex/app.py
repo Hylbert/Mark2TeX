@@ -94,6 +94,16 @@ class OptionItem(ListItem):
         self.label_text = label_text
 
 
+class DirItem(ListItem):
+    """Item de diretório na lista de arquivos. Guarda o Path absoluto do destino."""
+
+    def __init__(self, display_label: str, target: Path) -> None:
+        super().__init__(Label(display_label))
+        self.display_label = display_label
+        self.target = target
+        self.add_class("dir-item")
+
+
 class FontItem(ListItem):
     """Item de fonte na lista da TUI. Guarda o id interno da fonte."""
 
@@ -117,6 +127,7 @@ class HelpScreen(ModalScreen):
                 yield Label("w            — " + t("btn.watch_on") + " / " + t("btn.watch_off"))
                 yield Label("Tab          — " + ("Navigate panels" if t("menu.exit") == "EXIT" else "Navegar entre painéis"))
                 yield Label("↑ ↓          — " + ("Navigate lists" if t("menu.exit") == "EXIT" else "Navegar nas listas"))
+                yield Label("Enter        — " + ("Enter folder / select file" if t("menu.exit") == "EXIT" else "Entrar na pasta / selecionar arquivo"))
                 yield Label("")
                 yield Label(t("help.flow_title"), id="help-commands-title")
                 yield Label(t("help.flow_1"))
@@ -213,6 +224,7 @@ class Mark2TeXApp(App):
         self.selected_template: str | None = None
         self.selected_font:     str | None = None
         self._console_lines:    list[str]  = []
+        self._current_dir:      Path       = Path.cwd()
         self._refresh_ui_labels()
         self._populate_templates()
         self._populate_fonts()
@@ -244,14 +256,49 @@ class Mark2TeXApp(App):
             font_list.append(FontItem(font_id, label))
 
     def _populate_files(self) -> None:
-        md_files = sorted(f for f in os.listdir(".") if f.endswith(".md"))
+        """Populate the file list with dirs-first then .md files for _current_dir."""
         file_list = self.query_one("#file-list", ListView)
         file_list.clear()
+
+        # Update border title to show only the current folder name
+        folder_name = self._current_dir.name or str(self._current_dir)
+        self.query_one("#file-explorer").border_title = folder_name
+
+        # ../ entry when not at the filesystem root
+        cwd_root = Path.cwd()
+        if self._current_dir != cwd_root:
+            parent = self._current_dir.parent
+            file_list.append(DirItem("📁 ../", target=parent))
+
+        try:
+            entries = list(self._current_dir.iterdir())
+        except PermissionError:
+            return
+
+        subdirs = sorted(
+            [e for e in entries if e.is_dir() and not e.name.startswith(".")],
+            key=lambda p: p.name.lower(),
+        )
+        md_files = sorted(
+            [e for e in entries if e.is_file() and e.suffix == ".md"],
+            key=lambda p: p.name.lower(),
+        )
+
+        for d in subdirs:
+            file_list.append(DirItem(f"📁 {d.name}/", target=d))
+
         for f in md_files:
-            item = OptionItem(f)
-            if not has_frontmatter(f):
+            item = OptionItem(f.name)
+            if not has_frontmatter(str(f)):
                 item.add_class("file-item--no-yaml")
             file_list.append(item)
+
+    def _navigate_to(self, target: Path) -> None:
+        """Change the current directory and refresh the file list."""
+        self.selected_file = None
+        self.query_one("#status-file", Label).update(t("status.file"))
+        self._current_dir = target.resolve()
+        self._populate_files()
 
     def _refresh_ui_labels(self) -> None:
         self.query_one("#file-explorer").border_title  = t("panel.files")
@@ -272,9 +319,13 @@ class Mark2TeXApp(App):
 
     def on_list_view_selected(self, event: ListView.Selected) -> None:
         item = event.item
-        if event.list_view.id == "file-list" and isinstance(item, OptionItem):
-            self.selected_file = item.label_text
-            self.query_one("#status-file", Label).update(f"Arquivo  : {self.selected_file}")
+        if event.list_view.id == "file-list":
+            if isinstance(item, DirItem):
+                self._navigate_to(item.target)
+                return
+            if isinstance(item, OptionItem):
+                self.selected_file = item.label_text
+                self.query_one("#status-file", Label).update(f"Arquivo  : {self.selected_file}")
         elif event.list_view.id == "template-list" and isinstance(item, OptionItem):
             self.selected_template = item.label_text
             self.query_one("#status-template", Label).update(f"Template : {self.selected_template}")
@@ -284,12 +335,15 @@ class Mark2TeXApp(App):
 
     def on_list_view_highlighted(self, event: ListView.Highlighted) -> None:
         item = event.item
-        if event.list_view.id == "file-list" and isinstance(item, OptionItem):
-            self.selected_file = item.label_text
-            self.query_one("#status-file", Label).update(f"Arquivo  : {self.selected_file}")
-            self._update_preview(item.label_text)
-            # Show amber colour on file item if no frontmatter detected
-            self._check_yaml_badge(item)
+        if event.list_view.id == "file-list":
+            if isinstance(item, DirItem):
+                # Do not update preview or status for directory entries
+                return
+            if isinstance(item, OptionItem):
+                self.selected_file = item.label_text
+                self.query_one("#status-file", Label).update(f"Arquivo  : {self.selected_file}")
+                self._update_preview(item.label_text)
+                self._check_yaml_badge(item)
         elif event.list_view.id == "template-list" and isinstance(item, OptionItem):
             self.selected_template = item.label_text
             self.query_one("#status-template", Label).update(f"Template : {self.selected_template}")
@@ -299,14 +353,16 @@ class Mark2TeXApp(App):
 
     def _check_yaml_badge(self, item: OptionItem) -> None:
         """Add/remove the no-yaml CSS class based on frontmatter presence."""
-        if not has_frontmatter(item.label_text):
+        filepath = str(self._current_dir / item.label_text)
+        if not has_frontmatter(filepath):
             item.add_class("file-item--no-yaml")
         else:
             item.remove_class("file-item--no-yaml")
 
     def _update_preview(self, filename: str) -> None:
+        filepath = self._current_dir / filename
         try:
-            with open(filename, encoding="utf-8") as f:
+            with open(filepath, encoding="utf-8") as f:
                 content = f.read()
         except (FileNotFoundError, PermissionError, OSError):
             content = f"_Não foi possível ler o arquivo `{filename}`._"
@@ -368,8 +424,9 @@ class Mark2TeXApp(App):
             if not selected_file or not selected_template:
                 self._log_console(t("compile.select_watch"), style="#e05c5c")
                 return
+            abs_file = str(self._current_dir / selected_file)
             self.watcher_manager.start_watching(
-                selected_file,
+                abs_file,
                 selected_template,
                 lambda: self.compile_specific_document(
                     selected_file, selected_template, selected_font
@@ -391,10 +448,11 @@ class Mark2TeXApp(App):
         if not selected_file or not selected_template:
             self._log_console(t("compile.select_file"), style="#e05c5c")
             return
+        abs_file = str(self._current_dir / selected_file)
         # If the file lacks YAML frontmatter, prompt the user before compiling
-        if not has_frontmatter(selected_file):
+        if not has_frontmatter(abs_file):
             self.push_screen(
-                YamlInjectScreen(selected_file, selected_template),
+                YamlInjectScreen(abs_file, selected_template),
                 lambda confirmed: self._on_yaml_inject_dismissed(
                     confirmed, selected_file, selected_template, selected_font
                 ),
@@ -412,7 +470,8 @@ class Mark2TeXApp(App):
         """Called when YamlInjectScreen closes."""
         if not confirmed:
             return
-        ok = inject_frontmatter(selected_file, selected_template)
+        abs_file = str(self._current_dir / selected_file)
+        ok = inject_frontmatter(abs_file, selected_template)
         if ok:
             self._log_console(t("yaml.injected_ok"), style="#4caf87")
             # Refresh file list so badge is removed for this file
@@ -430,8 +489,9 @@ class Mark2TeXApp(App):
         selected_template: str,
         selected_font: str | None = None,
     ) -> None:
+        abs_file = str(self._current_dir / selected_file)
         self.run_worker(
-            lambda: self._run_compilation(selected_file, selected_template, selected_font),
+            lambda: self._run_compilation(abs_file, selected_template, selected_font),
             thread=True,
         )
 

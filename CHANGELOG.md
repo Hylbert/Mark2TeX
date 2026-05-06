@@ -15,6 +15,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and 
 - `\tightlist` stub in `doc-tecnica` template (fixes Pandoc compact-list rendering).
 - YAML frontmatter injection flow: files without a YAML header are highlighted in amber in the TUI file list. A confirmation modal injects the required frontmatter before compilation. The original file is backed up to `~/.local/share/mark2tex/backups/` with an `index.json` manifest.
 - `mark2tex restore <file>` CLI subcommand to roll back a file to its pre-injection state.
+- Directory tree traversal in the TUI file panel: subdirectories are listed before `.md` files; pressing `Enter` on a folder enters it. A `../` entry at the top navigates to the parent directory. Navigation is rooted at the working directory where `mark2tex` was invoked. The panel title shows the current folder name.
 
 ### Fixed
 - CRLF line endings in `build.sh` causing `$'\r': command not found` on Windows Docker builds.

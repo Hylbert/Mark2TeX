@@ -115,6 +115,7 @@ Código de saída `0` quando não há erros; código `1` quando pelo menos uma v
 |---|---|
 | `c` | Compilar |
 | `w` | Ativar/desativar Watch Mode |
+| `Enter` | Entrar na pasta / selecionar arquivo |
 | `F1` / `?` | Ajuda |
 | `Esc` / `q` | Menu global |
 
@@ -122,6 +123,7 @@ Código de saída `0` quando não há erros; código `1` quando pelo menos uma v
 
 - **Builds Dockerizados** — sem instalação local de LaTeX; resultado idêntico em qualquer máquina.
 - **TUI interativa** — navegador de arquivos, seletor de template, console de log em tempo real e barra de progresso criados com [Textual](https://github.com/Textualize/textual).
+- **Navegação de diretórios** — o painel de arquivos abre no diretório de trabalho atual. Subpastas são listadas antes dos arquivos `.md`; pressione `Enter` em uma pasta para entrar nela. Um item `../` no topo da lista volta para a pasta pai.
 - **Onboarding no primeiro uso** — tela de boas-vindas exibida na primeira abertura com botão **"Inicializar projeto aqui"** que copia um `.md` de exemplo no diretório atual sem sair do app.
 - **Watch mode** — recompilação automática a cada salvamento do arquivo.
 - **Logs legíveis por humanos** — a saída bruta do XeLaTeX é analisada e traduzida para mensagens em linguagem simples.
@@ -149,6 +151,7 @@ Código de saída `0` quando não há erros; código `1` quando pelo menos uma v
 - [x] Tela de boas-vindas com fluxo guiado e botão "Inicializar projeto aqui"
 - [x] `mark2tex init` — criar scaffold de template no diretório atual
 - [x] Injeção automática de YAML frontmatter em arquivos sem cabeçalho (com backup e restore)
+- [x] Navegação de diretórios no painel de arquivos (subpastas + navegação `../`)
 - [ ] Templates ABNT adicionais (dissertação, apresentação)
 - [ ] Instalador nativo para Windows
 - [ ] Integração com GitHub Actions para geração de PDF em CI

@@ -115,6 +115,7 @@ Exit code `0` when no errors are found; exit code `1` when at least one error pr
 |---|---|
 | `c` | Compile |
 | `w` | Toggle Watch Mode |
+| `Enter` | Enter folder / select file |
 | `F1` / `?` | Help |
 | `Esc` / `q` | Global menu |
 
@@ -122,6 +123,7 @@ Exit code `0` when no errors are found; exit code `1` when at least one error pr
 
 - **Dockerized builds** — zero local LaTeX installation; identical output on every machine.
 - **Interactive TUI** — file browser, template selector, real-time log console, and progress bar built with [Textual](https://github.com/Textualize/textual).
+- **Directory navigation** — the file panel opens at the current working directory. Subdirectories are listed before `.md` files; press `Enter` on a folder to enter it. A `../` entry at the top of the list navigates back to the parent folder.
 - **First-run onboarding** — welcome screen shown on the first launch with a built-in "Initialise project here" button that copies an example `.md` into your current directory without leaving the app.
 - **Watch mode** — automatic recompilation on every file save.
 - **Human-readable logs** — raw XeLaTeX output is parsed and translated into plain-language messages.
@@ -149,6 +151,7 @@ Exit code `0` when no errors are found; exit code `1` when at least one error pr
 - [x] Welcome screen with guided workflow and "Initialise project here" button
 - [x] `mark2tex init` — scaffold a template into the current directory
 - [x] Auto-inject YAML frontmatter for files without it (with backup & restore)
+- [x] Directory tree traversal in the file panel (subdirs + `../` navigation)
 - [ ] Additional ABNT templates (dissertation, presentation)
 - [ ] Windows-native installer
 - [ ] GitHub Actions integration for CI PDF generation
