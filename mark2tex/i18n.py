@@ -137,6 +137,13 @@ _STRINGS: dict[str, dict[str, str]] = {
         "uninstall.config_removed":   "✔ Configurações removidas: {path}",
         "uninstall.config_not_found": "  Configurações não encontradas: {path}",
         "uninstall.pipx_hint":        "Execute `pipx uninstall mark2tex` para remover o pacote Python.",
+        # Frontmatter validator
+        "validator.parse_error": "⚠️ Não foi possível ler o cabeçalho YAML. Verifique se o arquivo começa com um bloco --- válido.",
+        "validator.missing": "⚠️ Campo obrigatório ausente ou vazio: '{field}'.",
+        "validator.placeholder": "⚠️ O campo '{field}' ainda contém o valor padrão. Preencha antes de compilar.",
+        "validator.template_mismatch": "⚠️ O cabeçalho declara template '{fm_template}' mas a TUI tem '{selected}' selecionado. Atualize o cabeçalho ou escolha o template correto.",
+        "validator.invalid_lang": "⚠️ O valor de 'lang' ({lang}) não é reconhecido. Valores aceitos: {accepted}.",
+        "validator.warnings_header": "── Avisos do cabeçalho YAML (a compilação continua) ──",
     },
     "en_US": {
         # Menu Global
@@ -272,6 +279,13 @@ _STRINGS: dict[str, dict[str, str]] = {
         "uninstall.config_removed":   "✔ Config removed: {path}",
         "uninstall.config_not_found": "  Config not found: {path}",
         "uninstall.pipx_hint":        "Run `pipx uninstall mark2tex` to remove the Python package.",
+        # Frontmatter validator
+        "validator.parse_error": "⚠️ Could not read the YAML header. Make sure the file starts with a valid --- block.",
+        "validator.missing": "⚠️ Required field missing or empty: '{field}'.",
+        "validator.placeholder": "⚠️ Field '{field}' still contains the default placeholder. Fill it in before compiling.",
+        "validator.template_mismatch": "⚠️ Header declares template '{fm_template}' but the TUI has '{selected}' selected. Update the header or re-select the correct template.",
+        "validator.invalid_lang": "⚠️ The 'lang' value ({lang}) is not recognised. Accepted values: {accepted}.",
+        "validator.warnings_header": "── YAML header warnings (compilation continues) ──",
     },
 }
 

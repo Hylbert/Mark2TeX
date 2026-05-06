@@ -23,6 +23,7 @@ from textual.widgets import (
 
 from . import config as cfg
 from .docker_manager import DockerManager
+from .frontmatter_validator import validate as validate_frontmatter
 from .i18n import set_language, t
 from .log_translator import log_translator
 from .onboarding import OnboardingScreen, is_first_run
@@ -417,6 +418,15 @@ class Mark2TeXApp(App):
     def _set_progress(self, value: int) -> None:
         self.query_one("#progress-bar", ProgressBar).update(progress=value)
 
+    def _run_frontmatter_warnings(self, abs_file: str, selected_template: str) -> None:
+        """Log frontmatter validation warnings in yellow. Never blocks compilation."""
+        errors = validate_frontmatter(abs_file, selected_template)
+        if not errors:
+            return
+        self._log_console(t("validator.warnings_header"), style="#e0a24a")
+        for err in errors:
+            self._log_console(err.message, style="#e0a24a")
+
     def toggle_watch_mode(self) -> None:
         btn = self.query_one("#watch-btn", Button)
         if not self.is_watching:
@@ -458,6 +468,8 @@ class Mark2TeXApp(App):
                 ),
             )
             return
+        # Non-blocking frontmatter warnings — always logged, never block build
+        self._run_frontmatter_warnings(abs_file, selected_template)
         self.compile_specific_document(selected_file, selected_template, selected_font)
 
     def _on_yaml_inject_dismissed(
