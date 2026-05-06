@@ -3,6 +3,7 @@ import os
 import platform
 import shutil
 import subprocess
+import threading
 from importlib import resources
 from pathlib import Path
 
@@ -16,6 +17,9 @@ IMAGE_HUB  = "hylbert/mark2tex:latest"
 # Timeout in seconds for a single compilation run.
 # Can be overridden via the MARK2TEX_TIMEOUT environment variable.
 COMPILE_TIMEOUT = int(os.environ.get("MARK2TEX_TIMEOUT", "300"))
+
+# How long abort() waits for the killed process to exit before giving up.
+_ABORT_WAIT = 5.0
 
 
 def _get_package_path() -> Path:
@@ -45,6 +49,8 @@ class DockerManager:
         pkg = _get_package_path()
         self.bin_dir       = pkg / "bin"
         self.templates_dir = pkg / "templates"
+        self._active_process: subprocess.Popen | None = None
+        self._process_lock = threading.Lock()
 
     def list_templates(self) -> list[str]:
         """Return template names discovered from the bundled templates directory."""
@@ -55,6 +61,33 @@ class DockerManager:
             for d in self.templates_dir.iterdir()
             if d.is_dir() and (d / "template.tex").exists()
         )
+
+    def abort(self) -> None:
+        """Kill the active Docker process (if any) and wait for it to exit.
+
+        Safe to call from any thread. Returns only after the process has
+        terminated or the _ABORT_WAIT timeout expires.
+        """
+        with self._process_lock:
+            proc = self._active_process
+
+        if proc is None:
+            return
+
+        try:
+            proc.kill()
+        except OSError:
+            pass  # already dead
+
+        try:
+            proc.wait(timeout=_ABORT_WAIT)
+        except subprocess.TimeoutExpired:
+            pass  # best effort
+
+        with self._process_lock:
+            # Only clear if it's still the same process we killed.
+            if self._active_process is proc:
+                self._active_process = None
 
     def compile(
         self,
@@ -104,20 +137,35 @@ class DockerManager:
             universal_newlines=True,
         )
 
+        with self._process_lock:
+            self._active_process = process
+
         try:
             stdout, _ = process.communicate(timeout=COMPILE_TIMEOUT)
         except subprocess.TimeoutExpired:
             process.kill()
             process.communicate()  # drain the pipe to avoid ResourceWarning
+            with self._process_lock:
+                if self._active_process is process:
+                    self._active_process = None
             yield (
                 f"\u274c Timeout: compilation exceeded {COMPILE_TIMEOUT}s "
                 "and was terminated. Set MARK2TEX_TIMEOUT to increase the limit."
             )
             return
+        except Exception:
+            with self._process_lock:
+                if self._active_process is process:
+                    self._active_process = None
+            return
+        finally:
+            with self._process_lock:
+                if self._active_process is process:
+                    self._active_process = None
 
         yield from stdout.splitlines(keepends=True)
 
-        if process.returncode != 0:
+        if process.returncode not in (0, -9, -15):  # -9=SIGKILL, -15=SIGTERM
             yield f"\n\u274c Error: Docker process exited with code {process.returncode}"
 
 
