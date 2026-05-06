@@ -7,20 +7,94 @@
 
 ## Índice
 
-1. [Como o Mark2TeX funciona por dentro](#1-como-o-mark2tex-funciona-por-dentro)
-2. [O arquivo Markdown — referência completa do YAML](#2-o-arquivo-markdown--referência-completa-do-yaml)
-3. [Templates — guia por template](#3-templates--guia-por-template)
-4. [Fontes — quando usar cada uma](#4-fontes--quando-usar-cada-uma)
-5. [BibTeX — bibliografia passo a passo](#5-bibtex--bibliografia-passo-a-passo)
-6. [Watch Mode — como funciona](#6-watch-mode--como-funciona)
-7. [Docker internals — o que está na imagem](#7-docker-internals--o-que-está-na-imagem)
-8. [Diagnóstico do sistema (`mark2tex check`)](#8-diagnóstico-do-sistema-mark2tex-check)
-9. [Erros comuns do XeLaTeX — o que significam](#9-erros-comuns-do-xelatex--o-que-significam)
-10. [Integração com CI/CD](#10-integração-com-cicd)
+1. [Instalação — `pipx` e desinstalação completa](#1-instalação--pipx-e-desinstalação-completa)
+2. [Como o Mark2TeX funciona por dentro](#2-como-o-mark2tex-funciona-por-dentro)
+3. [O arquivo Markdown — referência completa do YAML](#3-o-arquivo-markdown--referência-completa-do-yaml)
+4. [Templates — guia por template](#4-templates--guia-por-template)
+5. [Fontes — quando usar cada uma](#5-fontes--quando-usar-cada-uma)
+6. [BibTeX — bibliografia passo a passo](#6-bibtex--bibliografia-passo-a-passo)
+7. [Watch Mode — como funciona](#7-watch-mode--como-funciona)
+8. [Docker internals — o que está na imagem](#8-docker-internals--o-que-está-na-imagem)
+9. [Diagnóstico do sistema (`mark2tex check`)](#9-diagnóstico-do-sistema-mark2tex-check)
+10. [Erros comuns do XeLaTeX — o que significam](#10-erros-comuns-do-xelatex--o-que-significam)
+11. [Integração com CI/CD](#11-integração-com-cicd)
 
 ---
 
-## 1. Como o Mark2TeX funciona por dentro
+## 1. Instalação — `pipx` e desinstalação completa
+
+### 1.1 Por que `pipx`?
+
+O Mark2TeX é uma ferramenta de linha de comando, não uma biblioteca.
+O `pipx` é o método recomendado para instalar ferramentas CLI Python porque:
+
+- Cria um ambiente virtual isolado automaticamente para cada ferramenta
+- Não polui o Python do sistema nem interfere em outros projetos
+- Disponibiliza o comando `mark2tex` globalmente no terminal sem `venv` manual
+- Facilita atualização (`pipx upgrade mark2tex`) e remoção limpas
+
+### 1.2 Instalando o `pipx`
+
+```bash
+# Ubuntu / Debian
+sudo apt install pipx && pipx ensurepath
+
+# macOS
+brew install pipx && pipx ensurepath
+
+# Windows (PowerShell)
+python -m pip install --user pipx
+python -m pipx ensurepath
+```
+
+> Reinicie o terminal após executar `ensurepath` para que o PATH seja atualizado.
+
+### 1.3 Instalando o Mark2TeX
+
+```bash
+pipx install mark2tex
+```
+
+Verifique a instalação:
+
+```bash
+mark2tex check
+```
+
+### 1.4 Atualizando
+
+```bash
+pipx upgrade mark2tex
+```
+
+### 1.5 Desinstalação completa
+
+A desinstalação **deve seguir esta ordem**:
+
+**Passo 1 — limpar dados e imagens Docker:**
+
+```bash
+mark2tex uninstall
+```
+
+Este comando remove:
+- As imagens Docker `hylbert/mark2tex:latest` e `mark2tex:latest`
+- O diretório de dados do usuário (`~/.local/share/mark2tex/`), incluindo backups de YAML
+- O diretório de configuração do usuário (`~/.config/mark2tex/`)
+
+**Passo 2 — remover o pacote Python:**
+
+```bash
+pipx uninstall mark2tex
+```
+
+> ⚠️ **Não pule o Passo 1.** Executar `pipx uninstall mark2tex` sem antes rodar
+> `mark2tex uninstall` deixa as imagens Docker (~1,1 GB) e os dados do usuário
+> no disco sem nenhuma forma de removê-los pelo Mark2TeX.
+
+---
+
+## 2. Como o Mark2TeX funciona por dentro
 
 Entender o pipeline evita surpresas quando algo dá errado.
 
@@ -53,12 +127,12 @@ final é copiado de volta para o host.
 
 ---
 
-## 2. O arquivo Markdown — referência completa do YAML
+## 3. O arquivo Markdown — referência completa do YAML
 
 O cabeçalho YAML controla metadados, capa, sumário, norma e compilação.
 Ele deve estar entre `---` no início do arquivo, antes de qualquer conteúdo.
 
-### 2.1 Campos universais (todos os templates)
+### 3.1 Campos universais (todos os templates)
 
 | Campo | Tipo | Padrão | Descrição |
 |---|---|---|---|
@@ -67,14 +141,14 @@ Ele deve estar entre `---` no início do arquivo, antes de qualquer conteúdo.
 | `date` | string | data atual | Data de entrega (`YYYY-MM-DD` ou texto livre) |
 | `lang` | string | `pt-BR` | Idioma; afeta hifenização e rótulos automáticos |
 | `bibliography` | string | — | Caminho relativo para o `.bib` (ex: `referencias.bib`) |
-| `font` | string | `liberation-serif` | Fonte tipográfica (ver [seção 4](#4-fontes--quando-usar-cada-uma)) |
+| `font` | string | `liberation-serif` | Fonte tipográfica (ver [seção 5](#5-fontes--quando-usar-cada-uma)) |
 
 > **Dica:** Envolva valores com caracteres especiais LaTeX em aspas simples:
 > ```yaml
 > title: 'Análise de $\alpha$-cetoacidos em amostras clínicas'
 > ```
 
-### 2.2 Campos específicos — `tcc-abnt`
+### 3.2 Campos específicos — `tcc-abnt`
 
 | Campo | Obrigatório | Descrição |
 |---|---|---|
@@ -120,14 +194,14 @@ font: liberation-serif
 ---
 ```
 
-### 2.3 Campos específicos — `artigo-ieee`
+### 3.3 Campos específicos — `artigo-ieee`
 
 | Campo | Obrigatório | Descrição |
 |---|---|---|
 | `abstract` | Sim | Abstract do artigo (campo único, padrão IEEE) |
 | `keywords` | Não | Palavras-chave separadas por vírgula |
 
-### 2.4 Campos específicos — `artigo-abnt`
+### 3.4 Campos específicos — `artigo-abnt`
 
 Mesmos campos do `tcc-abnt`, com `abstract-pt` e `abstract-en`, mais:
 
@@ -137,7 +211,7 @@ Mesmos campos do `tcc-abnt`, com `abstract-pt` e `abstract-en`, mais:
 | `keywords-pt` | Não | Palavras-chave em português |
 | `keywords-en` | Não | Keywords em inglês |
 
-### 2.5 Campos específicos — `doc-tecnica` e `projeto`
+### 3.5 Campos específicos — `doc-tecnica` e `projeto`
 
 | Campo | Obrigatório | Descrição |
 |---|---|---|
@@ -147,7 +221,7 @@ Mesmos campos do `tcc-abnt`, com `abstract-pt` e `abstract-en`, mais:
 
 ---
 
-## 3. Templates — guia por template
+## 4. Templates — guia por template
 
 ### `tcc-abnt`
 
@@ -235,7 +309,7 @@ Suporta tabelas de cronograma em Markdown nativamente.
 
 ---
 
-## 4. Fontes — quando usar cada uma
+## 5. Fontes — quando usar cada uma
 
 O Mark2TeX usa fontes metricamente compatíveis com as exigidas por normas
 acadêmicas, distribuídas livremente sob licença open-source.
@@ -264,9 +338,9 @@ mark2tex compile meu-artigo.md --template artigo-ieee --font nimbus-sans
 
 ---
 
-## 5. BibTeX — bibliografia passo a passo
+## 6. BibTeX — bibliografia passo a passo
 
-### 5.1 Criando o arquivo `.bib`
+### 6.1 Criando o arquivo `.bib`
 
 Crie `referencias.bib` no mesmo diretório do seu `.md`:
 
@@ -294,7 +368,7 @@ Crie `referencias.bib` no mesmo diretório do seu `.md`:
 **Tipos de entrada mais usados:** `@article`, `@book`, `@inproceedings`,
 `@techreport`, `@misc` (para sites, com campos `url` e `urldate`).
 
-### 5.2 Declarando no YAML
+### 6.2 Declarando no YAML
 
 ```yaml
 bibliography: referencias.bib
@@ -306,7 +380,7 @@ O caminho é relativo ao arquivo `.md`. Se o `.bib` estiver em outro diretório:
 bibliography: ../shared/referencias.bib
 ```
 
-### 5.3 Citando no texto
+### 6.3 Citando no texto
 
 ```markdown
 # Citação simples
@@ -319,12 +393,12 @@ Segundo \citeonline{liu2020isolation} (p. 15), a isolação...
 Vários estudos \cite{liu2020isolation,abnt2011nbr} demonstram...
 ```
 
-### 5.4 Onde a lista de referências aparece
+### 6.4 Onde a lista de referências aparece
 
 O Mark2TeX insere as referências automaticamente ao final do documento,
 após o último capítulo. Não é necessário adicionar nenhuma seção manual.
 
-### 5.5 Fontes de entrada `.bib` confiáveis
+### 6.5 Fontes de entrada `.bib` confiáveis
 
 - **Google Scholar** → ❝ → BibTeX
 - **IEEE Xplore** → botão "Cite This" → BibTeX
@@ -332,7 +406,7 @@ após o último capítulo. Não é necessário adicionar nenhuma seção manual.
 
 ---
 
-## 6. Watch Mode — como funciona
+## 7. Watch Mode — como funciona
 
 Ao pressionar `w` na TUI (ou passar `--watch` na CLI), o Mark2TeX inicia
 um observador de arquivo baseado na biblioteca
@@ -363,7 +437,7 @@ ou aumente o debounce conforme acima.
 
 ---
 
-## 7. Docker internals — o que está na imagem
+## 8. Docker internals — o que está na imagem
 
 A imagem `mark2tex:latest` (~1,1 GB) contém:
 
@@ -377,7 +451,7 @@ A imagem `mark2tex:latest` (~1,1 GB) contém:
 | Fontes Nimbus Sans | — | Equivalente Helvetica open-source |
 | Fonte Ubuntu | — | Fonte Ubuntu oficial |
 
-### 7.1 Build manual da imagem
+### 8.1 Build manual da imagem
 
 Necessário apenas se você modificou o `Dockerfile` ou está offline:
 
@@ -389,7 +463,7 @@ make build-image
 docker build -t mark2tex:latest .
 ```
 
-### 7.2 Inspecionar o que está instalado
+### 8.2 Inspecionar o que está instalado
 
 ```bash
 # Abrir shell interativo dentro do container
@@ -402,21 +476,26 @@ biber --version
 fc-list | grep -i liberation   # listar fontes Liberation disponíveis
 ```
 
-### 7.3 Limpar a imagem
+### 8.3 Limpar a imagem e os dados
 
 ```bash
-# Via CLI Mark2TeX
 mark2tex uninstall
-
-# Ou diretamente
-docker rmi mark2tex:latest
 ```
+
+Este comando remove as imagens Docker, o diretório de dados do usuário
+(`~/.local/share/mark2tex/`) e o diretório de configuração (`~/.config/mark2tex/`).
+
+> ⚠️ **Execute `mark2tex uninstall` antes de `pipx uninstall mark2tex`.**
+> Remover o pacote pelo `pipx` primeiro torna o comando `mark2tex` indisponível,
+> deixando as imagens Docker (~1,1 GB) e os dados no disco sem como removê-los
+> pelo Mark2TeX. Consulte a [seção 1.5](#15-desinstalação-completa) para o
+> fluxo completo.
 
 ---
 
-## 8. Diagnóstico do sistema (`mark2tex check`)
+## 9. Diagnóstico do sistema (`mark2tex check`)
 
-### 8.1 O que cada probe verifica
+### 9.1 O que cada probe verifica
 
 | Probe | Severidade se falhar | O que analisa |
 |---|---|---|
@@ -428,7 +507,7 @@ docker rmi mark2tex:latest
 | **Python** | ❌ Erro crítico | `sys.version_info >= (3, 10)` |
 | **Espaço em disco** | ⚠️ Aviso | `shutil.disk_usage(Path.home())` — limiar 2 GB |
 
-### 8.2 Tabela de troubleshooting
+### 9.2 Tabela de troubleshooting
 
 | Probe falhou | Causa mais comum | Solução |
 |---|---|---|
@@ -441,7 +520,7 @@ docker rmi mark2tex:latest
 | Python ❌ | Python < 3.10 | Instalar Python 3.10+ via [python.org](https://python.org) ou `pyenv` |
 | Espaço em disco ⚠️ | < 2 GB livres | Liberar espaço; a imagem ocupa ~1,1 GB |
 
-### 8.3 Usando `check` em scripts e CI
+### 9.3 Usando `check` em scripts e CI
 
 ```bash
 # Abortar se houver erros críticos
@@ -456,7 +535,7 @@ pelo menos uma probe crítica falha.
 
 ---
 
-## 9. Erros comuns do XeLaTeX — o que significam
+## 10. Erros comuns do XeLaTeX — o que significam
 
 O Mark2TeX traduz os logs do XeLaTeX para mensagens simples, mas quando
 a compilação falha o log completo aparece no console da TUI. Esta tabela
@@ -473,7 +552,7 @@ ajuda a interpretar as mensagens mais frequentes.
 | `Citation ... undefined` | Chave BibTeX não encontrada no `.bib` | Verificar a chave no `.bib` e o campo `bibliography` no YAML |
 | `Output loop --- too many` | Referências cruzadas em loop | Recompilar — quase sempre se resolve na segunda passagem |
 
-### 9.1 Encontrando a causa raiz no log
+### 10.1 Encontrando a causa raiz no log
 
 1. Na TUI, role o console inferior até o final.
 2. Procure pela primeira linha que começa com `!` — essa é a causa raiz.
@@ -482,9 +561,9 @@ ajuda a interpretar as mensagens mais frequentes.
 
 ---
 
-## 10. Integração com CI/CD
+## 11. Integração com CI/CD
 
-### 10.1 GitHub Actions — gerar PDF a cada push
+### 11.1 GitHub Actions — gerar PDF a cada push
 
 Crie `.github/workflows/build-pdf.yml`:
 
@@ -510,7 +589,10 @@ jobs:
           python-version: '3.12'
 
       - name: Install Mark2TeX
-        run: pip install mark2tex
+        run: |
+          python -m pip install --user pipx
+          python -m pipx ensurepath
+          pipx install mark2tex
 
       - name: Check environment
         run: mark2tex check
@@ -533,7 +615,7 @@ jobs:
 > O passo `mark2tex check` retorna código `1` em caso de erro crítico,
 > abortando o workflow antes da compilação.
 
-### 10.2 GitLab CI
+### 11.2 GitLab CI
 
 ```yaml
 build-pdf:
@@ -543,7 +625,9 @@ build-pdf:
   variables:
     DOCKER_HOST: tcp://docker:2375
   before_script:
-    - pip install mark2tex
+    - python -m pip install --user pipx
+    - python -m pipx ensurepath
+    - pipx install mark2tex
     - mark2tex check
   script:
     - mark2tex compile docs/meu-tcc.md --template tcc-abnt
@@ -553,7 +637,7 @@ build-pdf:
     expire_in: 1 week
 ```
 
-### 10.3 Pre-commit hook local
+### 11.3 Pre-commit hook local
 
 Para compilar automaticamente antes de cada commit:
 

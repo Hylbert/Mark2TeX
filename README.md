@@ -38,6 +38,25 @@ Mark2TeX is a command-line tool that converts Markdown files into publication-re
 
 ## Quickstart
 
+> **Why `pipx`?**
+> Mark2TeX is a CLI tool, not a library. `pipx` installs Python CLI tools in
+> isolated environments automatically — without polluting your system Python or
+> requiring a manual `venv`. If you don't have `pipx` yet:
+>
+> ```bash
+> # Ubuntu / Debian
+> sudo apt install pipx && pipx ensurepath
+>
+> # macOS
+> brew install pipx && pipx ensurepath
+>
+> # Windows (PowerShell)
+> python -m pip install --user pipx
+> python -m pipx ensurepath
+> ```
+>
+> Restart your terminal after running `ensurepath`.
+
 ```bash
 # 1 — install (requires Python 3.10+ and Docker)
 pipx install mark2tex
@@ -71,7 +90,7 @@ mark2tex
 | `mark2tex check` | Run a full system health check |
 | `mark2tex init [--template NAME]` | Copy a template + example into the current directory |
 | `mark2tex restore <file>` | Restore a `.md` file to its state before YAML injection |
-| `mark2tex uninstall` | Remove the Mark2TeX Docker image and assets |
+| `mark2tex uninstall` | Remove Docker images, user data, and config dirs — run before `pipx uninstall mark2tex` |
 | `mark2tex doctor` | Alias for `check` *(deprecated — use `check`)* |
 
 ### `mark2tex check` — System Health Report
