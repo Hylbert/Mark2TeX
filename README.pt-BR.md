@@ -70,6 +70,7 @@ mark2tex
 | `mark2tex` | Abre a TUI interativa (padrão) |
 | `mark2tex check` | Executa diagnóstico completo do sistema |
 | `mark2tex init [--template NOME]` | Copia um template + exemplo para o diretório atual |
+| `mark2tex restore <arquivo>` | Restaura um `.md` ao estado anterior à injeção de YAML |
 | `mark2tex uninstall` | Remove a imagem Docker e assets do Mark2TeX |
 | `mark2tex doctor` | Alias para `check` *(depreciado — use `check`)* |
 
@@ -128,6 +129,7 @@ Código de saída `0` quando não há erros; código `1` quando pelo menos uma v
 - **Suporte a bibliografia** — BibTeX via Pandoc + XeLaTeX; basta adicionar um `referencias.bib` ao lado do `.md`.
 - **Diagnóstico do sistema** — `mark2tex check` verifica o ambiente antes de compilar.
 - **Progresso Rich no pull da imagem** — barras de progresso por layer com velocidade e ETA na primeira execução.
+- **Injeção de YAML frontmatter** — arquivos sem cabeçalho YAML são destacados em âmbar na TUI; um modal de confirmação injeta o frontmatter automaticamente antes de compilar. Um backup é salvo em `~/.local/share/mark2tex/backups/` e pode ser restaurado a qualquer momento com `mark2tex restore <arquivo>`.
 - **Fluxo orientado à ABNT** — templates construídos segundo as normas acadêmicas brasileiras.
 
 ## Templates Disponíveis
@@ -146,7 +148,7 @@ Código de saída `0` quando não há erros; código `1` quando pelo menos uma v
 - [x] Onboarding no primeiro uso com Rich Progress para pull da imagem Docker
 - [x] Tela de boas-vindas com fluxo guiado e botão "Inicializar projeto aqui"
 - [x] `mark2tex init` — criar scaffold de template no diretório atual
-- [ ] Injeção automática de YAML frontmatter em arquivos sem cabeçalho (com backup e restore)
+- [x] Injeção automática de YAML frontmatter em arquivos sem cabeçalho (com backup e restore)
 - [ ] Templates ABNT adicionais (dissertação, apresentação)
 - [ ] Instalador nativo para Windows
 - [ ] Integração com GitHub Actions para geração de PDF em CI

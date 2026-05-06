@@ -70,6 +70,7 @@ mark2tex
 | `mark2tex` | Open the interactive TUI dashboard (default) |
 | `mark2tex check` | Run a full system health check |
 | `mark2tex init [--template NAME]` | Copy a template + example into the current directory |
+| `mark2tex restore <file>` | Restore a `.md` file to its state before YAML injection |
 | `mark2tex uninstall` | Remove the Mark2TeX Docker image and assets |
 | `mark2tex doctor` | Alias for `check` *(deprecated — use `check`)* |
 
@@ -128,6 +129,7 @@ Exit code `0` when no errors are found; exit code `1` when at least one error pr
 - **Bibliography support** — BibTeX via Pandoc + XeLaTeX; just drop a `referencias.bib` alongside your `.md`.
 - **System health check** — `mark2tex check` diagnoses your environment before you compile.
 - **Rich image pull progress** — per-layer progress bars with speed and ETA when pulling the Docker image on first run.
+- **YAML frontmatter injection** — files without a YAML header are highlighted in amber in the TUI; a confirmation modal injects the frontmatter automatically before compilation. A backup is saved to `~/.local/share/mark2tex/backups/` and can be restored at any time with `mark2tex restore <file>`.
 - **ABNT-oriented workflow** — templates built around Brazilian academic standards.
 
 ## Available Templates
@@ -146,7 +148,7 @@ Exit code `0` when no errors are found; exit code `1` when at least one error pr
 - [x] First-run onboarding with Rich progress for Docker image pull
 - [x] Welcome screen with guided workflow and "Initialise project here" button
 - [x] `mark2tex init` — scaffold a template into the current directory
-- [ ] Auto-inject YAML frontmatter for files without it (with backup & restore)
+- [x] Auto-inject YAML frontmatter for files without it (with backup & restore)
 - [ ] Additional ABNT templates (dissertation, presentation)
 - [ ] Windows-native installer
 - [ ] GitHub Actions integration for CI PDF generation
