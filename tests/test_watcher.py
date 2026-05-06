@@ -11,12 +11,11 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from mark2tex.watcher import (
-    Mark2TeXWatcher,
-    WatcherManager,
     _IGNORE_DIRS,
     _TEMP_SUFFIXES,
+    Mark2TeXWatcher,
+    WatcherManager,
 )
-
 
 # ---------------------------------------------------------------------------
 # Helpers
