@@ -44,6 +44,41 @@ def _compute_cache_dir(abs_file: str) -> Path:
     return cache_dir
 
 
+def clean_cache(input_file: str | None = None) -> tuple[bool, str]:
+    """Remove latexmk cache for a specific document or for all documents.
+
+    Args:
+        input_file: Absolute or relative path to the .md file whose cache
+            should be removed.  Pass ``None`` to wipe the entire cache root
+            (all documents).
+
+    Returns:
+        A ``(success, message)`` tuple.
+    """
+    cache_root = Path(user_cache_dir("mark2tex", appauthor=False))
+
+    if input_file is None:
+        if not cache_root.exists():
+            return True, str(cache_root)
+        try:
+            shutil.rmtree(cache_root)
+        except OSError as exc:
+            return False, str(exc)
+        return True, str(cache_root)
+
+    abs_file = str(Path(input_file).resolve())
+    cache_dir = Path(user_cache_dir("mark2tex", appauthor=False)) / (
+        hashlib.sha1(abs_file.encode()).hexdigest()[:16]
+    )
+    if not cache_dir.exists():
+        return True, str(cache_dir)
+    try:
+        shutil.rmtree(cache_dir)
+    except OSError as exc:
+        return False, str(exc)
+    return True, str(cache_dir)
+
+
 class DockerManager:
     def __init__(self) -> None:
         pkg = _get_package_path()

@@ -69,21 +69,36 @@ echo "PROGRESS:10%"
 sync
 
 # ---------------------------------------------------------------------------
-# Cleanup: remove only ephemeral per-run files.
-# The cache dir lives on the host via bind-mount and is intentionally kept.
-# If latexmk failed AND no PDF was produced, wipe the cache so the next
-# run starts clean rather than re-failing on a corrupted dependency graph.
+# Cleanup: remove only ephemeral per-run files from the working directory.
+#
+# Rules:
+#   SUCCESS  — remove .tex and .xdv from /app; leave the cache dir intact
+#              so latexmk can do a real incremental build next time.
+#   FAILURE  — remove .tex and .xdv from /app; wipe the cache ONLY when
+#              the .fdb_latexmk file is missing, meaning latexmk never
+#              completed a full pass and the cache may be corrupted.
+#              If .fdb_latexmk exists the partial cache is still useful
+#              (latexmk will pick up where it left off).
 # ---------------------------------------------------------------------------
 cleanup() {
     local exit_code=$?
+    local doc_stem
+    doc_stem="$(basename "$OUTPUT_NAME")"
+
     echo "🧹 Cleaning up ephemeral build files..."
+    # Remove intermediate .tex/.xdv from the working dir (not the cache).
     rm -f "$OUTPUT_NAME".tex "$OUTPUT_NAME".xdv || true
-    # latexmk writes an extra PDF copy inside the cache dir when -outdir
-    # differs from -auxdir; remove it to avoid confusion.
-    rm -f "${CACHE_DIR}/$(basename "$OUTPUT_NAME").pdf" || true
+    # latexmk writes an extra PDF inside the cache dir when -outdir differs
+    # from -auxdir; remove it to avoid confusion with the real output.
+    rm -f "${CACHE_DIR}/${doc_stem}.pdf" || true
+
     if [[ $exit_code -ne 0 && ! -f "${OUTPUT_NAME}.pdf" ]]; then
-        echo "⚠️  Build failed — wiping cache for clean retry."
-        rm -rf "${CACHE_DIR:?}"/* || true
+        if [[ ! -f "${CACHE_DIR}/${doc_stem}.fdb_latexmk" ]]; then
+            echo "⚠️  Build failed with no latexmk state — wiping cache for a clean retry."
+            rm -rf "${CACHE_DIR:?}"/* || true
+        else
+            echo "⚠️  Build failed but latexmk state preserved — next run will resume incrementally."
+        fi
     fi
 }
 trap cleanup EXIT
