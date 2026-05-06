@@ -3,10 +3,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import pytest
-
 from mark2tex.frontmatter_validator import ValidationError, validate
-
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -106,7 +103,10 @@ def test_missing_title(tmp_path: Path) -> None:
 
 
 def test_missing_author(tmp_path: Path) -> None:
-    lines = [l for l in TCC_VALID.splitlines() if not l.startswith("author") and not l.strip().startswith("- name")]
+    lines = [
+        line for line in TCC_VALID.splitlines()
+        if not line.startswith("author") and not line.strip().startswith("- name")
+    ]
     fm = "\n".join(lines) + "\n"
     p = _write_md(tmp_path, fm)
     errors = validate(p, "tcc-abnt")
