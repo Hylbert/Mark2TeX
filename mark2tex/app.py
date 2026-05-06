@@ -493,6 +493,9 @@ class Mark2TeXApp(App):
         self.run_worker(
             lambda: self._run_compilation(abs_file, selected_template, selected_font),
             thread=True,
+            exclusive=True,
+            group="compile",
+            description=f"Compile {selected_file}",
         )
 
     def _run_compilation(
