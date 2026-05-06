@@ -115,6 +115,19 @@ _STRINGS: dict[str, dict[str, str]] = {
         "onboarding.init_nothing": "⚠ Nenhum arquivo novo copiado — arquivos já existem no diretório.",
         "onboarding.init_error": "✗ Falha ao inicializar: {msg}",
         "onboarding.footer": "ESC / Enter — fechar esta tela",
+        # YAML inject
+        "yaml.title": " ⚙  Configuração necessária ",
+        "yaml.body": (
+            "O arquivo '{filename}' não tem cabeçalho de configuração YAML.\n\n"
+            "O Mark2TeX vai adicionar um cabeçalho para o template '{template}'\n"
+            "no início do arquivo para que ele possa ser compilado."
+        ),
+        "yaml.hint_restore": "Você pode desfazer isso a qualquer momento com: mark2tex restore <arquivo>",
+        "yaml.btn_inject": "  Adicionar e compilar  ",
+        "yaml.btn_cancel": "  Cancelar  ",
+        "yaml.injected_ok": "✔ Cabeçalho YAML adicionado — compilando...",
+        "yaml.injected_err": "✗ Não foi possível modificar o arquivo: {msg}",
+        "yaml.no_frontmatter_badge": "⚠ sem YAML",
     },
     "en_US": {
         # Menu Global
@@ -228,6 +241,19 @@ _STRINGS: dict[str, dict[str, str]] = {
         "onboarding.init_nothing": "⚠ Nothing new to copy — files already exist in this directory.",
         "onboarding.init_error": "✗ Failed to initialise: {msg}",
         "onboarding.footer": "ESC / Enter — close this screen",
+        # YAML inject
+        "yaml.title": " ⚙  Configuration required ",
+        "yaml.body": (
+            "The file '{filename}' has no YAML configuration header.\n\n"
+            "Mark2TeX will add a header for template '{template}'\n"
+            "at the top of the file so it can be compiled."
+        ),
+        "yaml.hint_restore": "You can undo this at any time with: mark2tex restore <file>",
+        "yaml.btn_inject": "  Add header and compile  ",
+        "yaml.btn_cancel": "  Cancel  ",
+        "yaml.injected_ok": "✔ YAML header added — compiling...",
+        "yaml.injected_err": "✗ Could not modify the file: {msg}",
+        "yaml.no_frontmatter_badge": "⚠ no YAML",
     },
 }
 

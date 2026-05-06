@@ -1,9 +1,13 @@
+"""Mark2TeX CLI entry-point."""
+from __future__ import annotations
+
 import argparse
 import sys
 
 from .docker_manager import uninstall_docker_assets
 from .main import main as run_app
 from .setup_env import ensure_environment
+from .yaml_injector import has_backup, restore_file
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -27,6 +31,16 @@ def build_parser() -> argparse.ArgumentParser:
         metavar="NAME",
         default=None,
         help="Template name to copy (e.g. artigo-ieee, tcc-abnt, doc-tecnica)",
+    )
+
+    restore_cmd = subparsers.add_parser(
+        "restore",
+        help="Restore a .md file to its state before YAML frontmatter was injected",
+    )
+    restore_cmd.add_argument(
+        "file",
+        metavar="FILE",
+        help="Path to the .md file to restore",
     )
 
     return parser
@@ -58,7 +72,7 @@ def main() -> None:
     if command == "doctor":
         from rich.console import Console
         Console().print(
-            "[#e0a24a]\u26a0\ufe0f  `mark2tex doctor` is deprecated — use `mark2tex check` instead.[/]"
+            "[#e0a24a]⚠️  `mark2tex doctor` is deprecated — use `mark2tex check` instead.[/]"
         )
         _run_check()
         return
@@ -71,6 +85,19 @@ def main() -> None:
     if command == "init":
         from .onboarding import run_init
         run_init(template=getattr(args, "template", None))
+        return
+
+    if command == "restore":
+        file = args.file
+        if not has_backup(file):
+            print(f"✗ No backup found for '{file}'. Nothing to restore.", file=sys.stderr)
+            sys.exit(1)
+        success, msg = restore_file(file)
+        if success:
+            print(f"✔ {msg}")
+        else:
+            print(f"✗ {msg}", file=sys.stderr)
+            sys.exit(1)
         return
 
     # Default: open TUI (with first-run onboarding if needed)

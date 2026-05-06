@@ -496,3 +496,81 @@ OnboardingScreen {
     border-top: solid #03656b 20%;
     content-align: center middle;
 }
+
+/* ════════════════════════════════════════════════════════════
+   YamlInjectScreen
+   ════════════════════════════════════════════════════════════ */
+
+YamlInjectScreen {
+    align: center middle;
+    background: rgba(0,0,0,0.72);
+}
+
+#yaml-inject-window {
+    width: 68;
+    height: auto;
+    background: rgb(22,26,30);
+    border: round #03656b;
+    padding: 0;
+}
+
+#yaml-title {
+    background: #03656b;
+    color: white;
+    text-style: bold;
+    text-align: center;
+    width: 100%;
+    padding: 0 2;
+    content-align: center middle;
+}
+
+#yaml-body {
+    color: rgb(180,185,190);
+    padding: 1 3;
+    width: 100%;
+}
+
+#yaml-hint {
+    color: #e0a24a;
+    padding: 0 3;
+    width: 100%;
+    text-style: italic;
+}
+
+#yaml-spacer {
+    height: 1;
+}
+
+#yaml-btn-inject {
+    width: auto;
+    margin: 0 3 1 3;
+    background: #03656b;
+    color: white;
+    border: tall #4caf87;
+    text-style: bold;
+}
+
+#yaml-btn-inject:hover {
+    background: #4caf87;
+    color: rgb(22,26,30);
+    border: tall #4caf87;
+}
+
+#yaml-btn-cancel {
+    width: auto;
+    margin: 0 3 1 0;
+    background: transparent;
+    color: #888888;
+    border: tall #555555;
+}
+
+#yaml-btn-cancel:hover {
+    border: tall #e05c5c;
+    color: #e05c5c;
+}
+
+/* ── YAML no-frontmatter badge on file list ──────────────── */
+
+.file-item--no-yaml {
+    color: #e0a24a;
+}

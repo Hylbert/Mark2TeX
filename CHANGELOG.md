@@ -13,6 +13,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and 
 - `.gitattributes` enforcing LF line endings for all shell and text files.
 - `tocloft`-native TOC styling in `doc-tecnica` template (removes `hyperref` conflict).
 - `\tightlist` stub in `doc-tecnica` template (fixes Pandoc compact-list rendering).
+- YAML frontmatter injection flow: files without a YAML header are highlighted in amber in the TUI file list. A confirmation modal injects the required frontmatter before compilation. The original file is backed up to `~/.local/share/mark2tex/backups/` with an `index.json` manifest.
+- `mark2tex restore <file>` CLI subcommand to roll back a file to its pre-injection state.
 
 ### Fixed
 - CRLF line endings in `build.sh` causing `$'\r': command not found` on Windows Docker builds.
