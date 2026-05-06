@@ -7,8 +7,10 @@ FONT_VALUE=""
 OUTPUT_NAME="${INPUT_FILE%.*}"
 TEMPLATE_BASE="${MARK2TEX_TEMPLATE_DIR:-/app/templates}"
 
-# Cache dir for latexmk intermediate files (persistent across runs)
-CACHE_DIR="${OUTPUT_NAME}.m2t-cache"
+# Cache dir for latexmk intermediate files.
+# Provided by docker_manager.py as M2T_CACHE_DIR (mounted at /m2t-cache).
+# Falls back to /tmp/m2t-cache if run outside Docker.
+CACHE_DIR="${M2T_CACHE_DIR:-/tmp/m2t-cache}"
 
 # Parse optional --font <value> argument
 shift 2
@@ -68,20 +70,20 @@ sync
 
 # ---------------------------------------------------------------------------
 # Cleanup: remove only ephemeral per-run files.
-# The cache dir is intentionally kept for incremental reuse.
-# If latexmk failed AND no PDF was produced, wipe the cache so the
-# next run starts clean rather than re-failing on a corrupted graph.
+# The cache dir lives on the host via bind-mount and is intentionally kept.
+# If latexmk failed AND no PDF was produced, wipe the cache so the next
+# run starts clean rather than re-failing on a corrupted dependency graph.
 # ---------------------------------------------------------------------------
 cleanup() {
     local exit_code=$?
     echo "🧹 Cleaning up ephemeral build files..."
     rm -f "$OUTPUT_NAME".tex "$OUTPUT_NAME".xdv || true
-    # latexmk writes a copy of the PDF inside the cache dir when -outdir
+    # latexmk writes an extra PDF copy inside the cache dir when -outdir
     # differs from -auxdir; remove it to avoid confusion.
-    rm -f "${CACHE_DIR}/${OUTPUT_NAME##*/}.pdf" || true
-    if [[ $exit_code -ne 0 && ! -f "$OUTPUT_NAME.pdf" ]]; then
-        echo "⚠️  Build failed — wiping cache for next run."
-        rm -rf "$CACHE_DIR" || true
+    rm -f "${CACHE_DIR}/$(basename "$OUTPUT_NAME").pdf" || true
+    if [[ $exit_code -ne 0 && ! -f "${OUTPUT_NAME}.pdf" ]]; then
+        echo "⚠️  Build failed — wiping cache for clean retry."
+        rm -rf "${CACHE_DIR:?}"/* || true
     fi
 }
 trap cleanup EXIT
@@ -120,14 +122,14 @@ sync
 
 # ---------------------------------------------------------------------------
 # Incremental compilation
-# -auxdir  keeps all intermediate files (.aux, .fdb_latexmk, .fls, ...)
-#          in the cache dir so they survive between runs.
-# -outdir  places the final PDF next to the source .md file as before.
-# mkdir -p ensures the cache dir exists on first run.
+# -auxdir  keeps intermediate files in the host-mounted cache dir so they
+#          survive between container runs (container is --rm).
+# -outdir  places the final PDF next to the source .md file (unchanged).
 # ---------------------------------------------------------------------------
 mkdir -p "$CACHE_DIR"
 
-if [[ -f "${CACHE_DIR}/$(basename "$OUTPUT_NAME").fdb_latexmk" ]]; then
+DOC_STEM="$(basename "$OUTPUT_NAME")"
+if [[ -f "${CACHE_DIR}/${DOC_STEM}.fdb_latexmk" ]]; then
     echo "⚡ Incremental build: reusing latexmk cache from previous run."
 else
     echo "🔧 Full build: no previous cache found."
@@ -147,8 +149,8 @@ latexmk \
     -outdir="/app" \
     "$OUTPUT_NAME.tex"
 
-if [[ -f "$OUTPUT_NAME.pdf" ]]; then
-    echo "✅ PDF generated successfully: $OUTPUT_NAME.pdf"
+if [[ -f "${OUTPUT_NAME}.pdf" ]]; then
+    echo "✅ PDF generated successfully: ${OUTPUT_NAME}.pdf"
     echo "PROGRESS:100%"
     sync
 else

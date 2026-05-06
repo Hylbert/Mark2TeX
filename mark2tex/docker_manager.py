@@ -1,3 +1,4 @@
+import hashlib
 import os
 import platform
 import shutil
@@ -7,7 +8,7 @@ from pathlib import Path
 
 import docker
 from docker.errors import DockerException, ImageNotFound
-from platformdirs import user_config_dir, user_data_dir
+from platformdirs import user_cache_dir, user_config_dir, user_data_dir
 
 IMAGE_NAME = "mark2tex:latest"
 IMAGE_HUB  = "hylbert/mark2tex:latest"
@@ -20,6 +21,23 @@ COMPILE_TIMEOUT = int(os.environ.get("MARK2TEX_TIMEOUT", "300"))
 def _get_package_path() -> Path:
     """Return the root of the installed package (works in dev and pipx, Python 3.9+)."""
     return Path(str(resources.files("mark2tex")))
+
+
+def _compute_cache_dir(abs_file: str) -> Path:
+    """Return (and create) a per-document cache dir under the OS user-cache directory.
+
+    Path pattern:
+      Linux   : ~/.cache/mark2tex/<sha1>/
+      macOS   : ~/Library/Caches/mark2tex/<sha1>/
+      Windows : %LOCALAPPDATA%\\mark2tex\\Cache\\<sha1>\\
+
+    The SHA-1 is computed from the absolute path of the .md file so each
+    document gets an isolated bucket with no name collisions.
+    """
+    doc_hash = hashlib.sha1(abs_file.encode()).hexdigest()[:16]
+    cache_dir = Path(user_cache_dir("mark2tex", appauthor=False)) / doc_hash
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    return cache_dir
 
 
 class DockerManager:
@@ -46,8 +64,10 @@ class DockerManager:
     ):
         cwd           = Path.cwd().resolve()
         input_path    = cwd / input_file
+        abs_file      = str(input_path)
         build_sh      = (self.bin_dir / "build.sh").resolve()
         templates_dir = self.templates_dir.resolve()
+        cache_dir     = _compute_cache_dir(abs_file)
 
         if not input_path.exists():
             yield f"\u274c Error: Input file '{input_file}' not found."
@@ -55,9 +75,11 @@ class DockerManager:
 
         command = [
             "docker", "run", "--rm", "-i",
+            "--env", f"M2T_CACHE_DIR=/m2t-cache",
             "--mount", f"type=bind,src={cwd},dst=/app",
             "--mount", f"type=bind,src={build_sh},dst=/opt/mark2tex/build.sh,readonly",
             "--mount", f"type=bind,src={templates_dir},dst=/app/templates,readonly",
+            "--mount", f"type=bind,src={cache_dir},dst=/m2t-cache",
             IMAGE_NAME,
             "stdbuf", "-oL", "bash", "/opt/mark2tex/build.sh",
             f"/app/{Path(input_file).name}",
@@ -103,7 +125,7 @@ def uninstall_docker_assets() -> None:
     """Full cleanup: remove Docker images, user data dir, and user config dir."""
     from .i18n import t
 
-    # ── Docker images ─────────────────────────────────────────────────────
+    # ── Docker images ──────────────────────────────────────────────────
     try:
         client = docker.from_env()
         for tag in (IMAGE_HUB, IMAGE_NAME):
@@ -123,7 +145,7 @@ def uninstall_docker_assets() -> None:
     else:
         print(t("uninstall.data_not_found").format(path=data_dir))
 
-    # ── User config (language, theme) ─────────────────────────────────────────
+    # ── User config (language, theme) ──────────────────────────────────────────
     config_dir = Path(user_config_dir("mark2tex", appauthor=False))
     if config_dir.exists():
         shutil.rmtree(config_dir, ignore_errors=True)
@@ -131,6 +153,14 @@ def uninstall_docker_assets() -> None:
     else:
         print(t("uninstall.config_not_found").format(path=config_dir))
 
-    # ── Final hint ──────────────────────────────────────────────────────────
+    # ── Latexmk cache ────────────────────────────────────────────────────────
+    cache_root = Path(user_cache_dir("mark2tex", appauthor=False))
+    if cache_root.exists():
+        shutil.rmtree(cache_root, ignore_errors=True)
+        print(t("uninstall.cache_removed").format(path=cache_root))
+    else:
+        print(t("uninstall.cache_not_found").format(path=cache_root))
+
+    # ── Final hint ────────────────────────────────────────────────────────
     print()
     print(t("uninstall.pipx_hint"))
