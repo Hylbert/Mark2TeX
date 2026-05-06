@@ -6,6 +6,7 @@ from pathlib import Path
 
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
+from watchdog.observers.api import BaseObserver
 
 _logger = logging.getLogger("mark2tex.watcher")
 
@@ -81,8 +82,8 @@ class Mark2TeXWatcher(FileSystemEventHandler):
 
 class WatcherManager:
     def __init__(self) -> None:
-        self.observer = None
-        self.thread = None
+        self.observer: BaseObserver | None      = None
+        self.thread:   threading.Thread | None  = None
 
     def start_watching(self, file_path: str, template: str, compile_callback) -> None:
         self.stop_watching()
