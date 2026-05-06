@@ -12,6 +12,10 @@ from platformdirs import user_config_dir, user_data_dir
 IMAGE_NAME = "mark2tex:latest"
 IMAGE_HUB  = "hylbert/mark2tex:latest"
 
+# Timeout in seconds for a single compilation run.
+# Can be overridden via the MARK2TEX_TIMEOUT environment variable.
+COMPILE_TIMEOUT = int(os.environ.get("MARK2TEX_TIMEOUT", "300"))
+
 
 def _get_package_path() -> Path:
     """Return the root of the installed package (works in dev and pipx, Python 3.9+)."""
@@ -78,10 +82,19 @@ class DockerManager:
             universal_newlines=True,
         )
 
-        if process.stdout is not None:
-            yield from process.stdout
+        try:
+            stdout, _ = process.communicate(timeout=COMPILE_TIMEOUT)
+        except subprocess.TimeoutExpired:
+            process.kill()
+            process.communicate()  # drain the pipe to avoid ResourceWarning
+            yield (
+                f"\u274c Timeout: compilation exceeded {COMPILE_TIMEOUT}s "
+                "and was terminated. Set MARK2TEX_TIMEOUT to increase the limit."
+            )
+            return
 
-        process.wait()
+        yield from stdout.splitlines(keepends=True)
+
         if process.returncode != 0:
             yield f"\n\u274c Error: Docker process exited with code {process.returncode}"
 
@@ -90,7 +103,7 @@ def uninstall_docker_assets() -> None:
     """Full cleanup: remove Docker images, user data dir, and user config dir."""
     from .i18n import t
 
-    # ── Docker images ────────────────────────────────────────────────────────
+    # ── Docker images ─────────────────────────────────────────────────────
     try:
         client = docker.from_env()
         for tag in (IMAGE_HUB, IMAGE_NAME):
@@ -102,7 +115,7 @@ def uninstall_docker_assets() -> None:
     except DockerException as exc:
         print(t("uninstall.docker_error").format(error=exc))
 
-    # ── User data (backups, onboarding flag) ─────────────────────────────────
+    # ── User data (backups, onboarding flag) ───────────────────────────────────
     data_dir = Path(user_data_dir("mark2tex", appauthor=False))
     if data_dir.exists():
         shutil.rmtree(data_dir, ignore_errors=True)
@@ -110,7 +123,7 @@ def uninstall_docker_assets() -> None:
     else:
         print(t("uninstall.data_not_found").format(path=data_dir))
 
-    # ── User config (language, theme) ────────────────────────────────────────
+    # ── User config (language, theme) ─────────────────────────────────────────
     config_dir = Path(user_config_dir("mark2tex", appauthor=False))
     if config_dir.exists():
         shutil.rmtree(config_dir, ignore_errors=True)
@@ -118,6 +131,6 @@ def uninstall_docker_assets() -> None:
     else:
         print(t("uninstall.config_not_found").format(path=config_dir))
 
-    # ── Final hint ───────────────────────────────────────────────────────────
+    # ── Final hint ──────────────────────────────────────────────────────────
     print()
     print(t("uninstall.pipx_hint"))
