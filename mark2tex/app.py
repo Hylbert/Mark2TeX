@@ -31,7 +31,7 @@ from .settings_screen import LanguageChanged, SettingsScreen
 from .utils.visuals import M2TBannerWidget, M2TMenuOption
 from .watcher import WatcherManager
 from .yaml_inject_screen import YamlInjectScreen
-from .yaml_injector import has_frontmatter, inject_frontmatter
+from .yaml_injector import has_frontmatter, inject_frontmatter, swap_template
 
 # ---------------------------------------------------------------------------
 # Fontes disponíveis: (id interno, rótulo exibido na TUI)
@@ -230,8 +230,6 @@ class Mark2TeXApp(App):
         self._populate_templates()
         self._populate_fonts()
         self._populate_files()
-        # Show onboarding on first run; the callback refreshes the file panel
-        # if the user chose to initialise the project from within the screen.
         if is_first_run():
             self.call_after_refresh(
                 self.push_screen,
@@ -261,11 +259,9 @@ class Mark2TeXApp(App):
         file_list = self.query_one("#file-list", ListView)
         file_list.clear()
 
-        # Update border title to show only the current folder name
         folder_name = self._current_dir.name or str(self._current_dir)
         self.query_one("#file-explorer").border_title = folder_name
 
-        # ../ entry when not at the filesystem root
         cwd_root = Path.cwd()
         if self._current_dir != cwd_root:
             parent = self._current_dir.parent
@@ -318,6 +314,26 @@ class Mark2TeXApp(App):
     def on_language_changed(self, _: LanguageChanged) -> None:
         self._refresh_ui_labels()
 
+    def _apply_template_swap(self, new_template: str) -> None:
+        """If a file with frontmatter is selected, patch its header surgically."""
+        if not self.selected_file:
+            return
+        abs_file = str(self._current_dir / self.selected_file)
+        if not has_frontmatter(abs_file):
+            return
+        ok = swap_template(abs_file, new_template)
+        if ok:
+            self._log_console(
+                t("yaml.template_swapped").format(template=new_template),
+                style="#4caf87",
+            )
+            self._update_preview(self.selected_file)
+        else:
+            self._log_console(
+                t("yaml.template_swap_err").format(msg="I/O error"),
+                style="#e05c5c",
+            )
+
     def on_list_view_selected(self, event: ListView.Selected) -> None:
         item = event.item
         if event.list_view.id == "file-list":
@@ -330,6 +346,7 @@ class Mark2TeXApp(App):
         elif event.list_view.id == "template-list" and isinstance(item, OptionItem):
             self.selected_template = item.label_text
             self.query_one("#status-template", Label).update(f"Template : {self.selected_template}")
+            self._apply_template_swap(item.label_text)
         elif event.list_view.id == "font-list" and isinstance(item, FontItem):
             self.selected_font = item.font_id
             self.query_one("#status-font", Label).update(f"Fonte    : {item.display_label}")
@@ -338,7 +355,6 @@ class Mark2TeXApp(App):
         item = event.item
         if event.list_view.id == "file-list":
             if isinstance(item, DirItem):
-                # Do not update preview or status for directory entries
                 return
             if isinstance(item, OptionItem):
                 self.selected_file = item.label_text
@@ -348,6 +364,7 @@ class Mark2TeXApp(App):
         elif event.list_view.id == "template-list" and isinstance(item, OptionItem):
             self.selected_template = item.label_text
             self.query_one("#status-template", Label).update(f"Template : {self.selected_template}")
+            self._apply_template_swap(item.label_text)
         elif event.list_view.id == "font-list" and isinstance(item, FontItem):
             self.selected_font = item.font_id
             self.query_one("#status-font", Label).update(f"Fonte    : {item.display_label}")
@@ -459,7 +476,6 @@ class Mark2TeXApp(App):
             self._log_console(t("compile.select_file"), style="#e05c5c")
             return
         abs_file = str(self._current_dir / selected_file)
-        # If the file lacks YAML frontmatter, prompt the user before compiling
         if not has_frontmatter(abs_file):
             self.push_screen(
                 YamlInjectScreen(abs_file, selected_template),
@@ -468,7 +484,6 @@ class Mark2TeXApp(App):
                 ),
             )
             return
-        # Non-blocking frontmatter warnings — always logged, never block build
         self._run_frontmatter_warnings(abs_file, selected_template)
         self.compile_specific_document(selected_file, selected_template, selected_font)
 
@@ -486,7 +501,6 @@ class Mark2TeXApp(App):
         ok = inject_frontmatter(abs_file, selected_template)
         if ok:
             self._log_console(t("yaml.injected_ok"), style="#4caf87")
-            # Refresh file list so badge is removed for this file
             self._populate_files()
             self.compile_specific_document(selected_file, selected_template, selected_font)
         else:
