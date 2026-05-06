@@ -1,13 +1,16 @@
 import os
 import platform
+import shutil
 import subprocess
 from importlib import resources
 from pathlib import Path
 
 import docker
 from docker.errors import DockerException, ImageNotFound
+from platformdirs import user_config_dir, user_data_dir
 
 IMAGE_NAME = "mark2tex:latest"
+IMAGE_HUB  = "hylbert/mark2tex:latest"
 
 
 def _get_package_path() -> Path:
@@ -84,12 +87,37 @@ class DockerManager:
 
 
 def uninstall_docker_assets() -> None:
+    """Full cleanup: remove Docker images, user data dir, and user config dir."""
+    from .i18n import t
+
+    # ── Docker images ────────────────────────────────────────────────────────
     try:
         client = docker.from_env()
-        image  = client.images.get(IMAGE_NAME)
-        client.images.remove(image.id, force=True)
-        print(f"Imagem {IMAGE_NAME} removida com sucesso.")
-    except ImageNotFound:
-        print("Imagem Docker do Mark2TeX n\u00e3o encontrada.")
+        for tag in (IMAGE_HUB, IMAGE_NAME):
+            try:
+                client.images.remove(tag, force=True)
+                print(t("uninstall.image_removed").format(tag=tag))
+            except ImageNotFound:
+                print(t("uninstall.image_not_found").format(tag=tag))
     except DockerException as exc:
-        print(f"Erro ao remover imagem Docker: {exc}")
+        print(t("uninstall.docker_error").format(error=exc))
+
+    # ── User data (backups, onboarding flag) ─────────────────────────────────
+    data_dir = Path(user_data_dir("mark2tex", appauthor=False))
+    if data_dir.exists():
+        shutil.rmtree(data_dir, ignore_errors=True)
+        print(t("uninstall.data_removed").format(path=data_dir))
+    else:
+        print(t("uninstall.data_not_found").format(path=data_dir))
+
+    # ── User config (language, theme) ────────────────────────────────────────
+    config_dir = Path(user_config_dir("mark2tex", appauthor=False))
+    if config_dir.exists():
+        shutil.rmtree(config_dir, ignore_errors=True)
+        print(t("uninstall.config_removed").format(path=config_dir))
+    else:
+        print(t("uninstall.config_not_found").format(path=config_dir))
+
+    # ── Final hint ───────────────────────────────────────────────────────────
+    print()
+    print(t("uninstall.pipx_hint"))
