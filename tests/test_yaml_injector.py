@@ -1,11 +1,8 @@
 """Tests for mark2tex.yaml_injector."""
 from __future__ import annotations
 
-import json
 from pathlib import Path
 from unittest.mock import patch
-
-import pytest
 
 from mark2tex.yaml_injector import (
     build_frontmatter,
@@ -14,7 +11,6 @@ from mark2tex.yaml_injector import (
     inject_frontmatter,
     restore_file,
 )
-
 
 # ---------------------------------------------------------------------------
 # has_frontmatter

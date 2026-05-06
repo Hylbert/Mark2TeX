@@ -29,8 +29,8 @@ from .onboarding import OnboardingScreen, is_first_run
 from .settings_screen import LanguageChanged, SettingsScreen
 from .utils.visuals import M2TBannerWidget, M2TMenuOption
 from .watcher import WatcherManager
-from .yaml_injector import has_frontmatter, inject_frontmatter
 from .yaml_inject_screen import YamlInjectScreen
+from .yaml_injector import has_frontmatter, inject_frontmatter
 
 # ---------------------------------------------------------------------------
 # Fontes disponíveis: (id interno, rótulo exibido na TUI)

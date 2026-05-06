@@ -5,6 +5,7 @@ import json
 import re
 from datetime import date
 from pathlib import Path
+from typing import Any, cast
 
 from platformdirs import user_data_dir
 
@@ -75,11 +76,11 @@ def _index_path() -> Path:
     return _backup_dir() / "index.json"
 
 
-def _load_index() -> dict:
+def _load_index() -> dict[str, Any]:
     idx = _index_path()
     if idx.exists():
         try:
-            return json.loads(idx.read_text(encoding="utf-8"))
+            return cast(dict[str, Any], json.loads(idx.read_text(encoding="utf-8")))
         except (json.JSONDecodeError, OSError):
             return {}
     return {}
