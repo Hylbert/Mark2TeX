@@ -12,6 +12,14 @@
 \usepackage{fontspec}
 \setmainfont{TeX Gyre Termes}
 
+% --- IDIOMA (XeLaTeX-nativo, integra com fontspec) ---
+\usepackage{polyglossia}
+\setdefaultlanguage{$if(lang)$$lang$$else$portuguese$endif$}
+
+% --- ESPAÇAMENTO (ABNT NBR 6022 — 1,5 entrelinhas) ---
+\usepackage{setspace}
+\OnehalfSpacing
+
 % --- PACOTES ESSENCIAIS ---
 \usepackage{indentfirst}
 \usepackage{color}
@@ -21,6 +29,7 @@
 \usepackage{booktabs}
 \usepackage{longtable}
 \usepackage{hyperref}
+\usepackage{csquotes}
 \usepackage{microtype}
 \usepackage{array}
 \usepackage{calc}
@@ -50,9 +59,6 @@
 \newcommand{\ExtensionTok}[1]{#1}
 
 % --- METADADOS ---
-% Suporte a author como string simples ou lista de objetos {name, institution, ...}
-% Caso string:  author: "Nome"
-% Caso lista:   author:\n  - name: "Nome"\n    institution: "..."
 \titulo{$title$}
 \autor{$for(author)$$if(author.name)$$author.name$$else$$author$$endif$$sep$ \and $endfor$}
 \data{$if(year)$$year$$else$\the\year$endif$}

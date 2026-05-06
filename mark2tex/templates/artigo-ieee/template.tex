@@ -22,6 +22,7 @@ $endif$
 \usepackage{longtable}
 \usepackage{hyperref}
 \usepackage{array}
+\usepackage{csquotes}
 \usepackage{microtype}
 
 % --- SUPORTE A CÓDIGO (Pandoc) ---
@@ -54,9 +55,6 @@ $endif$
 
 \title{$title$$if(thanks)$\thanks{$thanks$}$endif$}
 
-% Suporte a author como string simples ou lista de objetos {name, institution, city, email}
-% Caso string:  author: "Nome"
-% Caso lista:   author:\n  - name: "Nome"\n    institution: "..."\n    city: "..."\n    email: "..."
 \author{
 $for(author)$
   \IEEEauthorblockN{$if(author.name)$$author.name$$else$$author$$endif$}
