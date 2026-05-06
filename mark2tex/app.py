@@ -230,6 +230,8 @@ class Mark2TeXApp(App):
         self._populate_templates()
         self._populate_fonts()
         self._populate_files()
+        # Show onboarding on first run; the callback refreshes the file panel
+        # if the user chose to initialise the project from within the screen.
         if is_first_run():
             self.call_after_refresh(
                 self.push_screen,
@@ -259,9 +261,11 @@ class Mark2TeXApp(App):
         file_list = self.query_one("#file-list", ListView)
         file_list.clear()
 
+        # Update border title to show only the current folder name
         folder_name = self._current_dir.name or str(self._current_dir)
         self.query_one("#file-explorer").border_title = folder_name
 
+        # ../ entry when not at the filesystem root
         cwd_root = Path.cwd()
         if self._current_dir != cwd_root:
             parent = self._current_dir.parent
@@ -334,6 +338,7 @@ class Mark2TeXApp(App):
         item = event.item
         if event.list_view.id == "file-list":
             if isinstance(item, DirItem):
+                # Do not update preview or status for directory entries
                 return
             if isinstance(item, OptionItem):
                 self.selected_file = item.label_text
@@ -413,6 +418,15 @@ class Mark2TeXApp(App):
     def _set_progress(self, value: int) -> None:
         self.query_one("#progress-bar", ProgressBar).update(progress=value)
 
+    def _run_frontmatter_warnings(self, abs_file: str, selected_template: str) -> None:
+        """Log frontmatter validation warnings in yellow. Never blocks compilation."""
+        errors = validate_frontmatter(abs_file, selected_template)
+        if not errors:
+            return
+        self._log_console(t("validator.warnings_header"), style="#e0a24a")
+        for err in errors:
+            self._log_console(err.message, style="#e0a24a")
+
     def toggle_watch_mode(self) -> None:
         btn = self.query_one("#watch-btn", Button)
         if not self.is_watching:
@@ -445,6 +459,7 @@ class Mark2TeXApp(App):
             self._log_console(t("compile.select_file"), style="#e05c5c")
             return
         abs_file = str(self._current_dir / selected_file)
+        # If the file lacks YAML frontmatter, prompt the user before compiling
         if not has_frontmatter(abs_file):
             self.push_screen(
                 YamlInjectScreen(abs_file, selected_template),
@@ -453,6 +468,8 @@ class Mark2TeXApp(App):
                 ),
             )
             return
+        # Non-blocking frontmatter warnings — always logged, never block build
+        self._run_frontmatter_warnings(abs_file, selected_template)
         self.compile_specific_document(selected_file, selected_template, selected_font)
 
     def _on_yaml_inject_dismissed(
@@ -469,6 +486,7 @@ class Mark2TeXApp(App):
         ok = inject_frontmatter(abs_file, selected_template)
         if ok:
             self._log_console(t("yaml.injected_ok"), style="#4caf87")
+            # Refresh file list so badge is removed for this file
             self._populate_files()
             self.compile_specific_document(selected_file, selected_template, selected_font)
         else:
@@ -484,18 +502,6 @@ class Mark2TeXApp(App):
         selected_font: str | None = None,
     ) -> None:
         abs_file = str(self._current_dir / selected_file)
-
-        # --- Frontmatter validation: fail fast before touching Docker ---
-        errors = validate_frontmatter(abs_file, selected_template)
-        if errors:
-            for err in errors:
-                self._log_console(f"⚠️  {err.message}", style="#e0a24a")
-            self._log_console(
-                "Fix the issues above and try again.",
-                style="#e05c5c",
-            )
-            return
-
         self.run_worker(
             lambda: self._run_compilation(abs_file, selected_template, selected_font),
             thread=True,

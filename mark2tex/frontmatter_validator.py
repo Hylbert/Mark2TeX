@@ -26,6 +26,8 @@ except ModuleNotFoundError as exc:  # pragma: no cover
         "Install it with: pip install PyYAML"
     ) from exc
 
+from .i18n import t
+
 # ---------------------------------------------------------------------------
 # Types
 # ---------------------------------------------------------------------------
@@ -65,17 +67,17 @@ _REQUIRED_EXTRA: dict[str, tuple[str, ...]] = {
 
 # Default placeholder values copied from yaml_injector._TEMPLATE_FIELDS
 _PLACEHOLDERS: frozenset[str] = frozenset({
-    "T\u00edtulo do TCC",
-    "T\u00edtulo do Artigo",
+    "Título do TCC",
+    "Título do Artigo",
     "Article Title",
-    "Documento T\u00e9cnico",
-    "T\u00edtulo do Projeto",
+    "Documento Técnico",
+    "Título do Projeto",
     "Autor",
     "Author",
     "Nome Completo do Autor",
     "Nome do Orientador",
     "Prof. Dr. Nome do Orientador",
-    "Nome da Institui\u00e7\u00e3o de Ensino",
+    "Nome da Instituição de Ensino",
     "Nome do Curso",
     "Nome do Departamento",
     "Nome do Campus",
@@ -136,6 +138,9 @@ def validate(file_path: str | Path, selected_template: str) -> list[ValidationEr
     Returns a (possibly empty) list of :class:`ValidationError`.
     Never raises — parse failures are returned as a ValidationError with
     code ``parse_error``.
+
+    Messages are resolved via t() at call-time so the active language is
+    always respected.
     """
     path = Path(file_path)
     errors: list[ValidationError] = []
@@ -146,7 +151,7 @@ def validate(file_path: str | Path, selected_template: str) -> list[ValidationEr
             ValidationError(
                 field="frontmatter",
                 code="parse_error",
-                message="Could not parse YAML frontmatter. Make sure the file starts with a valid --- block.",
+                message=t("validator.parse_error"),
             )
         ]
 
@@ -160,7 +165,7 @@ def validate(file_path: str | Path, selected_template: str) -> list[ValidationEr
             errors.append(ValidationError(
                 field=field,
                 code="missing",
-                message=f"Required field '{field}' is missing or empty.",
+                message=t("validator.missing").format(field=field),
             ))
 
     # ------------------------------------------------------------------ #
@@ -172,7 +177,7 @@ def validate(file_path: str | Path, selected_template: str) -> list[ValidationEr
             errors.append(ValidationError(
                 field=field,
                 code="placeholder",
-                message=f"Field '{field}' still contains the default placeholder value. Please fill it in before compiling.",
+                message=t("validator.placeholder").format(field=field),
             ))
 
     # ------------------------------------------------------------------ #
@@ -183,10 +188,9 @@ def validate(file_path: str | Path, selected_template: str) -> list[ValidationEr
         errors.append(ValidationError(
             field="template",
             code="template_mismatch",
-            message=(
-                f"Frontmatter declares template '{fm_template}' "
-                f"but the TUI has '{selected_template}' selected. "
-                "Update the frontmatter or re-select the correct template."
+            message=t("validator.template_mismatch").format(
+                fm_template=fm_template,
+                selected=selected_template,
             ),
         ))
 
@@ -198,9 +202,9 @@ def validate(file_path: str | Path, selected_template: str) -> list[ValidationEr
         errors.append(ValidationError(
             field="lang",
             code="invalid_lang",
-            message=(
-                f"lang '{lang}' is not a recognised value. "
-                f"Accepted values: {', '.join(sorted(_VALID_LANGS))}."
+            message=t("validator.invalid_lang").format(
+                lang=lang,
+                accepted=", ".join(sorted(_VALID_LANGS)),
             ),
         ))
 
