@@ -32,8 +32,16 @@ $else$
   \setmainfont{TeX Gyre Termes}
 $endif$$endif$$endif$
 
+% --- IDIOMA (XeLaTeX-nativo, integra com fontspec) ---
+\usepackage{polyglossia}
+\setdefaultlanguage{$if(lang)$$lang$$else$portuguese$endif$}
+
 % --- MARGENS (ABNT NBR 14724) ---
 \usepackage[a4paper,top=3cm,left=3cm,right=2cm,bottom=2cm]{geometry}
+
+% --- ESPAÇAMENTO (ABNT NBR 14724 — 1,5 entrelinhas) ---
+\usepackage{setspace}
+\OnehalfSpacing
 
 % --- PACOTES ESSENCIAIS ---
 \usepackage{graphicx}
@@ -48,6 +56,7 @@ $endif$$endif$$endif$
 \usepackage{listings}
 \usepackage{fancyvrb}
 \usepackage{upquote}
+\usepackage{csquotes}
 \usepackage{microtype}
 \usepackage{hyperref}
 \hypersetup{
