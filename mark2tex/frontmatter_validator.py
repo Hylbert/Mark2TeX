@@ -19,9 +19,12 @@ from pathlib import Path
 from typing import Any
 
 try:
-    import yaml  # PyYAML is already a transitive dep via several packages
-except ModuleNotFoundError:  # pragma: no cover
-    yaml = None  # type: ignore[assignment]
+    import yaml
+except ModuleNotFoundError as exc:  # pragma: no cover
+    raise ImportError(
+        "PyYAML is required by mark2tex.frontmatter_validator. "
+        "Install it with: pip install PyYAML"
+    ) from exc
 
 # ---------------------------------------------------------------------------
 # Types
@@ -38,7 +41,16 @@ class ValidationError:
 # Constants
 # ---------------------------------------------------------------------------
 
-_FRONTMATTER_RE = re.compile(r"^---\s*\n(.*?)\n---\s*\n", re.DOTALL)
+# Matches the opening --- and captures everything up to the closing ---.
+# Flags:
+#   re.DOTALL   — . matches newlines inside the YAML block
+#   re.MULTILINE — ^ matches the very start of the string
+# The closing delimiter accepts an optional leading newline (\n?) so it
+# works whether or not the last YAML field line ends with an extra blank line.
+_FRONTMATTER_RE = re.compile(
+    r"^---[ \t]*\r?\n(.*?)\r?\n?---[ \t]*\r?\n",
+    re.DOTALL | re.MULTILINE,
+)
 
 # Fields required for every template
 _REQUIRED_COMMON: tuple[str, ...] = ("title", "author", "template")
@@ -52,7 +64,6 @@ _REQUIRED_EXTRA: dict[str, tuple[str, ...]] = {
 }
 
 # Default placeholder values copied from yaml_injector._TEMPLATE_FIELDS
-# These are flagged as "not filled in yet" regardless of template.
 _PLACEHOLDERS: frozenset[str] = frozenset({
     "T\u00edtulo do TCC",
     "T\u00edtulo do Artigo",
@@ -68,7 +79,6 @@ _PLACEHOLDERS: frozenset[str] = frozenset({
     "Nome do Curso",
     "Nome do Departamento",
     "Nome do Campus",
-
 })
 
 _VALID_LANGS: frozenset[str] = frozenset({
@@ -93,9 +103,6 @@ def _extract_yaml(file_path: Path) -> dict[str, Any] | None:
     if not m:
         return None
 
-    if yaml is None:
-        return None
-
     try:
         data = yaml.safe_load(m.group(1))
         return data if isinstance(data, dict) else None
@@ -109,7 +116,6 @@ def _str_value(data: dict[str, Any], key: str) -> str:
     if val is None:
         return ""
     if isinstance(val, list):
-        # author: [{name: "..."}] pattern used in tcc-abnt
         names = []
         for item in val:
             if isinstance(item, dict):
