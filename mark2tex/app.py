@@ -23,6 +23,7 @@ from textual.widgets import (
 
 from . import config as cfg
 from .docker_manager import DockerManager
+from .frontmatter_validator import validate as validate_frontmatter
 from .i18n import set_language, t
 from .log_translator import log_translator
 from .onboarding import OnboardingScreen, is_first_run
@@ -229,8 +230,6 @@ class Mark2TeXApp(App):
         self._populate_templates()
         self._populate_fonts()
         self._populate_files()
-        # Show onboarding on first run; the callback refreshes the file panel
-        # if the user chose to initialise the project from within the screen.
         if is_first_run():
             self.call_after_refresh(
                 self.push_screen,
@@ -260,11 +259,9 @@ class Mark2TeXApp(App):
         file_list = self.query_one("#file-list", ListView)
         file_list.clear()
 
-        # Update border title to show only the current folder name
         folder_name = self._current_dir.name or str(self._current_dir)
         self.query_one("#file-explorer").border_title = folder_name
 
-        # ../ entry when not at the filesystem root
         cwd_root = Path.cwd()
         if self._current_dir != cwd_root:
             parent = self._current_dir.parent
@@ -337,7 +334,6 @@ class Mark2TeXApp(App):
         item = event.item
         if event.list_view.id == "file-list":
             if isinstance(item, DirItem):
-                # Do not update preview or status for directory entries
                 return
             if isinstance(item, OptionItem):
                 self.selected_file = item.label_text
@@ -449,7 +445,6 @@ class Mark2TeXApp(App):
             self._log_console(t("compile.select_file"), style="#e05c5c")
             return
         abs_file = str(self._current_dir / selected_file)
-        # If the file lacks YAML frontmatter, prompt the user before compiling
         if not has_frontmatter(abs_file):
             self.push_screen(
                 YamlInjectScreen(abs_file, selected_template),
@@ -474,7 +469,6 @@ class Mark2TeXApp(App):
         ok = inject_frontmatter(abs_file, selected_template)
         if ok:
             self._log_console(t("yaml.injected_ok"), style="#4caf87")
-            # Refresh file list so badge is removed for this file
             self._populate_files()
             self.compile_specific_document(selected_file, selected_template, selected_font)
         else:
@@ -490,6 +484,18 @@ class Mark2TeXApp(App):
         selected_font: str | None = None,
     ) -> None:
         abs_file = str(self._current_dir / selected_file)
+
+        # --- Frontmatter validation: fail fast before touching Docker ---
+        errors = validate_frontmatter(abs_file, selected_template)
+        if errors:
+            for err in errors:
+                self._log_console(f"⚠️  {err.message}", style="#e0a24a")
+            self._log_console(
+                "Fix the issues above and try again.",
+                style="#e05c5c",
+            )
+            return
+
         self.run_worker(
             lambda: self._run_compilation(abs_file, selected_template, selected_font),
             thread=True,
