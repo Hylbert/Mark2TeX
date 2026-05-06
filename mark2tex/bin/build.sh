@@ -7,6 +7,9 @@ FONT_VALUE=""
 OUTPUT_NAME="${INPUT_FILE%.*}"
 TEMPLATE_BASE="${MARK2TEX_TEMPLATE_DIR:-/app/templates}"
 
+# Cache dir for latexmk intermediate files (persistent across runs)
+CACHE_DIR="${OUTPUT_NAME}.m2t-cache"
+
 # Parse optional --font <value> argument
 shift 2
 while [[ $# -gt 0 ]]; do
@@ -63,12 +66,23 @@ fi
 echo "PROGRESS:10%"
 sync
 
+# ---------------------------------------------------------------------------
+# Cleanup: remove only ephemeral per-run files.
+# The cache dir is intentionally kept for incremental reuse.
+# If latexmk failed AND no PDF was produced, wipe the cache so the
+# next run starts clean rather than re-failing on a corrupted graph.
+# ---------------------------------------------------------------------------
 cleanup() {
-    echo "🧹 Cleaning up auxiliary files..."
-    rm -f "$OUTPUT_NAME".aux "$OUTPUT_NAME".log "$OUTPUT_NAME".out "$OUTPUT_NAME".toc \
-          "$OUTPUT_NAME".lot "$OUTPUT_NAME".lof "$OUTPUT_NAME".bbl "$OUTPUT_NAME".blg \
-          "$OUTPUT_NAME".synctex.gz "$OUTPUT_NAME".fls "$OUTPUT_NAME".fdb_latexmk \
-          "$OUTPUT_NAME".xdv "$OUTPUT_NAME".tex || true
+    local exit_code=$?
+    echo "🧹 Cleaning up ephemeral build files..."
+    rm -f "$OUTPUT_NAME".tex "$OUTPUT_NAME".xdv || true
+    # latexmk writes a copy of the PDF inside the cache dir when -outdir
+    # differs from -auxdir; remove it to avoid confusion.
+    rm -f "${CACHE_DIR}/${OUTPUT_NAME##*/}.pdf" || true
+    if [[ $exit_code -ne 0 && ! -f "$OUTPUT_NAME.pdf" ]]; then
+        echo "⚠️  Build failed — wiping cache for next run."
+        rm -rf "$CACHE_DIR" || true
+    fi
 }
 trap cleanup EXIT
 
@@ -79,9 +93,8 @@ if [[ -f "referencias.bib" ]]; then
     BIB_ARGS="--bibliography=referencias.bib --citeproc"
 fi
 
-# Converte --font em flag booleana para o Pandoc.
-# Pandoc NÃO suporta comparação de strings em templates ($if(var == "x")$).
-# Valores aceitos: times | arial | helvetica | ubuntu
+# Convert --font to boolean metadata flags for Pandoc.
+# Pandoc does NOT support string comparison in templates.
 FONT_ARGS=""
 case "$FONT_VALUE" in
     arial)     FONT_ARGS="--metadata=font-arial:true" ;;
@@ -105,10 +118,34 @@ echo "✅ Markdown converted to LaTeX."
 echo "PROGRESS:40%"
 sync
 
+# ---------------------------------------------------------------------------
+# Incremental compilation
+# -auxdir  keeps all intermediate files (.aux, .fdb_latexmk, .fls, ...)
+#          in the cache dir so they survive between runs.
+# -outdir  places the final PDF next to the source .md file as before.
+# mkdir -p ensures the cache dir exists on first run.
+# ---------------------------------------------------------------------------
+mkdir -p "$CACHE_DIR"
+
+if [[ -f "${CACHE_DIR}/$(basename "$OUTPUT_NAME").fdb_latexmk" ]]; then
+    echo "⚡ Incremental build: reusing latexmk cache from previous run."
+else
+    echo "🔧 Full build: no previous cache found."
+fi
+
 echo "🔨 Compiling PDF with latexmk..."
 echo "PROGRESS:50%"
 sync
-latexmk -pdfxe -f -interaction=nonstopmode -shell-escape -bibtex "$OUTPUT_NAME.tex"
+
+latexmk \
+    -pdfxe \
+    -f \
+    -interaction=nonstopmode \
+    -shell-escape \
+    -bibtex \
+    -auxdir="$CACHE_DIR" \
+    -outdir="/app" \
+    "$OUTPUT_NAME.tex"
 
 if [[ -f "$OUTPUT_NAME.pdf" ]]; then
     echo "✅ PDF generated successfully: $OUTPUT_NAME.pdf"
