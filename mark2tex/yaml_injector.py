@@ -15,20 +15,28 @@ from platformdirs import user_data_dir
 
 _FRONTMATTER_RE = re.compile(r"^---\s*\n.*?\n---\s*\n", re.DOTALL)
 
+# Captures a simple scalar YAML field: key: "value" or key: value
+_FIELD_RE = re.compile(r'^(?P<key>[\w-]+):\s*(?P<value>.+)$', re.MULTILINE)
+
 _TEMPLATE_FIELDS: dict[str, dict[str, str]] = {
     "tcc-abnt": {
-        "title": "Título do TCC",
+        "title": "T\u00edtulo do TCC",
         "author": "Autor",
         "date": "",
         "template": "tcc-abnt",
         "lang": "pt-BR",
+        "year": "",
+        "institution": "Nome da Institui\u00e7\u00e3o de Ensino",
+        "course": "Nome do Curso",
+        "advisor": "Prof. Dr. Nome do Orientador",
     },
     "artigo-abnt": {
-        "title": "Título do Artigo",
+        "title": "T\u00edtulo do Artigo",
         "author": "Autor",
         "date": "",
         "template": "artigo-abnt",
         "lang": "pt-BR",
+        "institution": "Nome da Institui\u00e7\u00e3o de Ensino",
     },
     "artigo-ieee": {
         "title": "Article Title",
@@ -38,14 +46,14 @@ _TEMPLATE_FIELDS: dict[str, dict[str, str]] = {
         "lang": "en-US",
     },
     "doc-tecnica": {
-        "title": "Documento Técnico",
+        "title": "Documento T\u00e9cnico",
         "author": "Autor",
         "date": "",
         "template": "doc-tecnica",
         "lang": "pt-BR",
     },
     "projeto": {
-        "title": "Título do Projeto",
+        "title": "T\u00edtulo do Projeto",
         "author": "Autor",
         "date": "",
         "template": "projeto",
@@ -60,6 +68,10 @@ _DEFAULT_FIELDS: dict[str, str] = {
     "template": "",
     "lang": "pt-BR",
 }
+
+# Fields that are template-specific (not universal) — used by swap_template
+# to decide what to add/remove when changing templates.
+_COMMON_FIELDS: frozenset[str] = frozenset({"title", "author", "date", "lang"})
 
 
 # ---------------------------------------------------------------------------
@@ -95,6 +107,25 @@ def _bak_filename(file_path: Path) -> str:
     return str(file_path.resolve()).replace("/", "_").replace("\\", "_").replace(":", "_") + ".bak"
 
 
+def _parse_scalar_fields(fm_block: str) -> dict[str, str]:
+    """Extract simple key: value pairs from a raw frontmatter block string.
+
+    Handles quoted and unquoted values. Multi-line / list fields (e.g.
+    author as a YAML list) are skipped intentionally — swap_template only
+    patches scalar fields.
+    """
+    fields: dict[str, str] = {}
+    for m in _FIELD_RE.finditer(fm_block):
+        key = m.group("key")
+        raw = m.group("value").strip()
+        # Strip surrounding quotes if present
+        if (raw.startswith('"') and raw.endswith('"')) or \
+           (raw.startswith("'") and raw.endswith("'")):
+            raw = raw[1:-1]
+        fields[key] = raw
+    return fields
+
+
 # ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
@@ -119,6 +150,70 @@ def build_frontmatter(template: str) -> str:
     lines.append("---")
     lines.append("")  # blank line after closing ---
     return "\n".join(lines) + "\n"
+
+
+def swap_template(file_path: str | Path, new_template: str) -> bool:
+    """Update the frontmatter of *file_path* to *new_template* surgically.
+
+    Rules:
+    - ``template:`` and ``date:`` are always updated.
+    - Fields shared between old and new template keep the user's current value.
+    - Fields exclusive to the new template are appended with their placeholder.
+    - Fields exclusive to the old template (not in new template) are removed.
+    - Common fields (title, author, date, lang) are always preserved.
+
+    Returns True on success, False on any I/O or parse error.
+    Never raises.
+    """
+    path = Path(file_path).resolve()
+    try:
+        content = path.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError):
+        return False
+
+    fm_match = _FRONTMATTER_RE.match(content)
+    if not fm_match:
+        return False  # No frontmatter to patch — caller should use inject_frontmatter
+
+    fm_raw = fm_match.group(0)  # includes opening/closing ---
+    body = content[fm_match.end():]
+
+    # Current scalar values in the frontmatter
+    current_values = _parse_scalar_fields(fm_raw)
+
+    # Fields defined for the new template
+    new_template_fields = dict(_TEMPLATE_FIELDS.get(new_template, _DEFAULT_FIELDS))
+    new_template_fields["template"] = new_template
+    new_template_fields["date"] = date.today().isoformat()
+
+    # Build the merged field set:
+    # 1. Start with new template field order
+    # 2. For each field, prefer the user's current value unless it's a
+    #    template-specific field not in the old frontmatter at all (new addition)
+    merged: dict[str, str] = {}
+    for key, placeholder in new_template_fields.items():
+        if key in ("template", "date"):
+            merged[key] = new_template_fields[key]
+        elif key in current_values:
+            # User may have filled this in — keep their value
+            merged[key] = current_values[key]
+        else:
+            # Field is new to this template — insert placeholder
+            merged[key] = placeholder
+
+    # Build new frontmatter block
+    lines = ["---"]
+    for key, value in merged.items():
+        lines.append(f'{key}: "{value}"')
+    lines.append("---")
+    lines.append("")
+    new_fm = "\n".join(lines) + "\n"
+
+    try:
+        path.write_text(new_fm + body, encoding="utf-8")
+        return True
+    except OSError:
+        return False
 
 
 def inject_frontmatter(file_path: str | Path, template: str) -> bool:

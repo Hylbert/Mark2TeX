@@ -128,6 +128,8 @@ _STRINGS: dict[str, dict[str, str]] = {
         "yaml.injected_ok": "✔ Cabeçalho YAML adicionado — compilando...",
         "yaml.injected_err": "✗ Não foi possível modificar o arquivo: {msg}",
         "yaml.no_frontmatter_badge": "⚠ sem YAML",
+        "yaml.template_swapped": "✔ Cabeçalho atualizado para template '{template}'.",
+        "yaml.template_swap_err": "✗ Não foi possível atualizar o cabeçalho: {msg}",
         # Uninstall
         "uninstall.image_removed":    "✔ Imagem {tag} removida.",
         "uninstall.image_not_found":  "  Imagem {tag} não encontrada, ignorando.",
@@ -270,6 +272,8 @@ _STRINGS: dict[str, dict[str, str]] = {
         "yaml.injected_ok": "✔ YAML header added — compiling...",
         "yaml.injected_err": "✗ Could not modify the file: {msg}",
         "yaml.no_frontmatter_badge": "⚠ no YAML",
+        "yaml.template_swapped": "✔ Header updated to template '{template}'.",
+        "yaml.template_swap_err": "✗ Could not update the header: {msg}",
         # Uninstall
         "uninstall.image_removed":    "✔ Image {tag} removed.",
         "uninstall.image_not_found":  "  Image {tag} not found, skipping.",
