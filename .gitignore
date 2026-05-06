@@ -8,7 +8,6 @@
 *.bbl
 *.blg
 *.synctex.gz
-*.tex
 *.xdv
 *.fls
 *.fdb_latexmk
