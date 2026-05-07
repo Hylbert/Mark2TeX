@@ -43,6 +43,12 @@ AVAILABLE_FONTS: list[tuple[str, str]] = [
     ("ubuntu",    "Ubuntu"),
 ]
 
+# Maximum number of characters rendered in the preview panel.
+# Large documents (e.g. 60+ page TCCs) can freeze the Textual event loop
+# when the full content is passed to the Markdown widget at once.
+_PREVIEW_MAX_CHARS = 8_000
+_PREVIEW_TRUNCATED_SUFFIX = "\n\n---\n_Preview truncated. Open the file in your editor to see the full content._"
+
 
 def _setup_logger() -> logging.Logger:
     logger = logging.getLogger("mark2tex")
@@ -383,7 +389,9 @@ class Mark2TeXApp(App):
             with open(filepath, encoding="utf-8") as f:
                 content = f.read()
         except (FileNotFoundError, PermissionError, OSError):
-            content = f"_Não foi possível ler o arquivo `{filename}`._"
+            content = f"_Could not read file `{filename}`._"
+        if len(content) > _PREVIEW_MAX_CHARS:
+            content = content[:_PREVIEW_MAX_CHARS] + _PREVIEW_TRUNCATED_SUFFIX
         preview = self.query_one("#preview-content", Markdown)
         self.call_after_refresh(preview.update, content)
 
