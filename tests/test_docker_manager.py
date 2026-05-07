@@ -13,7 +13,6 @@ from unittest.mock import MagicMock, patch
 
 from mark2tex.docker_manager import DockerManager
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
