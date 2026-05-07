@@ -173,17 +173,23 @@ sync
 # ---------------------------------------------------------------------------
 # Granular progress during latexmk
 #
-# latexmk reports each XeLaTeX pass as:
+# latexmk reports each XeLaTeX pass with a line like:
 #   "Run number N of rule 'xelatex'"
-# We pipe its output through a while-read loop that intercepts those markers
-# and emits PROGRESS tokens so the TUI bar advances in real time instead of
-# jumping from 50% to 100% after a long silence.
+# We pipe its combined output (stdout + stderr) through a while-read loop
+# that intercepts those markers and emits PROGRESS tokens so the TUI bar
+# advances in real time instead of jumping from 50% to 100% after a long
+# silence on large documents.
 #
-# Pass mapping (conservative — most docs need 2–3 passes):
-#   Run 1 starts  → 60%   (first xelatex pass begun)
-#   Run 2 starts  → 75%   (cross-references / TOC pass)
-#   Run 3 starts  → 88%   (final stabilisation pass)
-#   xdvipdfmx     → 94%   (PDF assembly from .xdv)
+# Pass mapping (conservative — most documents need 2–3 passes):
+#   Run 1 starts   → 60%   (first xelatex pass begun)
+#   Run 2 starts   → 75%   (cross-references / TOC pass)
+#   Run 3 starts   → 88%   (final stabilisation pass)
+#   xdvipdfmx pass → 94%   (PDF assembly from .xdv)
+#
+# Exit-code recovery: bash pipes run the right-hand side in a subshell, so
+# $? after a pipe reflects the last command in the pipe (the while loop),
+# not latexmk itself. We use a temp file inside CACHE_DIR to persist the
+# real latexmk exit code across the subshell boundary.
 #
 # -bibtex- unconditionally disables bibtex in latexmk.
 # Citation-free docs never emit \bibliography{} (guarded above), so latexmk
@@ -191,23 +197,11 @@ sync
 # pandoc's --citeproc resolves them at the Markdown→LaTeX step, so bibtex
 # is also not needed at the latexmk level.
 # ---------------------------------------------------------------------------
-LATEXMK_EXIT=0
-while IFS= read -r line; do
-    echo "$line"
-    case "$line" in
-        *"Run number 1 of rule 'xelatex'"*|*"Run number 1 of rule \"xelatex\""*)
-            echo "PROGRESS:60%" ; sync ;;
-        *"Run number 2 of rule 'xelatex'"*|*"Run number 2 of rule \"xelatex\""*)
-            echo "PROGRESS:75%" ; sync ;;
-        *"Run number 3 of rule 'xelatex'"*|*"Run number 3 of rule \"xelatex\""*)
-            echo "PROGRESS:88%" ; sync ;;
-        *"Run number"*"of rule 'xelatex'"*|*"Run number"*"of rule \"xelatex\""*)
-            # 4th pass or beyond — stay at 88% (rare edge case)
-            ;;
-        *"Run number 1 of rule 'xdvipdfmx'"*|*"xdvipdfmx"*"for"*)
-            echo "PROGRESS:94%" ; sync ;;
-    esac
-done < <(
+LATEXMK_EXIT_FILE="${CACHE_DIR}/.latexmk_exit"
+
+# Run latexmk in a subshell so we can capture its exit code separately,
+# then pipe to the progress-emitting reader loop.
+(
     latexmk \
         -pdfxe \
         -f \
@@ -215,42 +209,30 @@ done < <(
         -shell-escape \
         -bibtex- \
         -r "$LATEXMKRC" \
-        "$OUTPUT_NAME.tex" 2>&1
-    echo "LATEXMK_EXIT:$?"
-)
-
-# Recover latexmk exit code from the sentinel line emitted above.
-# The pipe runs in a subshell so $? is not directly available here.
-while IFS= read -r line; do
-    [[ "$line" == LATEXMK_EXIT:* ]] && LATEXMK_EXIT="${line#LATEXMK_EXIT:}"
-done < <(grep '^LATEXMK_EXIT:' <<< "$(latexmk --version 2>/dev/null || true)")
-# Simpler: re-read from the process substitution output we already consumed.
-# Instead, use a temp file to capture the exit code reliably.
-LATEXMK_EXIT_FILE="${CACHE_DIR}/.latexmk_exit"
-latexmk \
-    -pdfxe \
-    -f \
-    -interaction=nonstopmode \
-    -shell-escape \
-    -bibtex- \
-    -r "$LATEXMKRC" \
-    "$OUTPUT_NAME.tex" 2>&1 | while IFS= read -r line; do
-        echo "$line"
-        case "$line" in
-            *"Run number 1 of rule 'xelatex'"*|*"Run number 1 of rule \"xelatex\""*)
-                echo "PROGRESS:60%" ; sync ;;
-            *"Run number 2 of rule 'xelatex'"*|*"Run number 2 of rule \"xelatex\""*)
-                echo "PROGRESS:75%" ; sync ;;
-            *"Run number 3 of rule 'xelatex'"*|*"Run number 3 of rule \"xelatex\""*)
-                echo "PROGRESS:88%" ; sync ;;
-            *"Run number"*"of rule 'xelatex'"*|*"Run number"*"of rule \"xelatex\""*)
-                ;;
-            *"Run number 1 of rule 'xdvipdfmx'"*|*xdvipdfmx*for*)
-                echo "PROGRESS:94%" ; sync ;;
-        esac
-    done
+        "$OUTPUT_NAME.tex"
     echo $? > "$LATEXMK_EXIT_FILE"
-LATEXMK_EXIT=$(cat "$LATEXMK_EXIT_FILE" 2>/dev/null || echo 0)
+) 2>&1 | while IFS= read -r line; do
+    echo "$line"
+    case "$line" in
+        *"Run number 1 of rule"*xelatex*)
+            echo "PROGRESS:60%" ; sync ;;
+        *"Run number 2 of rule"*xelatex*)
+            echo "PROGRESS:75%" ; sync ;;
+        *"Run number 3 of rule"*xelatex*)
+            echo "PROGRESS:88%" ; sync ;;
+        *"Run number"*"of rule"*xdvipdfmx*|*"Running 'xdvipdfmx"*)
+            echo "PROGRESS:94%" ; sync ;;
+    esac
+done
+
+# Read back the real latexmk exit code written by the subshell above.
+LATEXMK_EXIT=$(cat "$LATEXMK_EXIT_FILE" 2>/dev/null || echo 1)
+rm -f "$LATEXMK_EXIT_FILE"
+
+if [[ "$LATEXMK_EXIT" -ne 0 ]]; then
+    # latexmk failed — let the cleanup trap handle cache wiping.
+    exit "$LATEXMK_EXIT"
+fi
 
 if [[ -f "${OUTPUT_NAME}.pdf" ]]; then
     echo "✅ PDF generated successfully: ${OUTPUT_NAME}.pdf"
