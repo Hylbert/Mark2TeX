@@ -255,6 +255,20 @@ ou `cm`.
 Produz layout de duas colunas padrão IEEE. Não inclui sumário.
 Referências seguem o estilo numérico IEEE.
 
+> **Nota sobre o campo `lang`:** O Babel (pacote de idiomas do LaTeX) **não aceita
+> códigos BCP-47** como `en-US` ou `pt-BR`. Para o `artigo-ieee`, use sempre o nome
+> de idioma reconhecido pelo Babel:
+>
+> | Idioma | Valor correto para `lang` |
+> |---|---|
+> | Inglês | `english` |
+> | Português (Brasil) | `brazil` |
+> | Espanhol | `spanish` |
+>
+> O valor padrão injetado pelo Mark2TeX para este template é `"english"`.
+> Se você alterar para um código BCP-47, o XeLaTeX emitirá um erro fatal
+> `Unknown option '<código>'` e a compilação falhará.
+
 **Citação no texto:**
 
 ```markdown
@@ -404,6 +418,11 @@ após o último capítulo. Não é necessário adicionar nenhuma seção manual.
 - **IEEE Xplore** → botão "Cite This" → BibTeX
 - **ACM Digital Library** → Export Citation → BibTeX
 
+> **Nota:** O `--bibliography` só é passado ao Pandoc quando o arquivo `.md`
+> contém marcadores de citação reais (`[@key]` ou `\cite{`). Documentos sem
+> citações não invocam o Biber, evitando o loop de erro `missing \item` em
+> arquivos `.bbl` vazios.
+
 ---
 
 ## 7. Watch Mode — como funciona
@@ -418,15 +437,23 @@ um observador de arquivo baseado na biblioteca
 - O arquivo `.bib` referenciado no YAML (se existir)
 - Arquivos de imagem no mesmo diretório referenciados no `.md`
 
-**Debounce de 800 ms:** múltiplos salvamentos rápidos geram apenas
+**Debounce de 1,5 s:** múltiplos salvamentos rápidos geram apenas
 uma compilação. O valor é ajustável via variável de ambiente:
 
 ```bash
 MARK2TEX_WATCH_DEBOUNCE=2000 mark2tex  # debounce de 2 s
 ```
 
+**Builds incrementais com latexmk:** o Watch Mode beneficia-se de compilações
+incrementais. O latexmk persiste os arquivos intermediários (`.aux`,
+`.fdb_latexmk`, `.fls`, `.bbl`, `.xdv`) em um diretório de cache por documento
+(`~/.cache/mark2tex/<hash>/` no Linux). Nas recompilações seguintes, apenas as
+partes que mudaram são reprocessadas, reduzindo o tempo de ~18 s para ~6 s em
+um documento de 15 páginas após uma edição de uma linha. Use
+`mark2tex clean [arquivo]` para limpar o cache manualmente se necessário.
+
 **Editores com salvamento automático (VS Code `formatOnSave`, JetBrains
-`autosave`):** se o intervalo entre salvamentos for maior que 800 ms,
+`autosave`):** se o intervalo entre salvamentos for maior que 1,5 s,
 cada salvamento dispara uma compilação. Desative o autosave agressivo
 ou aumente o debounce conforme acima.
 
@@ -551,6 +578,7 @@ ajuda a interpretar as mensagens mais frequentes.
 | `I can't find file` | Imagem referenciada não existe no caminho informado | Verificar caminho e extensão do arquivo de imagem |
 | `Citation ... undefined` | Chave BibTeX não encontrada no `.bib` | Verificar a chave no `.bib` e o campo `bibliography` no YAML |
 | `Output loop --- too many` | Referências cruzadas em loop | Recompilar — quase sempre se resolve na segunda passagem |
+| `Unknown option '<código>'` | Código BCP-47 passado ao Babel (ex: `en-US`, `pt-BR`) | Usar nome de idioma Babel: `english`, `brazil`, `spanish` |
 
 ### 10.1 Encontrando a causa raiz no log
 
