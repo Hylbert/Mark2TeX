@@ -30,6 +30,13 @@ _RE_PATH_ONLY    = re.compile(r"^\s*'?[\w./\\-]+\.(tex|aux|bbl|lof|lot|toc|log|x
 _RE_FONTSPEC_ERR = re.compile(r"^fontspec error: \"(.+?)\"")
 _RE_BIBTEX_WARN  = re.compile(r"^Warning--(.*)")
 _RE_XDVIPDFMX    = re.compile(r"^xdvipdfmx:")
+# Polyglossia wraps its "Asking to add empty feature" message across two lines.
+# The first line ends mid-word (e.g. "...font (Languag") and the continuation
+# starts with fragments like 'e="Pt-BR" to langtag' or 's for pt-BR.'.
+_RE_POLYGLOSSIA_CONT = re.compile(
+    r'^(?:e="[^"]*" to langtag|s for [a-z]{2}(?:-[A-Z]{2})?[. ]|'
+    r'\(polyglossia\)\s+I will)'
+)
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Module-level constants (hoisted out of the translate loop)
@@ -151,6 +158,9 @@ class LogTranslator:
     subsequent ``l.N context`` line are merged into a single, unified
     console message.
 
+    Also tracks multi-line suppression blocks (e.g. polyglossia warnings
+    that wrap across two lines) via ``_suppressing_continuation``.
+
     Usage::
 
         translator = LogTranslator()
@@ -162,6 +172,8 @@ class LogTranslator:
 
     def __init__(self) -> None:
         self._pending_error: str | None = None
+        # True while the next line is known to be a suppressed continuation
+        self._suppressing_continuation: bool = False
 
     def translate(self, line: str) -> str | None:
         """
@@ -175,6 +187,14 @@ class LogTranslator:
 
         if not stripped:
             self._pending_error = None
+            self._suppressing_continuation = False
+            return None
+
+        # ── Consume continuation line of a previously suppressed block ───────
+        if self._suppressing_continuation:
+            # The continuation ends when the line closes with ") on input line N."
+            if stripped.endswith(".") or "on input line" in stripped:
+                self._suppressing_continuation = False
             return None
 
         # ── PROGRESS directive ───────────────────────────────────────────────
@@ -215,8 +235,15 @@ class LogTranslator:
             return None
         if stripped in _SUPPRESS_EXACT:
             return None
+
+        # ── Prefix-based suppression (with continuation tracking) ────────────
         if stripped.startswith(_SUPPRESS_PREFIX):
+            # If the line is truncated mid-sentence (doesn't end with "." or
+            # a closing paren+period), the next line is a continuation.
+            if not stripped.endswith((".", ")")):
+                self._suppressing_continuation = True
             return None
+
         if _RE_PATH_ONLY.match(stripped):
             return None
         if re.match(r"^\[\d+(\.\d+)?[a-z]*\]$", stripped):
@@ -228,6 +255,10 @@ class LogTranslator:
 
         # ── xdvipdfmx messages — suppress (driver-level noise) ───────────────
         if _RE_XDVIPDFMX.match(stripped):
+            return None
+
+        # ── Polyglossia wrapped continuation lines ───────────────────────────
+        if _RE_POLYGLOSSIA_CONT.match(stripped):
             return None
 
         # ── Merge pending error with its l.N location line ───────────────────
