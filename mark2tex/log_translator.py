@@ -239,7 +239,7 @@ class LogTranslator:
         # ── Prefix-based suppression (with continuation tracking) ────────────
         if stripped.startswith(_SUPPRESS_PREFIX):
             # If the line is truncated mid-sentence (doesn't end with "." or
-            # a closing paren+period), the next line is a continuation.
+            # a closing paren), the next line is a continuation.
             if not stripped.endswith((".", ")")):
                 self._suppressing_continuation = True
             return None
@@ -381,6 +381,11 @@ class LogTranslator:
         m = _RE_OVERFULL.match(stripped)
         if m:
             kind, amount, l1, l2 = m.groups()
+            # "badness N" is dimensionless (no pt unit) — always suppress
+            # for Underfull; for Overfull it means a very loose line, also
+            # not worth surfacing.
+            if amount.startswith("badness"):
+                return None
             pts_match = re.search(r"[\d.]+", amount)
             if pts_match:
                 try:
@@ -448,10 +453,11 @@ class LogTranslator:
         return stripped
 
 
-# ── Default instance — backward-compatible module-level wrapper ───────────────
-_default_translator = LogTranslator()
-
-
+# ── Module-level wrapper ───────────────────────────────────────────────────────────
+# Each call creates a fresh LogTranslator so that isolated single-line
+# callers (e.g. unit tests, one-off utilities) never inherit state from
+# a previous call. Code that processes a multi-line log stream should
+# instantiate LogTranslator() directly and reuse that instance.
 def log_translator(line: str) -> str | None:
-    """Module-level wrapper around the default LogTranslator singleton."""
-    return _default_translator.translate(line)
+    """Stateless convenience wrapper — creates a fresh translator per call."""
+    return LogTranslator().translate(line)
