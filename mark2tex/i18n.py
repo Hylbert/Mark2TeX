@@ -138,7 +138,12 @@ _STRINGS: dict[str, dict[str, str]] = {
         "uninstall.data_not_found":   "  Dados do usuário não encontrados: {path}",
         "uninstall.config_removed":   "✔ Configurações removidas: {path}",
         "uninstall.config_not_found": "  Configurações não encontradas: {path}",
+        "uninstall.cache_removed":    "✔ Cache removido: {path}",
+        "uninstall.cache_not_found":  "  Cache não encontrado: {path}",
         "uninstall.pipx_hint":        "Execute `pipx uninstall mark2tex` para remover o pacote Python.",
+        # Clean
+        "clean.removed": "✔ Cache removido: {path}",
+        "clean.error":   "✗ Falha ao remover cache: {path}",
         # Frontmatter validator
         "validator.parse_error": "⚠️ Não foi possível ler o cabeçalho YAML. Verifique se o arquivo começa com um bloco --- válido.",
         "validator.missing": "⚠️ Campo obrigatório ausente ou vazio: '{field}'.",
@@ -282,7 +287,12 @@ _STRINGS: dict[str, dict[str, str]] = {
         "uninstall.data_not_found":   "  User data not found: {path}",
         "uninstall.config_removed":   "✔ Config removed: {path}",
         "uninstall.config_not_found": "  Config not found: {path}",
+        "uninstall.cache_removed":    "✔ Cache removed: {path}",
+        "uninstall.cache_not_found":  "  Cache not found: {path}",
         "uninstall.pipx_hint":        "Run `pipx uninstall mark2tex` to remove the Python package.",
+        # Clean
+        "clean.removed": "✔ Cache removed: {path}",
+        "clean.error":   "✗ Failed to remove cache: {path}",
         # Frontmatter validator
         "validator.parse_error": "⚠️ Could not read the YAML header. Make sure the file starts with a valid --- block.",
         "validator.missing": "⚠️ Required field missing or empty: '{field}'.",

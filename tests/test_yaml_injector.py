@@ -45,8 +45,9 @@ def test_build_frontmatter_contains_template_key() -> None:
 
 
 def test_build_frontmatter_contains_lang_for_artigo_ieee() -> None:
+    # babel does not accept BCP-47 codes; the default must be 'english'
     fm = build_frontmatter("artigo-ieee")
-    assert 'lang: "en-US"' in fm
+    assert 'lang: "english"' in fm
 
 
 def test_build_frontmatter_starts_and_ends_with_dashes() -> None:

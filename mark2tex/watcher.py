@@ -26,7 +26,7 @@ class Mark2TeXWatcher(FileSystemEventHandler):
         self.file_to_watch = os.path.realpath(os.path.abspath(file_to_watch))
         self.callback = callback
         self._last_triggered = 0.0
-        self._debounce_interval = 1.0
+        self._debounce_interval = 1.5  # raised from 1.0 s — Obsidian writes in two stages
 
     def _normalize(self, path: str) -> str:
         return os.path.realpath(os.path.abspath(path))

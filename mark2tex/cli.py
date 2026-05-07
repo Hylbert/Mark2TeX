@@ -4,7 +4,7 @@ from __future__ import annotations
 import argparse
 import sys
 
-from .docker_manager import uninstall_docker_assets
+from .docker_manager import clean_cache, uninstall_docker_assets
 from .main import main as run_app
 from .setup_env import ensure_environment
 from .yaml_injector import has_backup, restore_file
@@ -43,6 +43,22 @@ def build_parser() -> argparse.ArgumentParser:
         help="Path to the .md file to restore",
     )
 
+    clean_cmd = subparsers.add_parser(
+        "clean",
+        help=(
+            "Remove latexmk build cache. "
+            "Without FILE, wipes the entire cache for all documents. "
+            "With FILE, removes only the cache for that document."
+        ),
+    )
+    clean_cmd.add_argument(
+        "file",
+        metavar="FILE",
+        nargs="?",
+        default=None,
+        help="Path to the .md file whose cache should be removed (optional)",
+    )
+
     return parser
 
 
@@ -58,6 +74,18 @@ def _run_check() -> None:
     results = run_all_checks()
     code    = render_check_results(results, lang=lang, console=Console())
     sys.exit(code)
+
+
+def _run_clean(file: str | None) -> None:
+    """Remove latexmk cache and print a status message."""
+    from .i18n import t
+
+    ok, path = clean_cache(file)
+    if ok:
+        print(t("clean.removed").format(path=path))
+    else:
+        print(t("clean.error").format(path=path), file=sys.stderr)
+        sys.exit(1)
 
 
 def main() -> None:
@@ -98,6 +126,10 @@ def main() -> None:
         else:
             print(f"✗ {msg}", file=sys.stderr)
             sys.exit(1)
+        return
+
+    if command == "clean":
+        _run_clean(getattr(args, "file", None))
         return
 
     # Default: open TUI (with first-run onboarding if needed)

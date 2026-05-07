@@ -515,9 +515,16 @@ class Mark2TeXApp(App):
         selected_template: str,
         selected_font: str | None = None,
     ) -> None:
-        abs_file = str(self._current_dir / selected_file)
+        # Kill any running Docker container before starting a new one.
+        # This ensures the old container's cleanup() trap finishes before
+        # Pandoc regenerates the .tex file in the new run.
+        self.docker_manager.abort()
         self.run_worker(
-            lambda: self._run_compilation(abs_file, selected_template, selected_font),
+            lambda: self._run_compilation(
+                str(self._current_dir / selected_file),
+                selected_template,
+                selected_font,
+            ),
             thread=True,
             exclusive=True,
             group="compile",
