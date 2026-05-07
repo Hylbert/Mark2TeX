@@ -25,7 +25,7 @@ from . import config as cfg
 from .docker_manager import DockerManager
 from .frontmatter_validator import validate as validate_frontmatter
 from .i18n import set_language, t
-from .log_translator import log_translator
+from .log_translator import LogTranslator
 from .onboarding import OnboardingScreen, is_first_run
 from .settings_screen import LanguageChanged, SettingsScreen
 from .utils.visuals import M2TBannerWidget, M2TMenuOption
@@ -571,6 +571,11 @@ class Mark2TeXApp(App):
             _logger.debug("UI REQUEST - %s: %s", action, value)
             self.call_from_thread(self._apply_ui_update, action, value)
 
+        # One translator instance per compilation run so that stateful
+        # multi-line sequences (error + l.N location, polyglossia
+        # continuation blocks) are handled correctly across line boundaries.
+        translator = LogTranslator()
+
         ui("progress", 0)
         ui("console", (f"{t('compile.start')} {selected_file} com template '{selected_template}'...", "#5ab4bc"))
         if selected_font:
@@ -583,7 +588,7 @@ class Mark2TeXApp(App):
                 if not clean:
                     continue
                 _logger.debug("RAW LINE: %s", line)
-                result = log_translator(clean)
+                result = translator.translate(clean)
                 if result is None:
                     continue
                 if result.startswith("__PROGRESS__"):
