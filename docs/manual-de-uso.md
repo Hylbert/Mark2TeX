@@ -170,23 +170,23 @@ Ele deve estar entre `---` no início do arquivo, antes de qualquer conteúdo.
 
 ```yaml
 ---
-title: "Detecção de Anomalias em Sensores Industriais com Isolation Forest"
-author: "Hylbert Rodrigues"
-date: "2026-05-05"
-institution: Instituto de Desenvolvimento Tecnológico
-campus: Manaus
-department: Engenharia de Software
-course: Sistemas de Informação
-advisor: Prof. Dr. Fulano de Tal
-coadvisor: Prof. Me. Ciclano da Silva
-city: Manaus
+title: "Título do Trabalho de Conclusão de Curso"
+author: "Nome Completo do Autor"
+date: "2026-01-01"
+institution: Nome da Instituição de Ensino
+campus: Nome do Campus
+department: Nome do Departamento
+course: Nome do Curso
+advisor: Prof. Dr. Nome do Orientador
+coadvisor: Prof. Me. Nome do Coorientador
+city: Cidade
 year: "2026"
 lang: pt-BR
-abstract-pt: 'Este trabalho propõe um sistema de detecção de anomalias...'
-abstract-en: 'This work proposes an anomaly detection system...'
-acknowledgments: 'Agradeço ao INDT pelo suporte durante a pesquisa.'
+abstract-pt: 'Escreva aqui o resumo do trabalho em português...'
+abstract-en: 'Write the abstract of the work in English here...'
+acknowledgments: 'Escreva aqui os agradecimentos...'
 siglas: \begin{description}
-  \item[INDT] Instituto de Desenvolvimento Tecnológico
+  \item[ABNT] Associação Brasileira de Normas Técnicas
   \item[PDF]  Portable Document Format
   \end{description}
 bibliography: referencias.bib
