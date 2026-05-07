@@ -154,9 +154,11 @@ class LogTranslator:
     """
     Stateful translator for LaTeX/latexmk log lines.
 
-    Keeps context between lines so that a ``! Error`` line and its
-    subsequent ``l.N context`` line are merged into a single, unified
-    console message.
+    Error lines (``! ...``) are emitted **immediately** so that single-line
+    callers (e.g. unit tests, one-off utilities) receive the translated
+    message right away.  When used in a streaming context, the subsequent
+    ``l.N`` line — if present — is emitted as a supplementary location
+    message that appears directly below the error in the console.
 
     Also tracks multi-line suppression blocks (e.g. polyglossia warnings
     that wrap across two lines) via ``_suppressing_continuation``.
@@ -171,7 +173,9 @@ class LogTranslator:
     """
 
     def __init__(self) -> None:
-        self._pending_error: str | None = None
+        # Set to True right after emitting an error, so the next l.N line
+        # is rendered as a location supplement instead of a bare ref.
+        self._after_error: bool = False
         # True while the next line is known to be a suppressed continuation
         self._suppressing_continuation: bool = False
 
@@ -186,13 +190,12 @@ class LogTranslator:
         stripped = line.strip()
 
         if not stripped:
-            self._pending_error = None
+            self._after_error = False
             self._suppressing_continuation = False
             return None
 
         # ── Consume continuation line of a previously suppressed block ───────
         if self._suppressing_continuation:
-            # The continuation ends when the line closes with ") on input line N."
             if stripped.endswith(".") or "on input line" in stripped:
                 self._suppressing_continuation = False
             return None
@@ -238,8 +241,6 @@ class LogTranslator:
 
         # ── Prefix-based suppression (with continuation tracking) ────────────
         if stripped.startswith(_SUPPRESS_PREFIX):
-            # If the line is truncated mid-sentence (doesn't end with "." or
-            # a closing paren), the next line is a continuation.
             if not stripped.endswith((".", ")")):
                 self._suppressing_continuation = True
             return None
@@ -261,21 +262,19 @@ class LogTranslator:
         if _RE_POLYGLOSSIA_CONT.match(stripped):
             return None
 
-        # ── Merge pending error with its l.N location line ───────────────────
+        # ── l.N location line ──────────────────────────────────────────────────
         m = _RE_LINE_REF.match(stripped)
         if m:
             lineno = m.group(1)
             ctx    = m.group(2).strip()
             ctx_clean: str = re.sub(r"\\TU/\S+\s*", "", ctx).strip()
-            if self._pending_error:
-                msg = self._pending_error
-                self._pending_error = None
+            if self._after_error:
+                # Supplement the already-emitted error with its location.
+                self._after_error = False
                 if ctx_clean:
-                    return t("log.error_at_line_ctx").format(
-                        msg=msg, n=lineno, ctx=ctx_clean
-                    )
-                return t("log.error_at_line").format(msg=msg, n=lineno)
-            # No pending error: display bare line reference
+                    return t("log.line_ref_ctx").format(n=lineno, ctx=ctx_clean)
+                return t("log.line_ref").format(n=lineno)
+            # Bare l.N without a preceding error
             if ctx_clean:
                 return t("log.line_ref_ctx").format(n=lineno, ctx=ctx_clean)
             return t("log.line_ref").format(n=lineno)
@@ -366,24 +365,24 @@ class LogTranslator:
             msg  = m.group(1)
             hint = _get_error_hint(msg)
             base = t("log.latex_error").format(msg=msg)
-            self._pending_error = f"{base} — {hint}" if hint else base
-            return None  # held until l.N arrives
+            result = f"{base} — {hint}" if hint else base
+            self._after_error = True
+            return result
 
         m = _RE_GENERIC_ERROR.match(stripped)
         if m:
             msg  = m.group(1)
             hint = _get_error_hint(msg)
             base = t("log.error").format(msg=msg)
-            self._pending_error = f"{base} — {hint}" if hint else base
-            return None  # held until l.N arrives
+            result = f"{base} — {hint}" if hint else base
+            self._after_error = True
+            return result
 
         # ── Overfull / Underfull ─────────────────────────────────────────────
         m = _RE_OVERFULL.match(stripped)
         if m:
             kind, amount, l1, l2 = m.groups()
-            # "badness N" is dimensionless (no pt unit) — always suppress
-            # for Underfull; for Overfull it means a very loose line, also
-            # not worth surfacing.
+            # "badness N" is dimensionless — always suppress.
             if amount.startswith("badness"):
                 return None
             pts_match = re.search(r"[\d.]+", amount)
@@ -456,7 +455,7 @@ class LogTranslator:
 # ── Module-level wrapper ───────────────────────────────────────────────────────────
 # Each call creates a fresh LogTranslator so that isolated single-line
 # callers (e.g. unit tests, one-off utilities) never inherit state from
-# a previous call. Code that processes a multi-line log stream should
+# a previous call.  Code that processes a multi-line log stream should
 # instantiate LogTranslator() directly and reuse that instance.
 def log_translator(line: str) -> str | None:
     """Stateless convenience wrapper — creates a fresh translator per call."""
