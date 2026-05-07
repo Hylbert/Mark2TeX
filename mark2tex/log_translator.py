@@ -2,7 +2,7 @@ import re
 
 from .i18n import t
 
-# ──────────────────────────────────────────────────────────────────────────────
+# ────────────────────────────────────────────────────────────────────────────────
 # Compiled patterns (module level — created once for performance)
 _RE_PROGRESS    = re.compile(r"^PROGRESS:(\d+)%$")
 _RE_PAGE_NUMS   = re.compile(r"^(\[\d+\]\s*)+$")
@@ -30,6 +30,10 @@ _RE_PATH_ONLY    = re.compile(r"^\s*'?[\w./\\-]+\.(tex|aux|bbl|lof|lot|toc|log|x
 _RE_FONTSPEC_ERR = re.compile(r"^fontspec error: \"(.+?)\"")
 _RE_BIBTEX_WARN  = re.compile(r"^Warning--(.*)")
 _RE_XDVIPDFMX    = re.compile(r"^xdvipdfmx:")
+# build.sh status line patterns
+_RE_BUILD_STARTING   = re.compile(r"^🚀 Starting build for (.+) using template (.+?)\.\.\.")
+_RE_BUILD_PDF_OK     = re.compile(r"^✅ PDF generated successfully: (.+)")
+_RE_BUILD_WARN_FAIL  = re.compile(r"^⚠️\s+Build failed (.+)")
 # Polyglossia wraps its "Asking to add empty feature" message across two lines.
 # The first line ends mid-word (e.g. "...font (Languag") and the continuation
 # starts with fragments like 'e="Pt-BR" to langtag' or 's for pt-BR.'.
@@ -38,7 +42,7 @@ _RE_POLYGLOSSIA_CONT = re.compile(
     r'\(polyglossia\)\s+I will)'
 )
 
-# ──────────────────────────────────────────────────────────────────────────────
+# ────────────────────────────────────────────────────────────────────────────────
 # Module-level constants (hoisted out of the translate loop)
 _LAYOUT_PREFIXES = (
     "Stock height", "Top and edge", "Page height", "Text height",
@@ -194,23 +198,59 @@ class LogTranslator:
             self._suppressing_continuation = False
             return None
 
-        # ── Consume continuation line of a previously suppressed block ───────
+        # ── Consume continuation line of a previously suppressed block ───────────
         if self._suppressing_continuation:
             if stripped.endswith(".") or "on input line" in stripped:
                 self._suppressing_continuation = False
             return None
 
-        # ── PROGRESS directive ───────────────────────────────────────────────
+        # ── PROGRESS directive ─────────────────────────────────────────────
         m = _RE_PROGRESS.match(stripped)
         if m:
             return f"__PROGRESS__{m.group(1)}"
 
-        # ── Script-owned messages (emoji prefix) — pass through ─────────────
+        # ── build.sh status lines ───────────────────────────────────────────────
+        m = _RE_BUILD_STARTING.match(stripped)
+        if m:
+            return t("build.starting").format(file=m.group(1), template=m.group(2))
+
+        if stripped == "✅ Markdown converted to LaTeX.":
+            return t("build.md_converted")
+
+        if stripped == "🔧 Full build: no previous cache found.":
+            return t("build.full_build")
+
+        if stripped == "⚡ Incremental build: reusing latexmk cache from previous run.":
+            return t("build.incremental")
+
+        if stripped == "🔨 Compiling PDF with latexmk...":
+            return t("build.compiling_pdf")
+
+        m = _RE_BUILD_PDF_OK.match(stripped)
+        if m:
+            return t("build.pdf_ok").format(filename=m.group(1))
+
+        if stripped == "❌ Error: PDF was not generated.":
+            return t("build.pdf_error")
+
+        if stripped == "🎉 Process complete!":
+            return t("build.complete")
+
+        if stripped == "🧹 Cleaning up ephemeral build files...":
+            return t("build.cleaning")
+
+        if "Build failed with no latexmk state" in stripped:
+            return t("build.warn_no_state")
+
+        if "Build failed but latexmk state preserved" in stripped:
+            return t("build.warn_state_kept")
+
+        # ── Script-owned messages (emoji prefix) — pass through ───────────────
         first_char = stripped[0]
         if ord(first_char) > 127 and first_char not in ("(", "\\", "/"):
             return stripped
 
-        # ── Suppress: .sty / .cls / TexLive system paths ─────────────────────
+        # ── Suppress: .sty / .cls / TexLive system paths ────────────────────
         if _RE_STY_PATH.match(stripped):
             return None
         if stripped.startswith("/usr/share/texlive") or stripped.startswith("/etc/texmf"):
@@ -258,11 +298,11 @@ class LogTranslator:
         if _RE_XDVIPDFMX.match(stripped):
             return None
 
-        # ── Polyglossia wrapped continuation lines ───────────────────────────
+        # ── Polyglossia wrapped continuation lines ──────────────────────────
         if _RE_POLYGLOSSIA_CONT.match(stripped):
             return None
 
-        # ── l.N location line ──────────────────────────────────────────────────
+        # ── l.N location line ─────────────────────────────────────────────────────
         m = _RE_LINE_REF.match(stripped)
         if m:
             lineno = m.group(1)
@@ -279,18 +319,18 @@ class LogTranslator:
                 return t("log.line_ref_ctx").format(n=lineno, ctx=ctx_clean)
             return t("log.line_ref").format(n=lineno)
 
-        # ── Rc files ─────────────────────────────────────────────────────────
+        # ── Rc files ──────────────────────────────────────────────────────────────
         if stripped == "Rc files read:":
             return t("log.config_reading")
         if re.match(r"^/etc/[Ll]atex", stripped):
             return t("log.config_file").format(path=stripped)
 
-        # ── Output written ───────────────────────────────────────────────────
+        # ── Output written ─────────────────────────────────────────────────────
         m = _RE_OUTPUT_WRITTEN.match(stripped)
         if m:
             return t("log.output_written").format(fmt=m.group(1), pages=m.group(2))
 
-        # ── Latexmk ──────────────────────────────────────────────────────────
+        # ── Latexmk ──────────────────────────────────────────────────────────────
         m = _RE_LATEXMK.match(stripped)
         if m:
             msg = m.group(1).strip()
@@ -322,7 +362,7 @@ class LogTranslator:
             v = ver.group(1) if ver else ""
             return t("log.engine_bibtex").format(ver=v)
 
-        # ── Document Class ───────────────────────────────────────────────────
+        # ── Document Class ─────────────────────────────────────────────────────
         m = _RE_DOC_CLASS.match(stripped)
         if m:
             cls = m.group(1)
@@ -332,7 +372,7 @@ class LogTranslator:
             v = f" {ver.group(0)}" if ver else ""
             return t("log.doc_class").format(cls=cls, ver=v)
 
-        # ── Rule / Run ───────────────────────────────────────────────────────
+        # ── Rule / Run ──────────────────────────────────────────────────────────
         if _RE_RULE_CHANGE.match(stripped):
             return None
 
@@ -351,7 +391,7 @@ class LogTranslator:
                 return t("log.running_bibtex").format(arg=arg)
             return t("log.running_cmd").format(cmd=cmd[:80])
 
-        # ── fontspec errors (XeLaTeX) ────────────────────────────────────────
+        # ── fontspec errors (XeLaTeX) ──────────────────────────────────────────
         m = _RE_FONTSPEC_ERR.match(stripped)
         if m:
             code = m.group(1)
@@ -359,7 +399,7 @@ class LogTranslator:
             hint = t(hint_key) if hint_key else code
             return t("log.fontspec_error").format(code=code, hint=hint)
 
-        # ── LaTeX errors ─────────────────────────────────────────────────────
+        # ── LaTeX errors ─────────────────────────────────────────────────────────
         m = _RE_LATEX_ERROR.match(stripped)
         if m:
             msg  = m.group(1)
@@ -378,7 +418,7 @@ class LogTranslator:
             self._after_error = True
             return result
 
-        # ── Overfull / Underfull ─────────────────────────────────────────────
+        # ── Overfull / Underfull ────────────────────────────────────────────────
         m = _RE_OVERFULL.match(stripped)
         if m:
             kind, amount, l1, l2 = m.groups()
@@ -399,7 +439,7 @@ class LogTranslator:
                 return t("log.underfull").format(amount=amount, l1=l1, l2=l2)
             return t("log.overfull").format(amount=amount, l1=l1, l2=l2)
 
-        # ── Package / LaTeX warnings ─────────────────────────────────────────
+        # ── Package / LaTeX warnings ───────────────────────────────────────────
         m = _RE_PKG_WARN.match(stripped)
         if m:
             pkg, msg = m.group(1), m.group(2)
@@ -420,7 +460,7 @@ class LogTranslator:
                 return t("log.undefined_refs")
             return t("log.latex_warn").format(msg=msg)
 
-        # ── BibTeX ───────────────────────────────────────────────────────────
+        # ── BibTeX ───────────────────────────────────────────────────────────────────
         if stripped.startswith("The style file"):
             sty = stripped.replace("The style file", "").strip()
             return t("log.bib_style").format(sty=sty)
