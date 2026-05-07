@@ -1,6 +1,7 @@
 import hashlib
 import os
 import platform
+import queue
 import shutil
 import subprocess
 import threading
@@ -20,6 +21,9 @@ COMPILE_TIMEOUT = int(os.environ.get("MARK2TEX_TIMEOUT", "300"))
 
 # How long abort() waits for the killed process to exit before giving up.
 _ABORT_WAIT = 5.0
+
+# Sentinel pushed by the reader thread to signal end-of-stream.
+_EOF = object()
 
 
 def _get_package_path() -> Path:
@@ -79,6 +83,19 @@ def clean_cache(input_file: str | None = None) -> tuple[bool, str]:
     return True, str(cache_dir)
 
 
+def _reader_thread(stdout, line_queue: queue.Queue) -> None:
+    """Read stdout line-by-line in a background thread and push to *line_queue*.
+
+    Pushes each line as a ``str``, then pushes the ``_EOF`` sentinel when the
+    stream is exhausted (process exited or pipe closed).
+    """
+    try:
+        for line in iter(stdout.readline, ""):
+            line_queue.put(line)
+    finally:
+        line_queue.put(_EOF)
+
+
 class DockerManager:
     def __init__(self) -> None:
         pkg = _get_package_path()
@@ -130,6 +147,15 @@ class DockerManager:
         template: str,
         font: str | None = None,
     ):
+        """Run the Docker build pipeline and yield output lines in real time.
+
+        Lines are streamed as they arrive from the container stdout — the caller
+        receives each line immediately instead of waiting for the process to
+        finish.  The ``COMPILE_TIMEOUT`` deadline is preserved via a background
+        reader thread + ``queue.Queue.get(timeout=...)``: if no new line arrives
+        within the remaining budget, the process is killed and a timeout error
+        line is yielded.
+        """
         cwd           = Path.cwd().resolve()
         input_path    = cwd / input_file
         abs_file      = str(input_path)
@@ -175,30 +201,55 @@ class DockerManager:
         with self._process_lock:
             self._active_process = process
 
+        line_queue: queue.Queue = queue.Queue()
+        reader = threading.Thread(
+            target=_reader_thread,
+            args=(process.stdout, line_queue),
+            daemon=True,
+            name="m2t-stdout-reader",
+        )
+        reader.start()
+
+        deadline = COMPILE_TIMEOUT  # remaining seconds budget
+        timed_out = False
+
         try:
-            stdout, _ = process.communicate(timeout=COMPILE_TIMEOUT)
-        except subprocess.TimeoutExpired:
-            process.kill()
-            process.communicate()  # drain the pipe to avoid ResourceWarning
+            while True:
+                try:
+                    item = line_queue.get(timeout=min(deadline, 1.0))
+                except queue.Empty:
+                    deadline -= 1.0
+                    if deadline <= 0:
+                        timed_out = True
+                        break
+                    continue
+
+                if item is _EOF:
+                    break
+
+                deadline = COMPILE_TIMEOUT  # reset on every received line
+                yield item
+        finally:
+            if timed_out or (process.poll() is None):
+                try:
+                    process.kill()
+                except OSError:
+                    pass
+            reader.join(timeout=_ABORT_WAIT)
+            try:
+                process.wait(timeout=_ABORT_WAIT)
+            except subprocess.TimeoutExpired:
+                pass
             with self._process_lock:
                 if self._active_process is process:
                     self._active_process = None
+
+        if timed_out:
             yield (
                 f"\u274c Timeout: compilation exceeded {COMPILE_TIMEOUT}s "
                 "and was terminated. Set MARK2TEX_TIMEOUT to increase the limit."
             )
             return
-        except Exception:
-            with self._process_lock:
-                if self._active_process is process:
-                    self._active_process = None
-            return
-        finally:
-            with self._process_lock:
-                if self._active_process is process:
-                    self._active_process = None
-
-        yield from stdout.splitlines(keepends=True)
 
         if process.returncode not in (0, -9, -15):  # -9=SIGKILL, -15=SIGTERM
             yield f"\n\u274c Error: Docker process exited with code {process.returncode}"
@@ -208,7 +259,7 @@ def uninstall_docker_assets() -> None:
     """Full cleanup: remove Docker images, user data dir, and user config dir."""
     from .i18n import t
 
-    # ── Docker images ──────────────────────────────────────────────────
+    # ── Docker images ────────────────────────────────────────────────────────
     try:
         client = docker.from_env()
         for tag in (IMAGE_HUB, IMAGE_NAME):
@@ -220,7 +271,7 @@ def uninstall_docker_assets() -> None:
     except DockerException as exc:
         print(t("uninstall.docker_error").format(error=exc))
 
-    # ── User data (backups, onboarding flag) ───────────────────────────────────
+    # ── User data (backups, onboarding flag) ──────────────────────────────────────
     data_dir = Path(user_data_dir("mark2tex", appauthor=False))
     if data_dir.exists():
         shutil.rmtree(data_dir, ignore_errors=True)
@@ -228,7 +279,7 @@ def uninstall_docker_assets() -> None:
     else:
         print(t("uninstall.data_not_found").format(path=data_dir))
 
-    # ── User config (language, theme) ──────────────────────────────────────────
+    # ── User config (language, theme) ────────────────────────────────────────────
     config_dir = Path(user_config_dir("mark2tex", appauthor=False))
     if config_dir.exists():
         shutil.rmtree(config_dir, ignore_errors=True)
@@ -236,7 +287,7 @@ def uninstall_docker_assets() -> None:
     else:
         print(t("uninstall.config_not_found").format(path=config_dir))
 
-    # ── Latexmk cache ────────────────────────────────────────────────────────
+    # ── Latexmk cache ───────────────────────────────────────────────────────────
     cache_root = Path(user_cache_dir("mark2tex", appauthor=False))
     if cache_root.exists():
         shutil.rmtree(cache_root, ignore_errors=True)
@@ -244,6 +295,6 @@ def uninstall_docker_assets() -> None:
     else:
         print(t("uninstall.cache_not_found").format(path=cache_root))
 
-    # ── Final hint ────────────────────────────────────────────────────────
+    # ── Final hint ────────────────────────────────────────────────────────────
     print()
     print(t("uninstall.pipx_hint"))
