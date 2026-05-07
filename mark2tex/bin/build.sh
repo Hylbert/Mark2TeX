@@ -27,18 +27,18 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [[ -z "$INPUT_FILE" ]]; then
-    echo "\u274c Error: Input file is required."
+    echo "❌ Error: Input file is required."
     echo "Usage: $0 <file.md> <template> [--font <font>]"
     exit 1
 fi
 
 if [[ "$INPUT_FILE" != *.md ]]; then
-    echo "\u274c Error: Input file must have a .md extension."
+    echo "❌ Error: Input file must have a .md extension."
     exit 1
 fi
 
 if [[ ! -f "$INPUT_FILE" ]]; then
-    echo "\u274c Error: Input file '$INPUT_FILE' not found."
+    echo "❌ Error: Input file '$INPUT_FILE' not found."
     exit 1
 fi
 
@@ -60,7 +60,7 @@ for t in "${ALLOWED_TEMPLATES[@]}"; do
 done
 
 if [[ "$IS_VALID" == "false" ]]; then
-    echo "\u274c Error: Invalid template '$TEMPLATE_TYPE'."
+    echo "❌ Error: Invalid template '$TEMPLATE_TYPE'."
     echo "Allowed templates are: ${ALLOWED_TEMPLATES[*]}"
     exit 1
 fi
@@ -71,38 +71,34 @@ sync
 # ---------------------------------------------------------------------------
 # Cleanup: remove only ephemeral per-run files from the working directory.
 #
-# Rules:
-#   SUCCESS  - remove .tex/.xdv/.fls from /app; leave the cache dir intact
-#              so latexmk can do a real incremental build next time.
-#   FAILURE  - remove .tex/.xdv/.fls from /app; wipe the cache ONLY when
-#              the .fdb_latexmk file is missing, meaning latexmk never
-#              completed a full pass and the cache may be corrupted.
-#              If .fdb_latexmk exists the partial cache is still useful
-#              (latexmk will pick up where it left off).
+# SUCCESS: remove .tex from /app; leave the cache dir intact so latexmk
+#          can do a real incremental build next time.
+# FAILURE: remove .tex from /app; wipe the cache ONLY when .fdb_latexmk
+#          is missing (latexmk never completed a full pass).
+#          If .fdb_latexmk exists, preserve it so the next run resumes.
 # ---------------------------------------------------------------------------
 cleanup() {
     local exit_code=$?
     local doc_stem
     doc_stem="$(basename "$OUTPUT_NAME")"
 
-    echo "\U0001f9f9 Cleaning up ephemeral build files..."
-    # Remove intermediate files written to /app by xelatex (not the cache).
-    rm -f "$OUTPUT_NAME".tex "$OUTPUT_NAME".xdv "$OUTPUT_NAME".fls || true
-    # latexmk may write an extra PDF inside the cache dir; remove it.
+    echo "🧹 Cleaning up ephemeral build files..."
+    rm -f "$OUTPUT_NAME".tex || true
+    # Remove the extra PDF that xdvipdfmx may write inside the cache dir.
     rm -f "${CACHE_DIR}/${doc_stem}.pdf" || true
 
     if [[ $exit_code -ne 0 && ! -f "${OUTPUT_NAME}.pdf" ]]; then
         if [[ ! -f "${CACHE_DIR}/${doc_stem}.fdb_latexmk" ]]; then
-            echo "\u26a0\ufe0f  Build failed with no latexmk state - wiping cache for a clean retry."
+            echo "⚠️  Build failed with no latexmk state — wiping cache for a clean retry."
             rm -rf "${CACHE_DIR:?}"/* || true
         else
-            echo "\u26a0\ufe0f  Build failed but latexmk state preserved - next run will resume incrementally."
+            echo "⚠️  Build failed but latexmk state preserved — next run will resume incrementally."
         fi
     fi
 }
 trap cleanup EXIT
 
-echo "\U0001f680 Starting build for $INPUT_FILE using template $TEMPLATE_TYPE..."
+echo "🚀 Starting build for $INPUT_FILE using template $TEMPLATE_TYPE..."
 
 BIB_ARGS=""
 if [[ -f "referencias.bib" ]]; then
@@ -129,46 +125,43 @@ pandoc "$INPUT_FILE" \
     --listings \
     -o "$OUTPUT_NAME.tex"
 
-echo "\u2705 Markdown converted to LaTeX."
+echo "✅ Markdown converted to LaTeX."
 echo "PROGRESS:40%"
 sync
 
 # ---------------------------------------------------------------------------
-# Incremental compilation
+# Incremental compilation — TeX Live compatible
 #
 # TeX Live's xelatex does NOT support -aux-directory (MiKTeX only).
-# When latexmk uses -auxdir it silently passes -aux-directory to xelatex,
-# which ignores it and writes .log/.fls to the CWD (/app).
-# latexmk then detects the mismatch and enables "emulate_aux" mode, which
-# breaks every subsequent incremental build.
+# Overriding $xelatex with -output-directory causes latexmk to lose
+# track of the .fls and .xdv files because the internal path resolution
+# becomes inconsistent.
 #
-# Fix: write a .latexmkrc that overrides $xelatex to use -output-directory
-# (the TeX Live equivalent). latexmk reads it via -r and never issues
-# -aux-directory to the binary. The final PDF still goes to /app via -outdir.
+# The correct approach: set $aux_dir and $out_dir in a .latexmkrc file.
+# latexmk then passes -output-directory to xelatex internally, keeping
+# all intermediates (.aux, .log, .fls, .bbl, .xdv) in CACHE_DIR while
+# placing the final PDF in /app via $out_dir. No -auxdir on the CLI.
 # ---------------------------------------------------------------------------
 mkdir -p "$CACHE_DIR"
 
 # Write (or refresh) the per-document latexmkrc inside the cache dir.
+# Using single-quoted heredoc so $CACHE_DIR is interpolated by the shell
+# now (at write time) and the resulting file contains literal Perl strings.
 LATEXMKRC="${CACHE_DIR}/.latexmkrc"
-cat > "$LATEXMKRC" << 'RCEOF'
-# Auto-generated by mark2tex build.sh - do not edit manually.
-# Overrides xelatex invocation: uses -output-directory (TeX Live)
-# instead of -aux-directory (MiKTeX) to store intermediates in CACHE_DIR.
-RCEOF
-# Append the variable-interpolated lines separately so CACHE_DIR expands.
-cat >> "$LATEXMKRC" << RCEOF
-\$xelatex = 'xelatex -output-directory=${CACHE_DIR} -interaction=nonstopmode -shell-escape %O %S';
-\$xdvipdfmx = 'xdvipdfmx -E -o %D ${CACHE_DIR}/%R.xdv';
+cat > "$LATEXMKRC" << RCEOF
+# Auto-generated by mark2tex build.sh — do not edit manually.
+\$aux_dir = '${CACHE_DIR}';
+\$out_dir = '/app';
 RCEOF
 
 DOC_STEM="$(basename "$OUTPUT_NAME")"
 if [[ -f "${CACHE_DIR}/${DOC_STEM}.fdb_latexmk" ]]; then
-    echo "\u26a1 Incremental build: reusing latexmk cache from previous run."
+    echo "⚡ Incremental build: reusing latexmk cache from previous run."
 else
-    echo "\U0001f527 Full build: no previous cache found."
+    echo "🔧 Full build: no previous cache found."
 fi
 
-echo "\U0001f528 Compiling PDF with latexmk..."
+echo "🔨 Compiling PDF with latexmk..."
 echo "PROGRESS:50%"
 sync
 
@@ -179,16 +172,15 @@ latexmk \
     -shell-escape \
     -bibtex \
     -r "$LATEXMKRC" \
-    -outdir="/app" \
     "$OUTPUT_NAME.tex"
 
 if [[ -f "${OUTPUT_NAME}.pdf" ]]; then
-    echo "\u2705 PDF generated successfully: ${OUTPUT_NAME}.pdf"
+    echo "✅ PDF generated successfully: ${OUTPUT_NAME}.pdf"
     echo "PROGRESS:100%"
     sync
 else
-    echo "\u274c Error: PDF was not generated."
+    echo "❌ Error: PDF was not generated."
     exit 1
 fi
 
-echo "\U0001f389 Process complete!"
+echo "🎉 Process complete!"
