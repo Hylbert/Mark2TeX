@@ -29,6 +29,7 @@ _RE_ABNT_DIVIDER = re.compile(r"^-{30,}$")
 _RE_PATH_ONLY    = re.compile(r"^\s*'?[\w./\\-]+\.(tex|aux|bbl|lof|lot|toc|log|xdv|pdf)'?\s*$")
 _RE_FONTSPEC_ERR = re.compile(r"^fontspec error: \"(.+?)\"")
 _RE_BIBTEX_WARN  = re.compile(r"^Warning--(.*)")
+_RE_XDVIPDFMX    = re.compile(r"^xdvipdfmx:")
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Module-level constants (hoisted out of the translate loop)
@@ -66,6 +67,10 @@ _SUPPRESS_PREFIX = (
     "http://www.abntex",
     "See the LaTeX manual",
     "Type  H <return>",
+    # polyglossia internal font-feature noise — not actionable by the user
+    "(polyglossia) Asking to add empty feature to latin font",
+    # fontspec raw mapping lines that leak through (e.g. "n;language=dflt;mapping=tex-text;!")
+    "n;language=dflt;mapping=tex-text;",
 )
 
 # Maps error message substrings to i18n hint keys.
@@ -219,6 +224,10 @@ class LogTranslator:
         if len(stripped) <= 2:
             return None
         if re.match(r"^[()./\\]+$", stripped):
+            return None
+
+        # ── xdvipdfmx messages — suppress (driver-level noise) ───────────────
+        if _RE_XDVIPDFMX.match(stripped):
             return None
 
         # ── Merge pending error with its l.N location line ───────────────────
