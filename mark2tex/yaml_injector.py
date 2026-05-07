@@ -20,40 +20,42 @@ _FIELD_RE = re.compile(r'^(?P<key>[\w-]+):\s*(?P<value>.+)$', re.MULTILINE)
 
 _TEMPLATE_FIELDS: dict[str, dict[str, str]] = {
     "tcc-abnt": {
-        "title": "T\u00edtulo do TCC",
+        "title": "Título do TCC",
         "author": "Autor",
         "date": "",
         "template": "tcc-abnt",
         "lang": "pt-BR",
         "year": "",
-        "institution": "Nome da Institui\u00e7\u00e3o de Ensino",
+        "institution": "Nome da Instituição de Ensino",
         "course": "Nome do Curso",
         "advisor": "Prof. Dr. Nome do Orientador",
     },
     "artigo-abnt": {
-        "title": "T\u00edtulo do Artigo",
+        "title": "Título do Artigo",
         "author": "Autor",
         "date": "",
         "template": "artigo-abnt",
         "lang": "pt-BR",
-        "institution": "Nome da Institui\u00e7\u00e3o de Ensino",
+        "institution": "Nome da Instituição de Ensino",
     },
     "artigo-ieee": {
         "title": "Article Title",
         "author": "Author",
         "date": "",
         "template": "artigo-ieee",
-        "lang": "en-US",
+        # babel uses its own language names, not BCP-47 locale codes.
+        # 'english' maps to American English in babel (same as 'american').
+        "lang": "english",
     },
     "doc-tecnica": {
-        "title": "Documento T\u00e9cnico",
+        "title": "Documento Técnico",
         "author": "Autor",
         "date": "",
         "template": "doc-tecnica",
         "lang": "pt-BR",
     },
     "projeto": {
-        "title": "T\u00edtulo do Projeto",
+        "title": "Título do Projeto",
         "author": "Autor",
         "date": "",
         "template": "projeto",

@@ -165,12 +165,21 @@ echo "🔨 Compiling PDF with latexmk..."
 echo "PROGRESS:50%"
 sync
 
+# Only enable bibtex if the generated .tex actually contains \cite{} commands.
+# Running bibtex on a citation-free document produces an empty .bbl which
+# causes IEEEtran (and other classes) to emit a fatal 'missing \item' error,
+# making xelatex return code 1 even on a successful build.
+BIBTEX_FLAG="-bibtex-"
+if grep -q '\\cite{' "${OUTPUT_NAME}.tex" 2>/dev/null; then
+    BIBTEX_FLAG="-bibtex"
+fi
+
 latexmk \
     -pdfxe \
     -f \
     -interaction=nonstopmode \
     -shell-escape \
-    -bibtex \
+    "$BIBTEX_FLAG" \
     -r "$LATEXMKRC" \
     "$OUTPUT_NAME.tex"
 
