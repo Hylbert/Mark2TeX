@@ -12,10 +12,47 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and 
 - YAML frontmatter injection flow: files without a YAML header are highlighted in amber in the TUI file list. A confirmation modal injects the required frontmatter before compilation. The original file is backed up to `~/.local/share/mark2tex/backups/` with an `index.json` manifest.
 - `mark2tex restore <file>` CLI subcommand to roll back a file to its pre-injection state.
 - Directory tree traversal in the TUI file panel: subdirectories are listed before `.md` files; pressing `Enter` on a folder enters it. A `../` entry at the top navigates to the parent directory. Navigation is rooted at the working directory where `mark2tex` was invoked. The panel title shows the current folder name.
+- `frontmatter_validator` module (`mark2tex/frontmatter_validator.py`): validates YAML frontmatter before compilation. Returns a list of `ValidationError` dataclasses covering: missing required fields, placeholder values not filled in, `template` mismatch between frontmatter and TUI selection, and invalid `lang` codes. Never raises — malformed YAML returns a single `parse_error` instead of an exception.
+- Frontmatter validation integrated into `compile_specific_document()`: warnings are shown in the TUI console before the Docker worker starts. Non-critical warnings (placeholders, lang) do not block the build; missing required fields abort early and show a clear message.
+- `swap_template()` in `yaml_injector.py`: surgically patches the `template:` and `date:` fields when the user switches templates in the TUI. Common fields with user-filled values are preserved; missing fields for the new template are added with placeholders; fields exclusive to the old template are removed.
+- `mark2tex clean [file]` CLI subcommand: with no argument wipes the entire latexmk cache root; with a file argument removes only that document's cache bucket.
+- Latexmk incremental compilation: intermediate files (`.aux`, `.fdb_latexmk`, `.fls`, `.bbl`, `.xdv`) are persisted across runs in an OS-standard user cache directory (`~/.cache/mark2tex/<doc_hash>/` on Linux, `~/Library/Caches/mark2tex/<doc_hash>/` on macOS, `%LOCALAPPDATA%\mark2tex\Cache\<doc_hash>\` on Windows). The cache is mounted into the container via `--env M2T_CACHE_DIR` + volume bind, reducing re-compilation time from ~18 s to ~6 s on a 15-page document after a single-line edit.
+- Per-run `.latexmkrc` generated inside `CACHE_DIR` with `$emulate_aux = 1` for TeX Live 2022/4.76 compatibility (avoids the `-aux-directory` flag that xelatex rejects).
+- Stale-cache guard in `build.sh`: if latexmk exits non-zero and no PDF is produced, the cache is wiped automatically so the next run starts clean.
+- `DockerManager.abort()`: sends SIGKILL to the active container process and waits up to 5 s — called synchronously before scheduling a new Watch Mode worker to eliminate the race condition where the old container's cleanup trap deleted the `.tex` file written by the new Pandoc run.
+- Compile subprocess timeout: default 300 s (5 min), overridable via `MARK2TEX_TIMEOUT` env var. On timeout the process is killed, the pipe drained, and a clear error message is shown in the TUI console.
+- Exclusive compilation worker (`group="compile"`, `exclusive=True`): Textual cancels any prior worker before starting a new one, preventing parallel builds, interleaved log lines, and race conditions on the Docker subprocess.
+- Watch Mode watcher improvements: temp/swap file filtering (`_TEMP_SUFFIXES`, `_IGNORE_DIRS` frozensets); debounce raised from 1.0 s to 1.5 s for editors that write in two stages (e.g. Obsidian); debug log is now conditional on `MARK2TEX_DEBUG` instead of always writing to `tui_console_debug.log`.
+- Typography improvements for ABNT templates: `polyglossia` replaces `babel` in `tcc-abnt` and `artigo-abnt` for native XeLaTeX language support and correct pt-BR hyphenation; `setspace` + `\OnehalfSpacing` enforces ABNT NBR 14724 / NBR 6022 1.5 line spacing; `csquotes` added to all templates for typographically correct quotation marks via `\enquote{}` and `\blockquote{}`.
+- `mark2tex uninstall` now removes both `hylbert/mark2tex:latest` and `mark2tex:latest` Docker tags, the user data directory (`~/.local/share/mark2tex/`, including backups and onboarding flag), and the user config directory (`~/.config/mark2tex/`). All output respects the user's language preference via `i18n.t()`.
+- `platformdirs` used throughout for cross-platform path resolution (user cache, data, and config directories).
+- `PyYAML` and `types-pyyaml` added as explicit dependencies.
+- CI: `pip` upgraded before audit step to fix CVE-2026-6357.
 
 ### Fixed
 - Mypy `no-any-return` error in `_load_index` resolved with `cast`.
 - Removed `click` dependency; CLI now uses `argparse` only.
+- Watch Mode race condition: `DockerManager.abort()` is now called synchronously before the new Pandoc run so the old container's cleanup trap cannot delete the freshly generated `.tex` file.
+- `build.sh` latexmk cache preservation: cache is never wiped on successful builds; on failure it is only wiped when `.fdb_latexmk` is absent (i.e. latexmk never completed a full pass).
+- `build.sh`: `--bibliography` is now only passed to Pandoc when the `.md` source contains actual citation markers (`[@key]` or `\cite{`). This prevents Pandoc from emitting `\bibliography{}` in citation-free documents and stops latexmk from scheduling Biber unnecessarily (eliminates the "missing `\item`" / empty `.bbl` loop).
+- `artigo-ieee` default `lang` changed from `en-US` to `english` — Babel does not accept BCP-47 locale codes.
+- `WatcherManager` attributes annotated as `Optional[BaseObserver]` and `Optional[threading.Thread]` to satisfy mypy.
+- Watcher `_log()` legacy method removed; logging now goes through the standard-library logger used by `app.py`.
+- `latexmkrc` `$aux_dir`/`$out_dir` approach used instead of overriding `$xelatex` directly — prevents latexmk from losing track of `.fls`/`.xdv` files under TeX Live.
+- Emoji echo in `build.sh` replaced with literal UTF-8 characters (bash does not interpret `\uXXXX` in plain `echo`).
+- `docker_manager.py`: removed extraneous `f`-prefix from static string.
+
+### Tests
+- Full test suite for `watcher.py`: `_TEMP_SUFFIXES`, `_IGNORE_DIRS`, `_is_temp_file()`, `_should_trigger()`, `on_modified`/`on_created`/`on_moved` callbacks, debounce behaviour, `WatcherManager` lifecycle (start/stop/idempotent stop).
+- 30 tests for `frontmatter_validator`: happy paths for all templates, missing required fields, placeholder detection, `template_mismatch`, `invalid_lang`, `author` as list-of-dicts, multiple simultaneous errors, malformed YAML resilience.
+- Tests for `swap_template()`: happy path (common fields preserved, new fields added with placeholder, old exclusive fields removed), no-op on files without frontmatter, returns `False` on unreadable file, bidirectional template swap (`artigo-ieee` ↔ `tcc-abnt`).
+- Tests for compile timeout: `TimeoutExpired` path yields clear error message; `process.kill()` is called; pipe is drained; `MARK2TEX_TIMEOUT` env var overrides the module constant.
+- `artigo-ieee` lang assertion updated from `en-US` to `english` to match the corrected default.
+
+### Chore
+- `platformdirs` added to dependencies.
+- `PyYAML` and `types-pyyaml` added to dependencies.
+- `.latexmkrc` written per-run inside `CACHE_DIR` and read via `-r` flag, never passed as a global config.
 
 ---
 
