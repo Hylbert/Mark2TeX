@@ -210,7 +210,7 @@ class DockerManager:
         )
         reader.start()
 
-        deadline = COMPILE_TIMEOUT  # remaining seconds budget
+        deadline: float = float(COMPILE_TIMEOUT)  # remaining seconds budget
         timed_out = False
 
         try:
@@ -227,7 +227,7 @@ class DockerManager:
                 if item is _EOF:
                     break
 
-                deadline = COMPILE_TIMEOUT  # reset on every received line
+                deadline = float(COMPILE_TIMEOUT)  # reset on every received line
                 yield item
         finally:
             if timed_out or (process.poll() is None):
