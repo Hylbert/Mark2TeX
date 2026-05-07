@@ -90,6 +90,7 @@ mark2tex
 | `mark2tex check` | Executa diagnóstico completo do sistema |
 | `mark2tex init [--template NOME]` | Copia um template + exemplo para o diretório atual |
 | `mark2tex restore <arquivo>` | Restaura um `.md` ao estado anterior à injeção de YAML |
+| `mark2tex clean [arquivo]` | Remove o cache latexmk — todos os docs ou apenas um específico |
 | `mark2tex uninstall` | Remove imagens Docker, dados do usuário e configs — execute antes de `pipx uninstall mark2tex` |
 | `mark2tex doctor` | Alias para `check` *(depreciado — use `check`)* |
 
@@ -144,14 +145,20 @@ Código de saída `0` quando não há erros; código `1` quando pelo menos uma v
 - **TUI interativa** — navegador de arquivos, seletor de template, console de log em tempo real e barra de progresso criados com [Textual](https://github.com/Textualize/textual).
 - **Navegação de diretórios** — o painel de arquivos abre no diretório de trabalho atual. Subpastas são listadas antes dos arquivos `.md`; pressione `Enter` em uma pasta para entrar nela. Um item `../` no topo da lista volta para a pasta pai.
 - **Onboarding no primeiro uso** — tela de boas-vindas exibida na primeira abertura com botão **"Inicializar projeto aqui"** que copia um `.md` de exemplo no diretório atual sem sair do app.
-- **Watch mode** — recompilação automática a cada salvamento do arquivo.
+- **Watch mode** — recompilação automática a cada salvamento do arquivo; arquivos temporários/swap (`.swp`, `.bak`, `~`) são ignorados; debounce de 1,5 s evita duplos disparos em editores com escrita em duas etapas (ex.: Obsidian).
+- **Builds incrementais** — o latexmk persiste arquivos intermediários (`.aux`, `.fdb_latexmk`, `.fls`) em um diretório de cache padrão do SO. Recompilação após uma alteração de uma linha leva ~6 s em vez de ~18 s em um documento de 15 páginas.
+- **Timeout de compilação** — timeout padrão de 5 minutos (configurável via `MARK2TEX_TIMEOUT`) impede que builds travados bloqueiem a interface indefinidamente.
+- **Worker exclusivo** — pressionar `c` duas vezes ou um disparo do Watch Mode durante um build cancela o worker anterior antes de iniciar um novo, eliminando linhas de log entrecruzadas.
+- **Validador de frontmatter** — antes de cada compilação, o YAML frontmatter é verificado: campos obrigatórios ausentes, valores placeholder não preenchidos, template incompatível e códigos `lang` inválidos. Avisos aparecem no console da TUI; erros críticos abortam o build antecipadamente.
+- **Troca de template** — mudar de template na TUI atualiza cirurgicamente `template:` e `date:` no frontmatter, adiciona campos ausentes com placeholders e remove campos exclusivos do template antigo — sem tocar nos valores já preenchidos.
 - **Logs legíveis por humanos** — a saída bruta do XeLaTeX é analisada e traduzida para mensagens em linguagem simples.
 - **Seleção de fonte** — escolha entre Liberation Sans (Arial), Nimbus Sans (Helvetica), Liberation Serif (Times) e Ubuntu por documento.
-- **Suporte a bibliografia** — BibTeX via Pandoc + XeLaTeX; basta adicionar um `referencias.bib` ao lado do `.md`.
+- **Suporte a bibliografia** — BibTeX via Pandoc + XeLaTeX; basta adicionar um `referencias.bib` ao lado do `.md`. O BibTeX só é invocado quando o documento contém marcadores de citação reais.
 - **Diagnóstico do sistema** — `mark2tex check` verifica o ambiente antes de compilar.
 - **Progresso Rich no pull da imagem** — barras de progresso por layer com velocidade e ETA na primeira execução.
 - **Injeção de YAML frontmatter** — arquivos sem cabeçalho YAML são destacados em âmbar na TUI; um modal de confirmação injeta o frontmatter automaticamente antes de compilar. Um backup é salvo em `~/.local/share/mark2tex/backups/` e pode ser restaurado a qualquer momento com `mark2tex restore <arquivo>`.
-- **Fluxo orientado à ABNT** — templates construídos segundo as normas acadêmicas brasileiras.
+- **Gerência de cache de build** — `mark2tex clean [arquivo]` remove o cache latexmk de todos os documentos ou de um específico.
+- **Fluxo orientado à ABNT** — templates construídos segundo as normas acadêmicas brasileiras, com `polyglossia` para hifenização correta em pt-BR e `setspace` para o espaçamento 1,5 exigido pela ABNT.
 
 ## Templates Disponíveis
 
@@ -171,6 +178,13 @@ Código de saída `0` quando não há erros; código `1` quando pelo menos uma v
 - [x] `mark2tex init` — criar scaffold de template no diretório atual
 - [x] Injeção automática de YAML frontmatter em arquivos sem cabeçalho (com backup e restore)
 - [x] Navegação de diretórios no painel de arquivos (subpastas + navegação `../`)
+- [x] Validador de frontmatter — campos obrigatórios, placeholders, incompatibilidade de template, validação de lang
+- [x] Troca de template — preservar valores do usuário ao trocar de template na TUI
+- [x] Builds incrementais com latexmk e cache no diretório de usuário do SO
+- [x] Timeout de compilação com override via `MARK2TEX_TIMEOUT`
+- [x] Worker exclusivo de compilação (cancela e reinicia)
+- [x] `mark2tex clean` — limpar cache latexmk de build
+- [x] Correção de race condition no Watch Mode (abortar container antigo antes do novo Pandoc)
 - [ ] Templates ABNT adicionais (dissertação, apresentação)
 - [ ] Instalador nativo para Windows
 - [ ] Integração com GitHub Actions para geração de PDF em CI
