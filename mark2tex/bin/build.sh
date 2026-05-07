@@ -100,8 +100,13 @@ trap cleanup EXIT
 
 echo "🚀 Starting build for $INPUT_FILE using template $TEMPLATE_TYPE..."
 
+# Only pass --bibliography to pandoc if the source .md actually contains
+# citations ([@key] Pandoc syntax or \cite{key} LaTeX syntax).
+# Passing --bibliography unconditionally causes pandoc to emit \bibliography{}
+# in the .tex, which makes latexmk always schedule bibtex — even with -bibtex-
+# — leading to a 'Missing bbl / missing \item' loop on citation-free docs.
 BIB_ARGS=""
-if [[ -f "referencias.bib" ]]; then
+if [[ -f "referencias.bib" ]] && grep -qE '\[@[^]]+\]|\\cite\{' "$INPUT_FILE" 2>/dev/null; then
     BIB_ARGS="--bibliography=referencias.bib --citeproc"
 fi
 
@@ -165,21 +170,17 @@ echo "🔨 Compiling PDF with latexmk..."
 echo "PROGRESS:50%"
 sync
 
-# Only enable bibtex if the generated .tex actually contains \cite{} commands.
-# Running bibtex on a citation-free document produces an empty .bbl which
-# causes IEEEtran (and other classes) to emit a fatal 'missing \item' error,
-# making xelatex return code 1 even on a successful build.
-BIBTEX_FLAG="-bibtex-"
-if grep -q '\\cite{' "${OUTPUT_NAME}.tex" 2>/dev/null; then
-    BIBTEX_FLAG="-bibtex"
-fi
-
+# -bibtex- unconditionally disables bibtex in latexmk.
+# Citation-free docs never emit \bibliography{} (guarded above), so latexmk
+# has no reason to schedule bibtex regardless. When citations are present,
+# pandoc's --citeproc resolves them at the Markdown→LaTeX step, so bibtex
+# is also not needed at the latexmk level.
 latexmk \
     -pdfxe \
     -f \
     -interaction=nonstopmode \
     -shell-escape \
-    "$BIBTEX_FLAG" \
+    -bibtex- \
     -r "$LATEXMKRC" \
     "$OUTPUT_NAME.tex"
 
