@@ -49,6 +49,28 @@ AVAILABLE_FONTS: list[tuple[str, str]] = [
 _PREVIEW_MAX_CHARS = 8_000
 _PREVIEW_TRUNCATED_SUFFIX = "\n\n---\n_Preview truncated. Open the file in your editor to see the full content._"
 
+# ---------------------------------------------------------------------------
+# Progress milestones emitted by build.sh via PROGRESS:N% tokens.
+# Each value is the CEILING (exclusive) that bump is allowed to reach before
+# the next official token arrives.  build.sh emits the milestone itself, so
+# the ceiling is always (next_milestone - 1).
+#
+# Ordered ascending — _progress_ceiling() does a linear scan.
+# ---------------------------------------------------------------------------
+_PROGRESS_MILESTONES: tuple[int, ...] = (10, 40, 50, 60, 75, 88, 94, 100)
+
+
+def _bump_ceiling(current: int) -> int:
+    """Return the highest value bump may reach given the current progress.
+
+    The ceiling is (next_milestone - 1) so the bar never jumps past the
+    value that build.sh will emit next, preventing rewinds.
+    """
+    for milestone in _PROGRESS_MILESTONES:
+        if current < milestone:
+            return milestone - 1
+    return 99  # already at or past last milestone — cap at 99
+
 
 def _setup_logger() -> logging.Logger:
     logger = logging.getLogger("mark2tex")
@@ -566,9 +588,12 @@ class Mark2TeXApp(App):
                     continue
                 if result.startswith("__PROGRESS__"):
                     percent = int(result.removeprefix("__PROGRESS__"))
+                    # Official milestone: jump directly, no ceiling check needed.
                     ui("progress", percent)
                     ui("console", (f"⏳ Processing... {percent}%", "white"))
                     continue
+                # Bump the bar by 1 for ⚠️/❌/🔄 lines, but never cross
+                # into the next milestone's territory (avoids rewinds).
                 if result.startswith(("⚠️", "⚠", "❌", "🔄")):
                     ui("progress_bump", None)
                 ui("console", (result, "white"))
@@ -582,9 +607,10 @@ class Mark2TeXApp(App):
                 self._set_progress(int(value))
             elif action == "progress_bump":
                 bar = self.query_one("#progress-bar", ProgressBar)
-                current = bar.progress or 0
-                if current < 99:
-                    self._set_progress(min(int(current) + 1, 99))
+                current = int(bar.progress or 0)
+                ceiling = _bump_ceiling(current)
+                if current < ceiling:
+                    self._set_progress(current + 1)
             elif action == "console":
                 message, style = value
                 self._log_console(message, style=style)
