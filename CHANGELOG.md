@@ -9,6 +9,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and 
 ## [Unreleased]
 
 ### Added
+- `build.*` i18n keys in `i18n.py` (both `pt_BR` and `en_US`) for all status messages emitted by `build.sh`: `build.starting`, `build.md_converted`, `build.full_build`, `build.incremental`, `build.compiling_pdf`, `build.pdf_ok`, `build.pdf_error`, `build.complete`, `build.cleaning`, `build.warn_no_state`, `build.warn_state_kept`.
 - YAML frontmatter injection flow: files without a YAML header are highlighted in amber in the TUI file list. A confirmation modal injects the required frontmatter before compilation. The original file is backed up to `~/.local/share/mark2tex/backups/` with an `index.json` manifest.
 - `mark2tex restore <file>` CLI subcommand to roll back a file to its pre-injection state.
 - Directory tree traversal in the TUI file panel: subdirectories are listed before `.md` files; pressing `Enter` on a folder enters it. A `../` entry at the top navigates to the parent directory. Navigation is rooted at the working directory where `mark2tex` was invoked. The panel title shows the current folder name.
@@ -30,6 +31,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and 
 - CI: `pip` upgraded before audit step to fix CVE-2026-6357.
 
 ### Fixed
+- `build.sh` status messages (`🚀 Starting build…`, `✅ Markdown converted…`, `🔧 Full build…`, `⚡ Incremental build…`, `🔨 Compiling PDF…`, `✅ PDF generated…`, `🎉 Process complete!`, `🧹 Cleaning up…`, `⚠️ Build failed…`) are now intercepted by `LogTranslator.translate()` before the generic emoji pass-through and mapped to `build.*` i18n keys, so they are properly translated according to the user's selected language.
+- `tcc-abnt` template: `\setdefaultlanguage` now uses `[variant=brazilian]{portuguese}` instead of the dynamic `{pt-BR}` value from the YAML `lang` field. The `pt-BR` BCP-47 code is not a valid polyglossia language identifier (`gloss-pt-BR.ldf` does not exist in TeX Live), which caused a LaTeX3 error on every compilation. The template is always Brazilian Portuguese, so the language setting is now fixed and correct.
 - Mypy `no-any-return` error in `_load_index` resolved with `cast`.
 - Removed `click` dependency; CLI now uses `argparse` only.
 - Watch Mode race condition: `DockerManager.abort()` is now called synchronously before the new Pandoc run so the old container's cleanup trap cannot delete the freshly generated `.tex` file.
