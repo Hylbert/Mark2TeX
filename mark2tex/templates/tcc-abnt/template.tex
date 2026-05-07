@@ -4,7 +4,7 @@
   a4paper,
   chapter=TITLE,
   english,
-  $if(lang)$$lang$$else$portuguese$endif$
+  portuguese
 ]{abntex2}
 
 % --- CODIFICAÇÃO ---
@@ -33,8 +33,10 @@ $else$
 $endif$$endif$$endif$
 
 % --- IDIOMA (XeLaTeX-nativo, integra com fontspec) ---
+% polyglossia não reconhece 'pt-BR' como identificador — usar
+% variant=brazilian dentro do identificador canônico 'portuguese'.
 \usepackage{polyglossia}
-\setdefaultlanguage{$if(lang)$$lang$$else$portuguese$endif$}
+\setdefaultlanguage[variant=brazilian]{portuguese}
 
 % --- MARGENS (ABNT NBR 14724) ---
 \usepackage[a4paper,top=3cm,left=3cm,right=2cm,bottom=2cm]{geometry}
