@@ -96,6 +96,11 @@ def _reader_thread(stdout, line_queue: queue.Queue) -> None:
         line_queue.put(_EOF)
 
 
+# Mount destination for bundled templates inside the container.
+# Must be outside /app to avoid polluting the user's working directory.
+_TEMPLATES_MOUNT_DST = "/opt/mark2tex/templates"
+
+
 class DockerManager:
     def __init__(self) -> None:
         pkg = _get_package_path()
@@ -170,9 +175,10 @@ class DockerManager:
         command = [
             "docker", "run", "--rm", "-i",
             "--env", "M2T_CACHE_DIR=/m2t-cache",
+            "--env", f"MARK2TEX_TEMPLATE_DIR={_TEMPLATES_MOUNT_DST}",
             "--mount", f"type=bind,src={cwd},dst=/app",
             "--mount", f"type=bind,src={build_sh},dst=/opt/mark2tex/build.sh,readonly",
-            "--mount", f"type=bind,src={templates_dir},dst=/app/templates,readonly",
+            "--mount", f"type=bind,src={templates_dir},dst={_TEMPLATES_MOUNT_DST},readonly",
             "--mount", f"type=bind,src={cache_dir},dst=/m2t-cache",
             IMAGE_NAME,
             "stdbuf", "-oL", "bash", "/opt/mark2tex/build.sh",
