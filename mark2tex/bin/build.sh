@@ -71,11 +71,17 @@ sync
 # ---------------------------------------------------------------------------
 # Cleanup: remove only ephemeral per-run files from the working directory.
 #
-# SUCCESS: remove .tex from /app; leave the cache dir intact so latexmk
-#          can do a real incremental build next time.
-# FAILURE: remove .tex from /app; wipe the cache ONLY when .fdb_latexmk
-#          is missing (latexmk never completed a full pass).
+# SUCCESS: remove .tex and .fls from /app; leave the cache dir intact so
+#          latexmk can do a real incremental build next time.
+# FAILURE: remove .tex and .fls from /app; wipe the cache ONLY when
+#          .fdb_latexmk is missing (latexmk never completed a full pass).
 #          If .fdb_latexmk exists, preserve it so the next run resumes.
+#
+# Note on .fls: latexmk always writes the file list (.fls) to $out_dir
+# (/app) at the end of every run, even when $fls_file is set in .latexmkrc
+# (it moves the file back during finalisation). The .fls is not required
+# for incremental builds — latexmk uses .fdb_latexmk for that — so it is
+# safe to delete it unconditionally after each compilation.
 # ---------------------------------------------------------------------------
 cleanup() {
     local exit_code=$?
@@ -84,6 +90,7 @@ cleanup() {
 
     echo "🧹 Cleaning up ephemeral build files..."
     rm -f "$OUTPUT_NAME".tex || true
+    rm -f "$OUTPUT_NAME".fls || true
     # Remove any stray PDF that xdvipdfmx may write inside the cache dir.
     rm -f "${CACHE_DIR}/${doc_stem}.pdf" || true
 
@@ -145,12 +152,8 @@ sync
 # Fix: set $emulate_aux = 1 explicitly. latexmk then uses its own
 # copy-based emulation from the very first pass, never passing
 # -aux-directory or -output-directory to xelatex. All intermediates
-# (.aux, .log, .fls, .bbl, .xdv) are kept in $aux_dir via copy, and the
+# (.aux, .log, .bbl, .xdv) are kept in $aux_dir via copy, and the
 # final PDF goes to $out_dir=/app.
-#
-# Note on $fls_file: latexmk always writes the .fls (file list) to
-# $out_dir, regardless of $emulate_aux. Setting $fls_file explicitly
-# redirects it into $aux_dir so it never appears in the user's directory.
 # ---------------------------------------------------------------------------
 mkdir -p "$CACHE_DIR"
 
@@ -163,7 +166,6 @@ cat > "$LATEXMKRC" << RCEOF
 \$emulate_aux = 1;
 \$aux_dir = '${CACHE_DIR}';
 \$out_dir = '/app';
-\$fls_file = '${CACHE_DIR}/${DOC_STEM}.fls';
 RCEOF
 
 if [[ -f "${CACHE_DIR}/${DOC_STEM}.fdb_latexmk" ]]; then
