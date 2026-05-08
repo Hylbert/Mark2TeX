@@ -156,8 +156,8 @@ class DockerManager:
         within the remaining budget, the process is killed and a timeout error
         line is yielded.
         """
-        cwd           = Path.cwd().resolve()
-        input_path    = cwd / input_file
+        input_path    = Path(input_file).resolve()
+        cwd           = input_path.parent
         abs_file      = str(input_path)
         build_sh      = (self.bin_dir / "build.sh").resolve()
         templates_dir = self.templates_dir.resolve()
@@ -176,7 +176,7 @@ class DockerManager:
             "--mount", f"type=bind,src={cache_dir},dst=/m2t-cache",
             IMAGE_NAME,
             "stdbuf", "-oL", "bash", "/opt/mark2tex/build.sh",
-            f"/app/{Path(input_file).name}",
+            f"/app/{input_path.name}",
             template,
         ]
 
