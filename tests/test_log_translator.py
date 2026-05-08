@@ -1,6 +1,6 @@
-from src.log_translator import log_translator
+from mark2tex.log_translator import log_translator
 
-# ── Supressões ────────────────────────────────────────────────────────────
+# ── Supressões ──────────────────────────────────────────────
 
 def test_empty_line_returns_none():
     assert log_translator("") is None
@@ -22,32 +22,33 @@ def test_font_debug_suppressed():
 
 def test_hooks_warning_suppressed():
     assert log_translator("LaTeX hooks Warning: some hook message") is None
+
 def test_separator_suppressed():
     assert log_translator("-----------------------------------") is None
 
-# ── Traduções ─────────────────────────────────────────────────────────────
+# ── Traduções ──────────────────────────────────────────────
 
 def test_latex_error_translated():
     result = log_translator("! LaTeX Error: File not found.")
     assert result is not None
-    assert "✗" in result
+    assert "\u2717" in result
     assert "Erro LaTeX" in result
 
 def test_generic_error_translated():
     result = log_translator("! Undefined control sequence.")
     assert result is not None
-    assert "✗" in result
+    assert "\u2717" in result
 
 def test_output_written_translated():
     result = log_translator("Output written on output.pdf (10 pages, 12345 bytes).")
     assert result is not None
-    assert "📄" in result
-    assert "10 páginas" in result
+    assert "\U0001f4c4" in result
+    assert "10 p\u00e1ginas" in result
 
 def test_overfull_hbox_translated():
     result = log_translator("Overfull \\hbox (20.0pt too wide) in paragraph at lines 42--45")
     assert result is not None
-    assert "⚠️" in result
+    assert "\u26a0\ufe0f" in result
 
 def test_small_overfull_hbox_suppressed():
     result = log_translator("Overfull \\hbox (2.0pt too wide) in paragraph at lines 10--11")
@@ -60,13 +61,13 @@ def test_underfull_hbox_suppressed():
 def test_package_warning_translated():
     result = log_translator("Package hyperref Warning: Anchor duplicate.")
     assert result is not None
-    assert "⚠️" in result
+    assert "\u26a0\ufe0f" in result
     assert "hyperref" in result
 
 def test_latex_warning_empty_bibliography():
     result = log_translator("LaTeX Warning: Empty `thebibliography' environment on input line 200.")
     assert result is not None
-    assert "⚠️" in result
+    assert "\u26a0\ufe0f" in result
 
 def test_progress_directive():
     result = log_translator("PROGRESS:75%")
@@ -85,7 +86,7 @@ def test_line_ref_with_context():
 def test_latexmk_references_changed():
     result = log_translator("Latexmk: References changed.")
     assert result is not None
-    assert "🔄" in result
+    assert "\U0001f504" in result
 
 
 def test_bibtex_engine_translated() -> None:
@@ -96,12 +97,12 @@ def test_bibtex_engine_translated() -> None:
 def test_document_class_translated() -> None:
     result = log_translator("Document Class: abntex2 2023/01/01")
     assert result is not None
-    assert "📄" in result
+    assert "\U0001f4c4" in result
 
 def test_run_number_translated() -> None:
     result = log_translator("Run number 2 of rule 'xelatex'")
     assert result is not None
-    assert "🔄" in result
+    assert "\U0001f504" in result
 
 def test_running_xelatex_translated() -> None:
     result = log_translator("Running 'xelatex output.tex'")
@@ -111,12 +112,12 @@ def test_running_xelatex_translated() -> None:
 def test_bibliography_style_translated() -> None:
     result = log_translator("The style file: abnt.bst")
     assert result is not None
-    assert "📝" in result
+    assert "\U0001f4dd" in result
 
 def test_database_file_translated() -> None:
     result = log_translator("Database file #1: referencias.bib")
     assert result is not None
-    assert "📚" in result
+    assert "\U0001f4da" in result
 
 def test_latex_warning_labels_changed_suppressed() -> None:
     # Comportamento real: string com "Rerun" é suprimida

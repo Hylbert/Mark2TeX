@@ -1,0 +1,112 @@
+\documentclass[
+  $if(lang)$$lang$$else$brazil$endif$,
+  article,
+  12pt,
+  oneside,
+  a4paper
+]{abntex2}
+
+% --- CODIFICAÇÃO E FONTE ---
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{fontspec}
+\setmainfont{TeX Gyre Termes}
+
+% --- IDIOMA (XeLaTeX-nativo, integra com fontspec) ---
+\usepackage{polyglossia}
+\setdefaultlanguage{$if(lang)$$lang$$else$portuguese$endif$}
+
+% --- ESPAÇAMENTO (ABNT NBR 6022 — 1,5 entrelinhas) ---
+\usepackage{setspace}
+\OnehalfSpacing
+
+% --- PACOTES ESSENCIAIS ---
+\usepackage{indentfirst}
+\usepackage{color}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{amsmath, amssymb, amsfonts}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{hyperref}
+\usepackage{csquotes}
+\usepackage{microtype}
+\usepackage{array}
+\usepackage{calc}
+\usepackage[a4paper, left=3cm, right=2cm, top=3cm, bottom=2cm]{geometry}
+
+% --- SUPORTE A CÓDIGO (Pandoc) ---
+\usepackage{fancyvrb}
+\usepackage{listings}
+\usepackage{upquote}
+\newcommand{\passthrough}[1]{#1}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+\newenvironment{Shaded}{}{}
+\newcommand{\KeywordTok}[1]{\textcolor{blue}{\textbf{#1}}}
+\newcommand{\StringTok}[1]{\textcolor{teal}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor{gray}{\textit{#1}}}
+\newcommand{\FunctionTok}[1]{\textcolor{cyan}{#1}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OtherTok}[1]{#1}
+\newcommand{\ErrorTok}[1]{\textcolor{red}{#1}}
+\newcommand{\DataTypeTok}[1]{\textcolor{purple}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor{red}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor{blue}{\textbf{#1}}}
+\newcommand{\BuiltInTok}[1]{\textcolor{purple}{#1}}
+\newcommand{\ImportTok}[1]{\textcolor{teal}{#1}}
+\newcommand{\AttributeTok}[1]{\textcolor{orange}{#1}}
+\newcommand{\OperatorTok}[1]{#1}
+\newcommand{\ExtensionTok}[1]{#1}
+
+% --- METADADOS ---
+\titulo{$title$}
+\autor{$for(author)$$if(author.name)$$author.name$$else$$author$$endif$$sep$ \and $endfor$}
+\data{$if(year)$$year$$else$\the\year$endif$}
+\local{$if(local)$$local$$else$Brasil$endif$}
+
+% --- MARGENS E ESPAÇAMENTO ABNTEX2 ---
+\setlrmarginsandblock{3cm}{2cm}{*}
+\setulmarginsandblock{3cm}{2cm}{*}
+\checkandfixthelayout
+\setlength{\parindent}{1.3cm}
+\setlength{\parskip}{0.2cm}
+\SingleSpacing
+\setlength{\ABNTEXcitacaorecuo}{1.8cm}
+
+\begin{document}
+\frenchspacing
+\maketitle
+
+$if(abstract-pt)$
+\begin{resumoumacoluna}
+$abstract-pt$
+
+\vspace{\onelineskip}
+\noindent
+\textbf{Palavras-chave:} $if(keywords-pt)$$keywords-pt$$endif$
+\end{resumoumacoluna}
+$endif$
+
+$if(abstract-en)$
+\renewcommand{\resumoname}{Abstract}
+\begin{resumoumacoluna}
+$abstract-en$
+
+\vspace{\onelineskip}
+\noindent
+\textbf{Keywords:} $if(keywords-en)$$keywords-en$$endif$
+\end{resumoumacoluna}
+$endif$
+
+\textual
+
+$body$
+
+\postextual
+
+$if(bibliography)$
+\bibliographystyle{abntex2-alf}
+\bibliography{$bibliography$}
+$endif$
+
+\end{document}

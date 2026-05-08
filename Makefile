@@ -4,7 +4,7 @@
 TEMPLATE ?= tcc
 INPUT ?= exemplo.md
 
-.PHONY: build-image compile clean
+.PHONY: build-image compile clean test-all
 
 # Build the Docker image
 build-image:
@@ -22,3 +22,8 @@ compile:
 
 clean:
 	rm -f *.aux *.log *.out *.toc *.lot *.lof *.bbl *.blg *.synctex.gz *.tex *.xdv *.fls *.fdb_latexmk output.pdf
+
+test-all:
+	uv run pytest --cov=mark2tex
+	uv run ruff check .
+	uv run mypy mark2tex

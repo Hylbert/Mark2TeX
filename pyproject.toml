@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mark2tex"
-version = "0.2.1"
+version = "0.3.0"
 description = "Markdown to TeX/PDF with TUI and Docker"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -17,6 +17,8 @@ dependencies = [
   "pillow>=10.0.0",
   "platformdirs>=4.0.0",
   "pyperclip>=1.8.0",
+  "pyyaml>=6.0.3",
+  "types-pyyaml>=6.0.12.20260408",
 ]
 
 [project.optional-dependencies]
@@ -29,44 +31,46 @@ dev = [
 ]
 
 [project.scripts]
-mark2tex = "src.cli:main"
+mark2tex = "mark2tex.cli:main"
 
 [tool.setuptools]
 include-package-data = true
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["src*"]
+include = ["mark2tex*"]
 
 [tool.setuptools.package-data]
-"src" = [
+"mark2tex" = [
   "Dockerfile",
   "bin/*.sh",
   "templates/**/*",
+  "assets/**/*",
+  "styles.tcss",
 ]
 
-# ── Pytest ────────────────────────────────────────────────────────────────────────────────────
+# ── Pytest ─────────────────────────────────────────────────────────────────────────
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
 addopts = "-v --tb=short"
 asyncio_mode = "auto"
 
-# ── Coverage ──────────────────────────────────────────────────────────────────────────────────────
+# ── Coverage ──────────────────────────────────────────────────────────────────────
 [tool.coverage.run]
-source = ["src"]
+source = ["mark2tex"]
 omit = [
-  "src/__main__.py",
-  "src/assets/*",
-  "src/app.py",
-  "src/logo_renderer.py"
+  "mark2tex/__main__.py",
+  "mark2tex/assets/*",
+  "mark2tex/app.py",
+  "mark2tex/logo_renderer.py"
 ]
 
 [tool.coverage.report]
 show_missing = true
 fail_under = 40
 
-# ── Ruff ────────────────────────────────────────────────────────────────────────────────────────
+# ── Ruff ────────────────────────────────────────────────────────────────────────────
 [tool.ruff]
 line-length = 100
 target-version = "py310"
@@ -75,7 +79,7 @@ target-version = "py310"
 select = ["E", "F", "W", "I", "UP"]
 ignore = ["E501"]
 
-# ── Mypy ──────────────────────────────────────────────────────────────────────────────────────────
+# ── Mypy ────────────────────────────────────────────────────────────────────────────
 [tool.mypy]
 python_version = "3.10"
 warn_return_any = true

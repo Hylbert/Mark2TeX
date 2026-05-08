@@ -1,6 +1,6 @@
 from unittest.mock import patch
 
-from src.cli import build_parser
+from mark2tex.cli import build_parser
 
 
 def test_parser_creates_successfully():
@@ -32,17 +32,17 @@ def test_default_command_is_tui():
     command = args.command or "tui"
     assert command == "tui"
 
-def test_doctor_command_calls_ensure_environment() -> None:
-    with patch("src.cli.ensure_environment") as mock_env:
-        from src.cli import main
+def test_doctor_command_calls_run_check() -> None:
+    with patch("mark2tex.cli._run_check") as mock_run:
+        from mark2tex.cli import main
         with patch("sys.argv", ["mark2tex", "doctor"]):
             main()
-        mock_env.assert_called_once_with(check_only=True)
+        mock_run.assert_called_once()
 
 def test_uninstall_command_calls_uninstall_assets() -> None:
-    with patch("src.cli.uninstall_docker_assets") as mock_uninstall:
+    with patch("mark2tex.cli.uninstall_docker_assets") as mock_uninstall:
         with patch("sys.argv", ["mark2tex", "uninstall"]):
             with patch("builtins.print"):  # silencia o print
-                from src.cli import main
+                from mark2tex.cli import main
                 main()
         mock_uninstall.assert_called_once()
