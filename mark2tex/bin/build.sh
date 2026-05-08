@@ -147,8 +147,14 @@ sync
 # -aux-directory or -output-directory to xelatex. All intermediates
 # (.aux, .log, .fls, .bbl, .xdv) are kept in $aux_dir via copy, and the
 # final PDF goes to $out_dir=/app.
+#
+# Note on $fls_file: latexmk always writes the .fls (file list) to
+# $out_dir, regardless of $emulate_aux. Setting $fls_file explicitly
+# redirects it into $aux_dir so it never appears in the user's directory.
 # ---------------------------------------------------------------------------
 mkdir -p "$CACHE_DIR"
+
+DOC_STEM="$(basename "$OUTPUT_NAME")"
 
 # Write (or refresh) the per-document latexmkrc inside the cache dir.
 LATEXMKRC="${CACHE_DIR}/.latexmkrc"
@@ -157,9 +163,9 @@ cat > "$LATEXMKRC" << RCEOF
 \$emulate_aux = 1;
 \$aux_dir = '${CACHE_DIR}';
 \$out_dir = '/app';
+\$fls_file = '${CACHE_DIR}/${DOC_STEM}.fls';
 RCEOF
 
-DOC_STEM="$(basename "$OUTPUT_NAME")"
 if [[ -f "${CACHE_DIR}/${DOC_STEM}.fdb_latexmk" ]]; then
     echo "⚡ Incremental build: reusing latexmk cache from previous run."
 else
