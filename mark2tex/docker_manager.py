@@ -96,27 +96,29 @@ def _reader_thread(stdout, line_queue: queue.Queue) -> None:
         line_queue.put(_EOF)
 
 
+# Mount destination for bundled templates inside the container.
+# Must be outside /app to avoid polluting the user's working directory.
+# /opt/mark2tex/templates matches the path used by the Dockerfile (COPY),
+# so the bind mount overlays the baked-in templates with the host copy,
+# enabling custom templates to be added locally without rebuilding the image.
+_TEMPLATES_MOUNT_DST = "/opt/mark2tex/templates"
+
+
 class DockerManager:
     def __init__(self) -> None:
         pkg = _get_package_path()
-        self.bin_dir = pkg / "bin"
+        self.bin_dir       = pkg / "bin"
+        self.templates_dir = pkg / "templates"
         self._active_process: subprocess.Popen | None = None
         self._process_lock = threading.Lock()
 
     def list_templates(self) -> list[str]:
-        """Return template names discovered from the bundled templates directory.
-
-        Templates are baked into the Docker image at /opt/mark2tex/templates
-        during the image build (via COPY in the Dockerfile). The host-side
-        package path is used here only to enumerate available template names
-        without spinning up a container.
-        """
-        templates_dir = _get_package_path() / "templates"
-        if not templates_dir.is_dir():
+        """Return template names discovered from the bundled templates directory."""
+        if not self.templates_dir.is_dir():
             return []
         return sorted(
             d.name
-            for d in templates_dir.iterdir()
+            for d in self.templates_dir.iterdir()
             if d.is_dir() and (d / "template.tex").exists()
         )
 
@@ -161,16 +163,13 @@ class DockerManager:
         reader thread + ``queue.Queue.get(timeout=...)``: if no new line arrives
         within the remaining budget, the process is killed and a timeout error
         line is yielded.
-
-        Templates are not mounted at runtime — they are baked into the image
-        at /opt/mark2tex/templates during the Docker build. Only build.sh,
-        the user's working directory, and the latexmk cache are bind-mounted.
         """
-        input_path = Path(input_file).resolve()
-        cwd        = input_path.parent
-        abs_file   = str(input_path)
-        build_sh   = (self.bin_dir / "build.sh").resolve()
-        cache_dir  = _compute_cache_dir(abs_file)
+        input_path    = Path(input_file).resolve()
+        cwd           = input_path.parent
+        abs_file      = str(input_path)
+        build_sh      = (self.bin_dir / "build.sh").resolve()
+        templates_dir = self.templates_dir.resolve()
+        cache_dir     = _compute_cache_dir(abs_file)
 
         if not input_path.exists():
             yield f"\u274c Error: Input file '{input_file}' not found."
@@ -179,8 +178,10 @@ class DockerManager:
         command = [
             "docker", "run", "--rm", "-i",
             "--env", "M2T_CACHE_DIR=/m2t-cache",
+            "--env", f"MARK2TEX_TEMPLATE_DIR={_TEMPLATES_MOUNT_DST}",
             "--mount", f"type=bind,src={cwd},dst=/app",
             "--mount", f"type=bind,src={build_sh},dst=/opt/mark2tex/build.sh,readonly",
+            "--mount", f"type=bind,src={templates_dir},dst={_TEMPLATES_MOUNT_DST},readonly",
             "--mount", f"type=bind,src={cache_dir},dst=/m2t-cache",
             IMAGE_NAME,
             "stdbuf", "-oL", "bash", "/opt/mark2tex/build.sh",

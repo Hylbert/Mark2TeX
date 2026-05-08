@@ -6,8 +6,10 @@ TEMPLATE_TYPE="$2"
 FONT_VALUE=""
 OUTPUT_NAME="${INPUT_FILE%.*}"
 
-# Templates are baked into the Docker image at /opt/mark2tex/templates.
-# MARK2TEX_TEMPLATE_DIR is kept as an override for development/testing.
+# Templates are mounted from the host package directory at runtime
+# (bind mount to /opt/mark2tex/templates). MARK2TEX_TEMPLATE_DIR is set
+# by docker_manager.py to that path. The fallback /opt/mark2tex/templates
+# matches the Dockerfile COPY destination for use outside Docker.
 TEMPLATE_BASE="${MARK2TEX_TEMPLATE_DIR:-/opt/mark2tex/templates}"
 
 # Cache dir for latexmk intermediate files.
