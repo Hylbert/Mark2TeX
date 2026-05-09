@@ -50,6 +50,11 @@ _STRINGS: dict[str, dict[str, str]] = {
         "status.font": "Fonte    : — (padrão do template)",
         # Fonte
         "font.using": "Fonte selecionada:",
+        # Footer bindings
+        "binding.menu":    "Menu Global",
+        "binding.help":    "Ajuda",
+        "binding.compile": "Compilar",
+        "binding.watch":   "Watch Mode",
         # Help
         "help.title": "AJUDA & ATALHOS",
         "help.footer": "Pressione ESC para voltar",
@@ -272,6 +277,11 @@ _STRINGS: dict[str, dict[str, str]] = {
         "status.font": "Font     : — (template default)",
         # Fonte
         "font.using": "Selected font:",
+        # Footer bindings
+        "binding.menu":    "Global Menu",
+        "binding.help":    "Help",
+        "binding.compile": "Compile",
+        "binding.watch":   "Watch Mode",
         # Help
         "help.title": "HELP & SHORTCUTS",
         "help.footer": "Press ESC to go back",
