@@ -96,6 +96,14 @@ def _reader_thread(stdout, line_queue: queue.Queue) -> None:
         line_queue.put(_EOF)
 
 
+# Mount destination for bundled templates inside the container.
+# Must be outside /app to avoid polluting the user's working directory.
+# /opt/mark2tex/templates matches the path used by the Dockerfile (COPY),
+# so the bind mount overlays the baked-in templates with the host copy,
+# enabling custom templates to be added locally without rebuilding the image.
+_TEMPLATES_MOUNT_DST = "/opt/mark2tex/templates"
+
+
 class DockerManager:
     def __init__(self) -> None:
         pkg = _get_package_path()
@@ -156,8 +164,8 @@ class DockerManager:
         within the remaining budget, the process is killed and a timeout error
         line is yielded.
         """
-        cwd           = Path.cwd().resolve()
-        input_path    = cwd / input_file
+        input_path    = Path(input_file).resolve()
+        cwd           = input_path.parent
         abs_file      = str(input_path)
         build_sh      = (self.bin_dir / "build.sh").resolve()
         templates_dir = self.templates_dir.resolve()
@@ -170,13 +178,14 @@ class DockerManager:
         command = [
             "docker", "run", "--rm", "-i",
             "--env", "M2T_CACHE_DIR=/m2t-cache",
+            "--env", f"MARK2TEX_TEMPLATE_DIR={_TEMPLATES_MOUNT_DST}",
             "--mount", f"type=bind,src={cwd},dst=/app",
             "--mount", f"type=bind,src={build_sh},dst=/opt/mark2tex/build.sh,readonly",
-            "--mount", f"type=bind,src={templates_dir},dst=/app/templates,readonly",
+            "--mount", f"type=bind,src={templates_dir},dst={_TEMPLATES_MOUNT_DST},readonly",
             "--mount", f"type=bind,src={cache_dir},dst=/m2t-cache",
             IMAGE_NAME,
             "stdbuf", "-oL", "bash", "/opt/mark2tex/build.sh",
-            f"/app/{Path(input_file).name}",
+            f"/app/{input_path.name}",
             template,
         ]
 
@@ -271,7 +280,7 @@ def uninstall_docker_assets() -> None:
     except DockerException as exc:
         print(t("uninstall.docker_error").format(error=exc))
 
-    # ── User data (backups, onboarding flag) ──────────────────────────────────────
+    # ── User data (backups, onboarding flag) ─────────────────────────────────────
     data_dir = Path(user_data_dir("mark2tex", appauthor=False))
     if data_dir.exists():
         shutil.rmtree(data_dir, ignore_errors=True)

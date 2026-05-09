@@ -19,7 +19,25 @@
   <img src="https://img.shields.io/badge/workflow-GitFlow-orange.svg" alt="GitFlow">
   <img src="https://img.shields.io/badge/version-SemVer-green.svg" alt="SemVer">
   <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="Licença MIT">
+  <a href="https://pypi.org/project/mark2tex/">
+    <img src="https://img.shields.io/pypi/dm/mark2tex.svg" alt="Downloads PyPI">
+  </a>
+  <a href="https://coveralls.io/github/Hylbert/Mark2TeX?branch=develop">
+    <img src="https://coveralls.io/repos/github/Hylbert/Mark2TeX/badge.svg?branch=develop" alt="Status de Cobertura">
+  </a>
+  <a href="https://pypi.org/project/mark2tex/">
+    <img src="https://badge.fury.io/py/mark2tex.svg" alt="Versão PyPI">
+  </a>
+  <a href="https://snyk.io/test/github/Hylbert/Mark2TeX">
+    <img src="https://snyk.io/test/github/Hylbert/Mark2TeX/badge.svg" alt="Vulnerabilidades Conhecidas">
+  </a>
 </div>
+
+<br>
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/e2ebac18-6c4e-4048-b79c-66bc6d7fdddf" width="900" alt="Demo Mark2TeX">
+</p>
 
 <br>
 
@@ -68,6 +86,10 @@ mark2tex check
 mark2tex
 ```
 
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/3d4a666e-e4b0-470c-8677-936bf49289bd" width="900" alt="Instalação Mark2TeX via pipx">
+</p>
+
 > **Primeira execução:** O Mark2TeX baixa automaticamente a imagem `mark2tex` do Docker Hub com
 > uma **barra de progresso Rich visual** — uma barra por layer mostrando velocidade de download,
 > tamanho e tempo estimado. Requer conexão com a internet; pode levar alguns minutos dependendo
@@ -110,7 +132,7 @@ Executa seis verificações e exibe um relatório visual:
 ✅   Python            3.12.3
 ✅   Espaço em disco   145.0 GB free (320.1 GB used / 465.1 GB total)  ·  imagem: 1 143 MB
 
-───────────────────────────────────────────────────────────────────
+─────────────────────────────────────────────────────────────────
   5 OK  ·  1 aviso  ·  0 erros
 
   Verifique os avisos acima antes de compilar.
@@ -121,13 +143,15 @@ Código de saída `0` quando não há erros; código `1` quando pelo menos uma v
 ## A TUI em destaque
 
 <p align="center">
-  <img src="assets/dashboard_v2_m2t.png" alt="Dashboard Mark2TeX" width="800">
+  <img src="https://github.com/user-attachments/assets/036acf5a-d564-4173-9034-d603ec03f3ca" width="900" alt="Demo Watch Mode Mark2TeX">
 </p>
 
 1. Selecione um arquivo `.md` no painel esquerdo.
 2. Escolha um template (`tcc-abnt`, `artigo-ieee`, `doc-tecnica`, `projeto`).
 3. Opcionalmente escolha uma fonte (`Liberation Serif`, `Liberation Sans`, `Nimbus Sans`, `Ubuntu`).
 4. Pressione **`c`** para compilar ou **`w`** para ativar o Watch Mode.
+5. Visualize o arquivo Markdown.
+6. Monitore a saída do console em tempo real.
 
 ### Atalhos de teclado
 
@@ -186,8 +210,6 @@ Código de saída `0` quando não há erros; código `1` quando pelo menos uma v
 - [x] `mark2tex clean` — limpar cache latexmk de build
 - [x] Correção de race condition no Watch Mode (abortar container antigo antes do novo Pandoc)
 - [ ] Templates ABNT adicionais (dissertação, apresentação)
-- [ ] Instalador nativo para Windows
-- [ ] Integração com GitHub Actions para geração de PDF em CI
 
 Acompanhe as [issues abertas](https://github.com/Hylbert/Mark2TeX/issues) ou sugira novas funcionalidades.
 
@@ -207,6 +229,18 @@ Somos gratos por cada contribuição. ✨
 Mark2TeX é distribuído sob a [Licença MIT](LICENSE).
 
 ---
+
+## Histórico de Estrelas
+
+<a href="https://star-history.com/#Hylbert/Mark2TeX&Date">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=Hylbert/Mark2TeX&type=Date&theme=dark" />
+    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=Hylbert/Mark2TeX&type=Date" />
+    <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=Hylbert/Mark2TeX&type=Date" />
+  </picture>
+</a>
+
+---
 <div align="center">
-  Desenvolvido com ❤︎ por <a href="https://github.com/Hylbert">Hylbert</a> e <a href="https://github.com/Hylbert/Mark2TeX/graphs/contributors">contribuidores</a>.
+  Desenvolvido por <a href="https://github.com/Hylbert">Hylbert</a> e <a href="https://github.com/Hylbert/Mark2TeX/graphs/contributors">contribuidores</a>.
 </div>

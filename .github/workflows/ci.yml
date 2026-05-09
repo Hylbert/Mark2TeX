@@ -11,45 +11,48 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout código
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Configurar Python 3.11
+      - name: Set up Python 3.11
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
           cache: "pip"
 
-      - name: Instalar ferramentas de desenvolvimento
-        run: pip install ruff mypy pytest pytest-asyncio pytest-cov
+      - name: Install development tools
+        run: pip install ruff mypy pytest pytest-asyncio pytest-cov coveralls
 
-      - name: Instalar pacote em modo editável
+      - name: Install package in editable mode
         run: pip install -e .
 
       - name: Lint — ruff
         run: ruff check mark2tex/
 
-      - name: Verificação de tipos — mypy
+      - name: Type check — mypy
         run: mypy mark2tex/ --ignore-missing-imports
 
-      - name: Testes com cobertura
-        run: pytest tests/ -v --tb=short --cov=mark2tex --cov-report=term-missing --cov-fail-under=50
+      - name: Run tests with coverage
+        run: pytest tests/ -v --tb=short --cov=mark2tex --cov-report=term-missing --cov-report=lcov --cov-fail-under=50
 
-      - name: Upload cobertura para Codecov
-        uses: codecov/codecov-action@v4
-        if: always()
+      - name: Upload coverage to Coveralls
+        uses: coverallsapp/github-action@v2
         with:
-          fail_ci_if_error: false
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          file: coverage.lcov
+          format: lcov
+        env:
+          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
 
   build-package:
     needs: lint-and-test
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout código
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Configurar Python 3.11
+      - name: Set up Python 3.11
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
@@ -59,7 +62,7 @@ jobs:
           pip install build
           python -m build
 
-      - name: Upload artefato dist/
+      - name: Upload dist/ artifact
         uses: actions/upload-artifact@v4
         with:
           name: dist

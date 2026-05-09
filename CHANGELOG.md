@@ -10,6 +10,21 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and 
 
 ---
 
+## [0.3.1] — 2026-05-09
+
+### Fixed
+- **Docker working directory resolved from input file** (`fix/docker-cwd-input-file-path`): `cwd` was previously set to `Path.cwd()` — the terminal's working directory at launch — so the Docker bind mount pointed to the wrong directory whenever the `.md` file lived in a different folder. `cwd` is now derived from the resolved parent of `input_file`, ensuring the container always mounts the directory that actually contains the file and `/app/<filename>` is always reachable inside the container.
+- **Stray `.fls` file left in user's working directory** (`fix/fls-file-written-to-user-directory`): latexmk always writes the file list (`.fls`) to `$out_dir` (`/app`) at the end of every run, even when `$emulate_aux` is enabled, because `$fls_file` is not affected by the aux emulation mechanism. The `.fls` is not required for incremental builds — latexmk uses `.fdb_latexmk` for that — so it is now unconditionally removed by `cleanup()` in `build.sh` after each compilation, keeping the user's working directory clean.
+- **Docker templates mount collision** (`fix/docker-templates-mount-collision`): the bind mount for bundled templates was targeting `/app/templates`, which is inside the working-directory mount (`/app`). Docker materialised this path on the host, creating a spurious `templates/` folder in the user's current directory on every compilation run. The mount destination was changed from `/app/templates` to `/opt/mark2tex/templates` — a path outside `/app` that is never reflected on the host filesystem. The `MARK2TEX_TEMPLATE_DIR` environment variable and `build.sh` fallback were updated to match. Custom templates added to the local package directory remain immediately available without rebuilding the Docker image, as the bind mount overlays the baked-in copy at runtime.
+
+### Docs
+- Synced `README.pt-BR.md` with the English README: updated Roadmap (removed `Windows-native installer` and `GitHub Actions integration` pending items), corrected footer.
+- Added `docs/user-guide.md`: full English translation of `docs/manual-de-uso.md`.
+- Added `docs/manual.md`: English translation of the Mark2TeX operation and reference manual.
+- Renamed `docs/manual.md` (PT) to `docs/manual.pt-BR.md` to follow language-suffix convention.
+
+---
+
 ## [0.3.0] — 2026-05-07
 
 ### Added
