@@ -33,6 +33,15 @@
   </a>
 </div>
 
+
+<br>
+
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/e2ebac18-6c4e-4048-b79c-66bc6d7fdddf" width="900" alt="Mark2TeX demo">
+</p>
+
+
 <br>
 
 ## What is Mark2TeX?
@@ -79,6 +88,12 @@ mark2tex check
 # 3 — open the TUI dashboard (Docker image is pulled automatically)
 mark2tex
 ```
+
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/3d4a666e-e4b0-470c-8677-936bf49289bd" width="900" alt="Mark2TeX pipx installation">
+</p>
+
 
 > **First run:** Mark2TeX automatically pulls the `mark2tex` image from Docker Hub with a
 > **Rich visual progress bar** — one bar per image layer showing download speed, file size,
@@ -130,16 +145,20 @@ Runs six probes and prints a visual report:
 
 Exit code `0` when no errors are found; exit code `1` when at least one error probe fails — making it scriptable in CI pipelines.
 
+
 ## TUI at a Glance
 
 <p align="center">
-  <img src="assets/dashboard_v2_m2t.png" alt="Mark2TeX Dashboard" width="800">
+  <img src="https://github.com/user-attachments/assets/036acf5a-d564-4173-9034-d603ec03f3ca" width="900" alt="Mark2TeX Watch Mode demo">
 </p>
+
 
 1. Select a `.md` file from the left panel.
 2. Choose a template (`tcc-abnt`, `artigo-ieee`, `doc-tecnica`, `projeto`).
 3. Optionally pick a font (`Liberation Serif`, `Liberation Sans`, `Nimbus Sans`, `Ubuntu`).
 4. Press **`c`** to compile or **`w`** to toggle Watch Mode.
+5. Preview the Markdown file
+6. Monitor real-time console output
 
 ### Keyboard shortcuts
 
@@ -198,8 +217,6 @@ Exit code `0` when no errors are found; exit code `1` when at least one error pr
 - [x] `mark2tex clean` — wipe latexmk build cache
 - [x] Watch Mode race-condition fix (abort stale container before new Pandoc run)
 - [ ] Additional ABNT templates (dissertation, presentation)
-- [ ] Windows-native installer
-- [ ] GitHub Actions integration for CI PDF generation
 
 See open [issues](https://github.com/Hylbert/Mark2TeX/issues) to follow along or suggest features.
 
@@ -232,5 +249,5 @@ Mark2TeX is released under the [MIT License](LICENSE).
 
 ---
 <div align="center">
-  Built with ❤︎ by <a href="https://github.com/Hylbert">Hylbert</a> and <a href="https://github.com/Hylbert/Mark2TeX/graphs/contributors">contributors</a>.
+  Built by <a href="https://github.com/Hylbert">Hylbert</a> and <a href="https://github.com/Hylbert/Mark2TeX/graphs/contributors">contributors</a>.
 </div>
