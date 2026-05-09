@@ -43,17 +43,33 @@ AVAILABLE_FONTS: list[tuple[str, str]] = [
     ("ubuntu",    "Ubuntu"),
 ]
 
+# Maximum number of characters rendered in the preview panel.
+# Large documents (e.g. 60+ page TCCs) can freeze the Textual event loop
+# when the full content is passed to the Markdown widget at once.
 _PREVIEW_MAX_CHARS = 8_000
 _PREVIEW_TRUNCATED_SUFFIX = "\n\n---\n_Preview truncated. Open the file in your editor to see the full content._"
 
+# ---------------------------------------------------------------------------
+# Progress milestones emitted by build.sh via PROGRESS:N% tokens.
+# Each value is the CEILING (exclusive) that bump is allowed to reach before
+# the next official token arrives.  build.sh emits the milestone itself, so
+# the ceiling is always (next_milestone - 1).
+#
+# Ordered ascending — _progress_ceiling() does a linear scan.
+# ---------------------------------------------------------------------------
 _PROGRESS_MILESTONES: tuple[int, ...] = (10, 40, 50, 60, 75, 88, 94, 100)
 
 
 def _bump_ceiling(current: int) -> int:
+    """Return the highest value bump may reach given the current progress.
+
+    The ceiling is (next_milestone - 1) so the bar never jumps past the
+    value that build.sh will emit next, preventing rewinds.
+    """
     for milestone in _PROGRESS_MILESTONES:
         if current < milestone:
             return milestone - 1
-    return 99
+    return 99  # already at or past last milestone — cap at 99
 
 
 def _setup_logger() -> logging.Logger:
@@ -203,14 +219,19 @@ class Mark2TeXApp(App):
         self.theme = saved_theme
 
     def _refresh_bindings(self) -> None:
-        """Update Footer binding labels to the active language and force a repaint."""
+        """Update Footer binding labels to the active language and force a repaint.
+
+        self.bind() updates the runtime binding registry with translated descriptions.
+        self.query_one(Footer).refresh(force=True) then forces the Footer widget to
+        re-render from that registry, so the labels reflect the new language immediately.
+        """
         self.bind("escape",        "show_global_menu", description=t("binding.menu"))
         self.bind("q",             "show_global_menu", description=t("binding.menu"), show=False)
         self.bind("f1",            "show_help_menu",   description=t("binding.help"))
         self.bind("question_mark", "show_help_menu",   description=t("binding.help"), show=False)
         self.bind("c",             "compile_document", description=t("binding.compile"))
         self.bind("w",             "toggle_watch",     description=t("binding.watch"))
-        self.refresh_bindings()
+        self.query_one(Footer).refresh(force=True)
 
     def compose(self) -> ComposeResult:
         yield Header()
@@ -264,6 +285,7 @@ class Mark2TeXApp(App):
             )
 
     def _on_onboarding_dismissed(self, refresh_files: bool) -> None:
+        """Called automatically by Textual when OnboardingScreen.dismiss() fires."""
         if refresh_files:
             self._populate_files()
 
@@ -316,6 +338,7 @@ class Mark2TeXApp(App):
             file_list.append(item)
 
     def _navigate_to(self, target: Path) -> None:
+        """Change the current directory and refresh the file list."""
         self.selected_file = None
         self.query_one("#status-file", Label).update(t("status.file"))
         self._current_dir = target.resolve()
@@ -340,6 +363,7 @@ class Mark2TeXApp(App):
         self._refresh_bindings()
 
     def _apply_template_swap(self, new_template: str) -> None:
+        """If a file with frontmatter is selected, patch its header surgically."""
         if not self.selected_file:
             return
         abs_file = str(self._current_dir / self.selected_file)
@@ -394,6 +418,7 @@ class Mark2TeXApp(App):
             self.query_one("#status-font", Label).update(f"Fonte    : {item.display_label}")
 
     def _check_yaml_badge(self, item: OptionItem) -> None:
+        """Add/remove the no-yaml CSS class based on frontmatter presence."""
         filepath = str(self._current_dir / item.label_text)
         if not has_frontmatter(filepath):
             item.add_class("file-item--no-yaml")
@@ -519,6 +544,7 @@ class Mark2TeXApp(App):
         selected_template: str,
         selected_font: str | None,
     ) -> None:
+        """Called when YamlInjectScreen closes."""
         if not confirmed:
             return
         abs_file = str(self._current_dir / selected_file)
@@ -539,6 +565,9 @@ class Mark2TeXApp(App):
         selected_template: str,
         selected_font: str | None = None,
     ) -> None:
+        # Kill any running Docker container before starting a new one.
+        # This ensures the old container's cleanup() trap finishes before
+        # Pandoc regenerates the .tex file in the new run.
         self.docker_manager.abort()
         self.run_worker(
             lambda: self._run_compilation(
@@ -562,6 +591,9 @@ class Mark2TeXApp(App):
             _logger.debug("UI REQUEST - %s: %s", action, value)
             self.call_from_thread(self._apply_ui_update, action, value)
 
+        # One translator instance per compilation run so that stateful
+        # multi-line sequences (error + l.N location, polyglossia
+        # continuation blocks) are handled correctly across line boundaries.
         translator = LogTranslator()
 
         ui("progress", 0)
@@ -581,9 +613,12 @@ class Mark2TeXApp(App):
                     continue
                 if result.startswith("__PROGRESS__"):
                     percent = int(result.removeprefix("__PROGRESS__"))
+                    # Official milestone: jump directly, no ceiling check needed.
                     ui("progress", percent)
                     ui("console", (f"⏳ Processing... {percent}%", "white"))
                     continue
+                # Bump the bar by 1 for ⚠️/❌/🔄 lines, but never cross
+                # into the next milestone's territory (avoids rewinds).
                 if result.startswith(("⚠️", "⚠", "❌", "🔄")):
                     ui("progress_bump", None)
                 ui("console", (result, "white"))
