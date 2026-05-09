@@ -35,6 +35,12 @@
 
 <br>
 
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/e2ebac18-6c4e-4048-b79c-66bc6d7fdddf" width="900" alt="Demo Mark2TeX">
+</p>
+
+<br>
+
 ## O que é o Mark2TeX?
 
 Mark2TeX é uma ferramenta de linha de comando que converte arquivos Markdown em PDFs prontos para publicação, usando Pandoc, XeLaTeX e templates LaTeX pré-construídos — tudo dentro de um container Docker. Você escreve texto simples; o Mark2TeX cuida da tipografia.
@@ -79,6 +85,10 @@ mark2tex check
 # 3 — abrir a TUI (a imagem Docker é baixada automaticamente)
 mark2tex
 ```
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/3d4a666e-e4b0-470c-8677-936bf49289bd" width="900" alt="Instalação Mark2TeX via pipx">
+</p>
 
 > **Primeira execução:** O Mark2TeX baixa automaticamente a imagem `mark2tex` do Docker Hub com
 > uma **barra de progresso Rich visual** — uma barra por layer mostrando velocidade de download,
@@ -133,13 +143,15 @@ Código de saída `0` quando não há erros; código `1` quando pelo menos uma v
 ## A TUI em destaque
 
 <p align="center">
-  <img src="assets/dashboard_v2_m2t.png" alt="Dashboard Mark2TeX" width="800">
+  <img src="https://github.com/user-attachments/assets/036acf5a-d564-4173-9034-d603ec03f3ca" width="900" alt="Demo Watch Mode Mark2TeX">
 </p>
 
 1. Selecione um arquivo `.md` no painel esquerdo.
 2. Escolha um template (`tcc-abnt`, `artigo-ieee`, `doc-tecnica`, `projeto`).
 3. Opcionalmente escolha uma fonte (`Liberation Serif`, `Liberation Sans`, `Nimbus Sans`, `Ubuntu`).
 4. Pressione **`c`** para compilar ou **`w`** para ativar o Watch Mode.
+5. Visualize o arquivo Markdown.
+6. Monitore a saída do console em tempo real.
 
 ### Atalhos de teclado
 
