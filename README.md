@@ -19,6 +19,18 @@
   <img src="https://img.shields.io/badge/workflow-GitFlow-orange.svg" alt="GitFlow">
   <img src="https://img.shields.io/badge/version-SemVer-green.svg" alt="SemVer">
   <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT License">
+  <a href="https://pypi.org/project/mark2tex/">
+    <img src="https://img.shields.io/pypi/dm/mark2tex.svg" alt="PyPI Downloads">
+  </a>
+  <a href="https://coveralls.io/github/Hylbert/Mark2TeX?branch=develop">
+    <img src="https://coveralls.io/repos/github/Hylbert/Mark2TeX/badge.svg?branch=develop" alt="Coverage Status">
+  </a>
+  <a href="https://pypi.org/project/mark2tex/">
+    <img src="https://badge.fury.io/py/mark2tex.svg" alt="PyPI version">
+  </a>
+  <a href="https://snyk.io/test/github/Hylbert/Mark2TeX">
+    <img src="https://snyk.io/test/github/Hylbert/Mark2TeX/badge.svg" alt="Known Vulnerabilities">
+  </a>
 </div>
 
 <br>
@@ -205,6 +217,18 @@ We are grateful for every contribution. ✨
 ## License
 
 Mark2TeX is released under the [MIT License](LICENSE).
+
+---
+
+## Star History
+
+<a href="https://star-history.com/#Hylbert/Mark2TeX&Date">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=Hylbert/Mark2TeX&type=Date&theme=dark" />
+    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=Hylbert/Mark2TeX&type=Date" />
+    <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=Hylbert/Mark2TeX&type=Date" />
+  </picture>
+</a>
 
 ---
 <div align="center">

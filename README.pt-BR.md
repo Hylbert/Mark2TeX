@@ -19,6 +19,18 @@
   <img src="https://img.shields.io/badge/workflow-GitFlow-orange.svg" alt="GitFlow">
   <img src="https://img.shields.io/badge/version-SemVer-green.svg" alt="SemVer">
   <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="Licença MIT">
+  <a href="https://pypi.org/project/mark2tex/">
+    <img src="https://img.shields.io/pypi/dm/mark2tex.svg" alt="Downloads PyPI">
+  </a>
+  <a href="https://coveralls.io/github/Hylbert/Mark2TeX?branch=develop">
+    <img src="https://coveralls.io/repos/github/Hylbert/Mark2TeX/badge.svg?branch=develop" alt="Status de Cobertura">
+  </a>
+  <a href="https://pypi.org/project/mark2tex/">
+    <img src="https://badge.fury.io/py/mark2tex.svg" alt="Versão PyPI">
+  </a>
+  <a href="https://snyk.io/test/github/Hylbert/Mark2TeX">
+    <img src="https://snyk.io/test/github/Hylbert/Mark2TeX/badge.svg" alt="Vulnerabilidades Conhecidas">
+  </a>
 </div>
 
 <br>
@@ -110,7 +122,7 @@ Executa seis verificações e exibe um relatório visual:
 ✅   Python            3.12.3
 ✅   Espaço em disco   145.0 GB free (320.1 GB used / 465.1 GB total)  ·  imagem: 1 143 MB
 
-───────────────────────────────────────────────────────────────────
+─────────────────────────────────────────────────────────────────
   5 OK  ·  1 aviso  ·  0 erros
 
   Verifique os avisos acima antes de compilar.
@@ -205,6 +217,18 @@ Somos gratos por cada contribuição. ✨
 ## Licença
 
 Mark2TeX é distribuído sob a [Licença MIT](LICENSE).
+
+---
+
+## Histórico de Estrelas
+
+<a href="https://star-history.com/#Hylbert/Mark2TeX&Date">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=Hylbert/Mark2TeX&type=Date&theme=dark" />
+    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=Hylbert/Mark2TeX&type=Date" />
+    <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=Hylbert/Mark2TeX&type=Date" />
+  </picture>
+</a>
 
 ---
 <div align="center">
