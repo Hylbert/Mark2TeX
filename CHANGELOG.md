@@ -8,10 +8,20 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and 
 
 ## [Unreleased]
 
+---
+
+## [0.3.1] — 2026-05-09
+
 ### Fixed
 - **Docker working directory resolved from input file** (`fix/docker-cwd-input-file-path`): `cwd` was previously set to `Path.cwd()` — the terminal's working directory at launch — so the Docker bind mount pointed to the wrong directory whenever the `.md` file lived in a different folder. `cwd` is now derived from the resolved parent of `input_file`, ensuring the container always mounts the directory that actually contains the file and `/app/<filename>` is always reachable inside the container.
 - **Stray `.fls` file left in user's working directory** (`fix/fls-file-written-to-user-directory`): latexmk always writes the file list (`.fls`) to `$out_dir` (`/app`) at the end of every run, even when `$emulate_aux` is enabled, because `$fls_file` is not affected by the aux emulation mechanism. The `.fls` is not required for incremental builds — latexmk uses `.fdb_latexmk` for that — so it is now unconditionally removed by `cleanup()` in `build.sh` after each compilation, keeping the user's working directory clean.
 - **Docker templates mount collision** (`fix/docker-templates-mount-collision`): the bind mount for bundled templates was targeting `/app/templates`, which is inside the working-directory mount (`/app`). Docker materialised this path on the host, creating a spurious `templates/` folder in the user's current directory on every compilation run. The mount destination was changed from `/app/templates` to `/opt/mark2tex/templates` — a path outside `/app` that is never reflected on the host filesystem. The `MARK2TEX_TEMPLATE_DIR` environment variable and `build.sh` fallback were updated to match. Custom templates added to the local package directory remain immediately available without rebuilding the Docker image, as the bind mount overlays the baked-in copy at runtime.
+
+### Docs
+- Synced `README.pt-BR.md` with the English README: updated Roadmap (removed `Windows-native installer` and `GitHub Actions integration` pending items), corrected footer.
+- Added `docs/user-guide.md`: full English translation of `docs/manual-de-uso.md`.
+- Added `docs/manual.md`: English translation of the Mark2TeX operation and reference manual.
+- Renamed `docs/manual.md` (PT) to `docs/manual.pt-BR.md` to follow language-suffix convention.
 
 ---
 
@@ -29,14 +39,14 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and 
 - Frontmatter validation integrated into `compile_specific_document()`: warnings are shown in the TUI console before the Docker worker starts. Non-critical warnings (placeholders, lang) do not block the build; missing required fields abort early and show a clear message.
 - `swap_template()` in `yaml_injector.py`: surgically patches the `template:` and `date:` fields when the user switches templates in the TUI. Common fields with user-filled values are preserved; missing fields for the new template are added with placeholders; fields exclusive to the old template are removed.
 - `mark2tex clean [file]` CLI subcommand: with no argument wipes the entire latexmk cache root; with a file argument removes only that document's cache bucket.
-- Latexmk incremental compilation: intermediate files (`.aux`, `.fdb_latexmk`, `.fls`, `.bbl`, `.xdv`) are persisted across runs in an OS-standard user cache directory (`~/.cache/mark2tex/<doc_hash>/` on Linux, `~/Library/Caches/mark2tex/<doc_hash>/` on macOS, `%LOCALAPPDATA%\\mark2tex\\Cache\\<doc_hash>\\` on Windows). The cache is mounted into the container via `--env M2T_CACHE_DIR` + volume bind, reducing re-compilation time from ~18 s to ~6 s on a 15-page document after a single-line edit.
+- Latexmk incremental compilation: intermediate files (`.aux`, `.fdb_latexmk`, `.fls`, `.bbl`, `.xdv`) are persisted across runs in an OS-standard user cache directory (`~/.cache/mark2tex/<doc_hash>/` on Linux, `~/Library/Caches/mark2tex/<doc_hash>/` on macOS, `%LOCALAPPDATA%\mark2tex\Cache\<doc_hash>\` on Windows). The cache is mounted into the container via `--env M2T_CACHE_DIR` + volume bind, reducing re-compilation time from ~18 s to ~6 s on a 15-page document after a single-line edit.
 - Per-run `.latexmkrc` generated inside `CACHE_DIR` with `$emulate_aux = 1` for TeX Live 2022/4.76 compatibility (avoids the `-aux-directory` flag that xelatex rejects).
 - Stale-cache guard in `build.sh`: if latexmk exits non-zero and no PDF is produced, the cache is wiped automatically so the next run starts clean.
 - `DockerManager.abort()`: sends SIGKILL to the active container process and waits up to 5 s — called synchronously before scheduling a new Watch Mode worker to eliminate the race condition where the old container's cleanup trap deleted the `.tex` file written by the new Pandoc run.
 - Compile subprocess timeout: default 300 s (5 min), overridable via `MARK2TEX_TIMEOUT` env var. On timeout the process is killed, the pipe drained, and a clear error message is shown in the TUI console.
 - Exclusive compilation worker (`group="compile"`, `exclusive=True`): Textual cancels any prior worker before starting a new one, preventing parallel builds, interleaved log lines, and race conditions on the Docker subprocess.
 - Watch Mode watcher improvements: temp/swap file filtering (`_TEMP_SUFFIXES`, `_IGNORE_DIRS` frozensets); debounce raised from 1.0 s to 1.5 s for editors that write in two stages (e.g. Obsidian); debug log is now conditional on `MARK2TEX_DEBUG` instead of always writing to `tui_console_debug.log`.
-- Typography improvements for ABNT templates: `polyglossia` replaces `babel` in `tcc-abnt` and `artigo-abnt` for native XeLaTeX language support and correct pt-BR hyphenation; `setspace` + `\\OnehalfSpacing` enforces ABNT NBR 14724 / NBR 6022 1.5 line spacing; `csquotes` added to all templates for typographically correct quotation marks via `\\enquote{}` and `\\blockquote{}`.
+- Typography improvements for ABNT templates: `polyglossia` replaces `babel` in `tcc-abnt` and `artigo-abnt` for native XeLaTeX language support and correct pt-BR hyphenation; `setspace` + `\OnehalfSpacing` enforces ABNT NBR 14724 / NBR 6022 1.5 line spacing; `csquotes` added to all templates for typographically correct quotation marks via `\enquote{}` and `\blockquote{}`.
 - `mark2tex uninstall` now removes both `hylbert/mark2tex:latest` and `mark2tex:latest` Docker tags, the user data directory (`~/.local/share/mark2tex/`, including backups and onboarding flag), and the user config directory (`~/.config/mark2tex/`). All output respects the user's language preference via `i18n.t()`.
 - `platformdirs` used throughout for cross-platform path resolution (user cache, data, and config directories).
 - `PyYAML` and `types-pyyaml` added as explicit dependencies.
@@ -45,17 +55,17 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and 
 ### Fixed
 - Progress bar rewind bug: `progress_bump` previously had no ceiling, allowing warning-heavy compilations (e.g. 60+ overfull-hbox lines per xelatex pass) to push the bar past 99% during an early phase, causing it to visually snap back when the next official `PROGRESS:N%` token arrived. The bar is now strictly non-decreasing for all documents.
 - `build.sh` status messages (`🚀 Starting build…`, `✅ Markdown converted…`, `🔧 Full build…`, `⚡ Incremental build…`, `🔨 Compiling PDF…`, `✅ PDF generated…`, `🎉 Process complete!`, `🧹 Cleaning up…`, `⚠️ Build failed…`) are now intercepted by `LogTranslator.translate()` before the generic emoji pass-through and mapped to `build.*` i18n keys, so they are properly translated according to the user's selected language.
-- `tcc-abnt` template: `\\setdefaultlanguage` now uses `[variant=brazilian]{portuguese}` instead of the dynamic `{pt-BR}` value from the YAML `lang` field. The `pt-BR` BCP-47 code is not a valid polyglossia language identifier (`gloss-pt-BR.ldf` does not exist in TeX Live), which caused a LaTeX3 error on every compilation. The template is always Brazilian Portuguese, so the language setting is now fixed and correct.
+- `tcc-abnt` template: `\setdefaultlanguage` now uses `[variant=brazilian]{portuguese}` instead of the dynamic `{pt-BR}` value from the YAML `lang` field. The `pt-BR` BCP-47 code is not a valid polyglossia language identifier (`gloss-pt-BR.ldf` does not exist in TeX Live), which caused a LaTeX3 error on every compilation. The template is always Brazilian Portuguese, so the language setting is now fixed and correct.
 - Mypy `no-any-return` error in `_load_index` resolved with `cast`.
 - Removed `click` dependency; CLI now uses `argparse` only.
 - Watch Mode race condition: `DockerManager.abort()` is now called synchronously before the new Pandoc run so the old container's cleanup trap cannot delete the freshly generated `.tex` file.
 - `build.sh` latexmk cache preservation: cache is never wiped on successful builds; on failure it is only wiped when `.fdb_latexmk` is absent (i.e. latexmk never completed a full pass).
-- `build.sh`: `--bibliography` is now only passed to Pandoc when the `.md` source contains actual citation markers (`[@key]` or `\\cite{`). This prevents Pandoc from emitting `\\bibliography{}` in citation-free documents and stops latexmk from scheduling Biber unnecessarily (eliminates the \"missing `\\item`\" / empty `.bbl` loop).
+- `build.sh`: `--bibliography` is now only passed to Pandoc when the `.md` source contains actual citation markers (`[@key]` or `\cite{`). This prevents Pandoc from emitting `\bibliography{}` in citation-free documents and stops latexmk from scheduling Biber unnecessarily (eliminates the "missing `\item`" / empty `.bbl` loop).
 - `artigo-ieee` default `lang` changed from `en-US` to `english` — Babel does not accept BCP-47 locale codes.
 - `WatcherManager` attributes annotated as `Optional[BaseObserver]` and `Optional[threading.Thread]` to satisfy mypy.
 - Watcher `_log()` legacy method removed; logging now goes through the standard-library logger used by `app.py`.
 - `latexmkrc` `$aux_dir`/`$out_dir` approach used instead of overriding `$xelatex` directly — prevents latexmk from losing track of `.fls`/`.xdv` files under TeX Live.
-- Emoji echo in `build.sh` replaced with literal UTF-8 characters (bash does not interpret `\\uXXXX` in plain `echo`).
+- Emoji echo in `build.sh` replaced with literal UTF-8 characters (bash does not interpret `\uXXXX` in plain `echo`).
 - `docker_manager.py`: removed extraneous `f`-prefix from static string.
 
 ### Tests
@@ -124,14 +134,14 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and 
 - Font selection flag (`--font arial | helvetica | times | ubuntu`) via `build.sh` and TUI.
 - `.gitattributes` enforcing LF line endings for all shell and text files.
 - `tocloft`-native TOC styling in `doc-tecnica` template (removes `hyperref` conflict).
-- `\\tightlist` stub in `doc-tecnica` template (fixes Pandoc compact-list rendering).
+- `\tightlist` stub in `doc-tecnica` template (fixes Pandoc compact-list rendering).
 - Community health files: `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `PULL_REQUEST_TEMPLATE.md`, issue templates.
 - Rewritten `README.md` and `README.pt-BR.md` with CLI commands table, feature list, and roadmap.
 - `docs/manual-de-uso.md` initial user manual.
 
 ### Fixed
-- CRLF line endings in `build.sh` causing `$'\\r': command not found` on Windows Docker builds.
-- `\\renewcommand{\\contentsline}[4]` conflict with `hyperref` 5-argument redefinition.
+- CRLF line endings in `build.sh` causing `$'\r': command not found` on Windows Docker builds.
+- `\renewcommand{\contentsline}[4]` conflict with `hyperref` 5-argument redefinition.
 - `ca-certificates` added to Dockerfile to fix `curl` SSL error (exit code 77).
 - `fontconfig` added to Dockerfile to fix `fc-cache not found` (exit code 127).
 - Templates: replaced `Liberation Serif` / `Times New Roman` with `TeX Gyre Termes` for reliable font availability inside the Docker container (`tcc-abnt`, `artigo-abnt`, `doc-tecnica`, `projeto`).
