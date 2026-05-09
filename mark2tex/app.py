@@ -199,13 +199,16 @@ class Mark2TeXApp(App):
     CSS_PATH = os.path.join(os.path.dirname(__file__), "styles.tcss")
     TITLE = "Mark2TeX Dashboard"
 
+    # Labels are intentionally empty — they are set dynamically via
+    # _refresh_bindings() after the language is loaded, so the Footer
+    # bar always reflects the active locale.
     BINDINGS = [
-        ("escape", "show_global_menu", "Menu Global"),
-        ("q",      "show_global_menu", "Menu Global"),
-        ("f1",     "show_help_menu",   "Ajuda"),
-        ("question_mark", "show_help_menu", "Ajuda"),
-        ("c",      "compile_document", "Compilar"),
-        ("w",      "toggle_watch",     "Watch Mode"),
+        ("escape",        "show_global_menu", ""),
+        ("q",             "show_global_menu", ""),
+        ("f1",            "show_help_menu",   ""),
+        ("question_mark", "show_help_menu",   ""),
+        ("c",             "compile_document", ""),
+        ("w",             "toggle_watch",     ""),
     ]
 
     def on_load(self) -> None:
@@ -213,6 +216,15 @@ class Mark2TeXApp(App):
         set_language(settings.get("language", "pt_BR"))
         saved_theme = settings.get("theme", "textual-dark")
         self.theme = saved_theme
+
+    def _refresh_bindings(self) -> None:
+        """Re-register bindings with translated labels for the active language."""
+        self.bind("escape",        "show_global_menu", description=t("binding.menu"))
+        self.bind("q",             "show_global_menu", description=t("binding.menu"), show=False)
+        self.bind("f1",            "show_help_menu",   description=t("binding.help"))
+        self.bind("question_mark", "show_help_menu",   description=t("binding.help"), show=False)
+        self.bind("c",             "compile_document", description=t("binding.compile"))
+        self.bind("w",             "toggle_watch",     description=t("binding.watch"))
 
     def compose(self) -> ComposeResult:
         yield Header()
@@ -254,6 +266,7 @@ class Mark2TeXApp(App):
         self.selected_font:     str | None = None
         self._console_lines:    list[str]  = []
         self._current_dir:      Path       = Path.cwd()
+        self._refresh_bindings()
         self._refresh_ui_labels()
         self._populate_templates()
         self._populate_fonts()
@@ -341,6 +354,7 @@ class Mark2TeXApp(App):
 
     def on_language_changed(self, _: LanguageChanged) -> None:
         self._refresh_ui_labels()
+        self._refresh_bindings()
 
     def _apply_template_swap(self, new_template: str) -> None:
         """If a file with frontmatter is selected, patch its header surgically."""
