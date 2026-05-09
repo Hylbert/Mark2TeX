@@ -210,8 +210,6 @@ Código de saída `0` quando não há erros; código `1` quando pelo menos uma v
 - [x] `mark2tex clean` — limpar cache latexmk de build
 - [x] Correção de race condition no Watch Mode (abortar container antigo antes do novo Pandoc)
 - [ ] Templates ABNT adicionais (dissertação, apresentação)
-- [ ] Instalador nativo para Windows
-- [ ] Integração com GitHub Actions para geração de PDF em CI
 
 Acompanhe as [issues abertas](https://github.com/Hylbert/Mark2TeX/issues) ou sugira novas funcionalidades.
 
@@ -244,5 +242,5 @@ Mark2TeX é distribuído sob a [Licença MIT](LICENSE).
 
 ---
 <div align="center">
-  Desenvolvido com ❤︎ por <a href="https://github.com/Hylbert">Hylbert</a> e <a href="https://github.com/Hylbert/Mark2TeX/graphs/contributors">contribuidores</a>.
+  Desenvolvido por <a href="https://github.com/Hylbert">Hylbert</a> e <a href="https://github.com/Hylbert/Mark2TeX/graphs/contributors">contribuidores</a>.
 </div>

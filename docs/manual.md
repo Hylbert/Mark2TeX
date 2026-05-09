@@ -1,119 +1,119 @@
 ---
-title: Manual de Operação e Guia de Referência Mark2TeX
-author: Fulano de Tal
-institution: Ecossistema de Automação Acadêmica
+title: Mark2TeX Operation Manual and Reference Guide
+author: Your Name
+institution: Academic Automation Ecosystem
 campus: Virtual Campus
-department: Desenvolvimento de Ferramentas
-course: Engenharia de Software
-advisor: Automação
-coadvisor: Produtividade
-city: Mundo Digital
+department: Tool Development
+course: Software Engineering
+advisor: Automation
+coadvisor: Productivity
+city: Digital World
 year: "2026"
-acknowledgments: Agradecemos a todos os estudantes que buscam simplificar a formatação de seus trabalhos acadêmicos.
+acknowledgments: We thank all students who seek to simplify the formatting of their academic work.
 abstract-pt: Este documento serve como manual de usuário e prova de conceito para a ferramenta Mark2TeX. Ele demonstra a capacidade de conversão de Markdown para PDF seguindo as normas ABNT, validando a instalação do ambiente Docker e do motor XeLaTeX.
 abstract-en: This document serves as a user manual and proof of concept for the Mark2TeX tool. It demonstrates the ability to convert Markdown to PDF following ABNT standards, validating the Docker environment and XeLaTeX engine installation.
 siglas: \begin{description} \item[ABNT] Associação Brasileira de Normas Técnicas \item[PDF] Portable Document Format \item[YAML] Yet Another Markup Language \item[TCC] Trabalho de Conclusão de Curso \end{description}
-simbolos: \begin{description} \item[$\rightarrow$] Direcionamento de fluxo \item[$\sum$] Somatório de elementos \item[$\alpha$] Coeficiente de aprendizado \end{description}
-bibliography: referencias.bib
+simbolos: \begin{description} \item[$\rightarrow$] Flow direction \item[$\sum$] Summation of elements \item[$\alpha$] Learning coefficient \end{description}
+bibliography: references.bib
 ---
 
-# Introdução ao Mark2TeX
+# Introduction to Mark2TeX
 
-O **Mark2TeX** é um sistema de automação de documentos acadêmicos que desacopla o conteúdo da formatação. Em vez de lutar com a sintaxe complexa do LaTeX, o usuário escreve em **Markdown**, e a ferramenta cuida de toda a burocracia da norma ABNT através de um pipeline Dockerizado.
+**Mark2TeX** is an academic document automation system that decouples content from formatting. Instead of wrestling with complex LaTeX syntax, the user writes in **Markdown**, and the tool handles all the ABNT standard bureaucracy through a Dockerized pipeline.
 
-## O Fluxo de Trabalho
-O processo segue a seguinte cadeia:
+## The Workflow
+The process follows this chain:
 **Markdown** $\rightarrow$ **Pandoc** $\rightarrow$ **XeLaTeX** $\rightarrow$ **PDF**
 
-Isso garante que qualquer pessoa com Docker instalado consiga gerar o mesmo PDF, sem precisar instalar gigabytes de distribuições TeX localmente.
+This ensures that anyone with Docker installed can generate the same PDF, without needing to install gigabytes of TeX distributions locally.
 
-# Guia de Operação (Comandos)
+# Operation Guide (Commands)
 
-O Mark2TeX oferece duas formas de operação: através de um Dashboard Interativo (TUI) ou via linha de comando (CLI).
+Mark2TeX offers two modes of operation: through an Interactive Dashboard (TUI) or via the command line (CLI).
 
-## 🖥️ Operação via Dashboard (Recomendado)
+## 🖥️ Dashboard Operation (Recommended)
 
-O Dashboard é a forma mais intuitiva de utilizar a ferramenta. Para iniciá-lo, execute:
+The Dashboard is the most intuitive way to use the tool. To start it, run:
 `mark2tex`
 
-### Funcionalidades do Dashboard:
-1. **Explorador de Arquivos**: No painel esquerdo, navegue e selecione o arquivo `.md` que deseja compilar.
-2. **Seleção de Template**: No painel central, escolha entre os modelos disponíveis (`tcc`, `artigo` ou `projeto`).
-3. **Compilação**: Pressione a tecla `c` ou clique no botão **🚀 COMPILAR**. O progresso será exibido em tempo real na barra de status e no console inferior.
-4. **Watch Mode (Auto-compile)**: Pressione a tecla `w` ou clique em **👀 WATCH**. A ferramenta monitorará o arquivo selecionado e disparará a compilação automaticamente a cada salvamento.
-5. **Ajuda e Menus**: Pressione `F1` ou `?` para ver os atalhos, e `ESC` ou `q` para acessar o menu global.
+### Dashboard features:
+1. **File Explorer**: In the left panel, navigate and select the `.md` file you want to compile.
+2. **Template Selection**: In the centre panel, choose from the available templates (`tcc`, `artigo` or `projeto`).
+3. **Compilation**: Press `c` or click **🚀 COMPILE**. Progress will be displayed in real time in the status bar and the bottom console.
+4. **Watch Mode (Auto-compile)**: Press `w` or click **👀 WATCH**. The tool will monitor the selected file and trigger compilation automatically on every save.
+5. **Help and Menus**: Press `F1` or `?` to see shortcuts, and `ESC` or `q` to access the global menu.
 
 ---
 
-## ⌨️ Operação via Terminal (CLI)
+## ⌨️ Terminal Operation (CLI)
 
-Para usuários que preferem automação ou scripts, a interface de linha de comando continua disponível.
+For users who prefer automation or scripts, the command-line interface remains available.
 
-### Preparando o Ambiente
-Se for a primeira vez utilizando a ferramenta ou se o `Dockerfile` foi alterado:
+### Preparing the environment
+If this is the first time using the tool or if the `Dockerfile` has been changed:
 `make build-image`
 
-### Gerando o PDF (Manual)
-Para compilar um arquivo específico:
-`make compile INPUT=nome_do_arquivo.md TEMPLATE=tcc`
+### Generating the PDF (manual)
+To compile a specific file:
+`make compile INPUT=filename.md TEMPLATE=tcc`
 
-*   **INPUT**: O arquivo Markdown que contém seu texto.
-*   **TEMPLATE**: O modelo a ser usado (ex: `tcc`).
+*   **INPUT**: The Markdown file containing your text.
+*   **TEMPLATE**: The template to use (e.g. `tcc`).
 
-# Anatomia do Arquivo Markdown
+# Anatomy of the Markdown File
 
-O segredo do Mark2TeX está no cabeçalho **YAML**, localizado no topo do arquivo entre dois conjuntos de `---`.
+The secret of Mark2TeX lies in the **YAML** header, located at the top of the file between two sets of `---`.
 
-## Campos Principais
-- `title`: Título do trabalho (aparece na capa e folha de rosto).
-- `author`: Seu nome completo.
-- `institution`/`campus`/`department`: Dados institucionais para o cabeçalho da capa.
-- `siglas`: Lista de abreviaturas usando o ambiente `description` do LaTeX.
-- `simbolos`: Lista de símbolos matemáticos.
+## Main Fields
+- `title`: Work title (appears on the cover and title page).
+- `author`: Your full name.
+- `institution`/`campus`/`department`: Institutional data for the cover header.
+- `siglas`: List of abbreviations using the LaTeX `description` environment.
+- `simbolos`: List of mathematical symbols.
 
-**Dica Importante**: Sempre utilize aspas simples (`' '`) ao envolver comandos LaTeX no YAML para evitar erros de escape.
+**Important tip**: Always use single quotes (`' '`) when wrapping LaTeX commands in YAML to avoid escape errors.
 
-# Galeria de Recursos (Demonstração)
+# Resource Gallery (Demonstration)
 
-Esta seção prova que a ferramenta está funcionando corretamente.
+This section proves that the tool is working correctly.
 
-## Matemática e Fórmulas
-O Mark2TeX suporta matemática completa. Podemos ter fórmulas inline como $E = mc^2$ ou fórmulas em bloco:
+## Mathematics and Formulas
+Mark2TeX supports full mathematics. We can have inline formulas such as $E = mc^2$ or block formulas:
 
 $$
 \int_{a}^{b} f(x) \,dx = F(b) - F(a)
 $$
 
-## Código e Programação
-Blocos de código são formatados com fontes monoespaçadas e realce de sintaxe. Exemplo em Python:
+## Code and Programming
+Code blocks are formatted with monospaced fonts and syntax highlighting. Example in Python:
 
 ```python
-def saudacao(nome):
-    print(f"Olá, {nome}! Bem-vindo ao Mark2TeX.")
+def greeting(name):
+    print(f"Hello, {name}! Welcome to Mark2TeX.")
 
-saudacao("Usuário")
+greeting("User")
 ```
 
-## Formatação de Texto
-- **Negrito** para ênfase.
-- *Itálico* para termos estrangeiros.
-- Listas com bullets:
+## Text Formatting
+- **Bold** for emphasis.
+- *Italic* for foreign terms.
+- Bullet lists:
     - Item A
     - Item B
-- Listas numeradas:
-    1. Primeiro passo
-    2. Segundo passo
+- Numbered lists:
+    1. First step
+    2. Second step
 
-## Citações e Bibliografia
-As citações são feitas via BibTeX. Ao usar o comando `\cite{chave}`, o sistema busca a referência no arquivo `.bib` e gera a lista final automaticamente seguindo a norma ABNT.
+## Citations and Bibliography
+Citations are made via BibTeX. By using the `\cite{key}` command, the system looks up the reference in the `.bib` file and automatically generates the final list following ABNT standards.
 
-# Conclusões do Teste
+# Test Conclusions
 
-Se você está lendo este PDF, significa que:
+If you are reading this PDF, it means that:
 
-1. O Docker está configurado corretamente.
-2. As fontes Times New Roman foram instaladas.
-3. O motor XeLaTeX está processando o Markdown via Pandoc.
-4. A norma ABNT está sendo aplicada.
+1. Docker is correctly configured.
+2. The Times New Roman fonts were installed.
+3. The XeLaTeX engine is processing Markdown via Pandoc.
+4. The ABNT standard is being applied.
 
-Tudo pronto para começar seu TCC!
+All set to start your thesis!
