@@ -213,6 +213,47 @@ Código de saída `0` quando não há erros; código `1` quando pelo menos uma v
 
 Acompanhe as [issues abertas](https://github.com/Hylbert/Mark2TeX/issues) ou sugira novas funcionalidades.
 
+## Troubleshooting
+
+### macOS: socket do Docker não encontrado (`Connection aborted. FileNotFoundError`)
+
+Se ao instalar via `pipx` no macOS você receber este erro:
+
+```
+❌  Erro ao acessar o Docker: Error while fetching server API version:
+('Connection aborted.', FileNotFoundError(2, 'No such file or directory'))
+```
+
+Isso ocorre porque o Docker Desktop no macOS coloca o socket Unix em
+`~/.docker/run/docker.sock`, e não no caminho padrão do Linux (`/var/run/docker.sock`)
+que o cliente Python do Docker tenta primeiro.
+
+**Solução — definir `DOCKER_HOST` permanentemente no shell:**
+
+```bash
+# Confirme que o socket existe (Docker Desktop precisa estar em execução)
+ls ~/.docker/run/docker.sock
+
+# Adicione a variável ao seu perfil de shell
+echo 'export DOCKER_HOST=unix://$HOME/.docker/run/docker.sock' >> ~/.zshrc
+source ~/.zshrc
+
+# Verifique
+mark2tex check
+```
+
+> **Usando Colima em vez do Docker Desktop?** O caminho do socket é diferente:
+> ```bash
+> echo 'export DOCKER_HOST=unix://$HOME/.colima/default/docker.sock' >> ~/.zshrc
+> source ~/.zshrc
+> ```
+
+> **Socket não está em `~/.docker/run/`?** Localize-o com:
+> ```bash
+> find ~ -name "docker.sock" 2>/dev/null
+> ```
+> Em seguida, use o caminho encontrado no `DOCKER_HOST`.
+
 ## Como contribuir
 
 O Mark2TeX cresce com a ajuda da comunidade. Todos os níveis de habilidade são bem-vindos — desde correção de typos até a criação de novos templates.
