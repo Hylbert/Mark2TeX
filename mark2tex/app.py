@@ -222,8 +222,9 @@ class Mark2TeXApp(App):
         """Update Footer binding labels to the active language and force a repaint.
 
         self.bind() updates the runtime binding registry with translated descriptions.
-        self.query_one(Footer).refresh(force=True) then forces the Footer widget to
-        re-render from that registry, so the labels reflect the new language immediately.
+        self.screen.refresh_bindings() then publishes the bindings_updated_signal,
+        which the Footer subscribes to — causing it to re-read the active bindings
+        from the registry and repaint with the new labels.
         """
         self.bind("escape",        "show_global_menu", description=t("binding.menu"))
         self.bind("q",             "show_global_menu", description=t("binding.menu"), show=False)
@@ -231,7 +232,7 @@ class Mark2TeXApp(App):
         self.bind("question_mark", "show_help_menu",   description=t("binding.help"), show=False)
         self.bind("c",             "compile_document", description=t("binding.compile"))
         self.bind("w",             "toggle_watch",     description=t("binding.watch"))
-        self.query_one(Footer).refresh(force=True)
+        self.screen.refresh_bindings()
 
     def compose(self) -> ComposeResult:
         yield Header()
