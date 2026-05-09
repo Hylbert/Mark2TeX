@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mark2tex"
-version = "0.3.0"
+version = "0.3.1"
 description = "Markdown to TeX/PDF with TUI and Docker"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -49,14 +49,14 @@ include = ["mark2tex*"]
   "styles.tcss",
 ]
 
-# ── Pytest ─────────────────────────────────────────────────────────────────────────
+# ── Pytest ──────────────────────────────────────────────────────────────────────────────────
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
 addopts = "-v --tb=short"
 asyncio_mode = "auto"
 
-# ── Coverage ──────────────────────────────────────────────────────────────────────
+# ── Coverage ─────────────────────────────────────────────────────────────────────────────
 [tool.coverage.run]
 source = ["mark2tex"]
 omit = [
@@ -70,7 +70,7 @@ omit = [
 show_missing = true
 fail_under = 40
 
-# ── Ruff ────────────────────────────────────────────────────────────────────────────
+# ── Ruff ────────────────────────────────────────────────────────────────────────────────────
 [tool.ruff]
 line-length = 100
 target-version = "py310"
@@ -79,7 +79,7 @@ target-version = "py310"
 select = ["E", "F", "W", "I", "UP"]
 ignore = ["E501"]
 
-# ── Mypy ────────────────────────────────────────────────────────────────────────────
+# ── Mypy ────────────────────────────────────────────────────────────────────────────────────
 [tool.mypy]
 python_version = "3.10"
 warn_return_any = true
