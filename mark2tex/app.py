@@ -19,6 +19,9 @@ from textual.widgets import (
     Markdown,
     ProgressBar,
     RichLog,
+    Tab,
+    TabbedContent,
+    TabPane,
 )
 
 from . import config as cfg
@@ -32,6 +35,8 @@ from .utils.visuals import M2TBannerWidget, M2TMenuOption
 from .watcher import WatcherManager
 from .yaml_inject_screen import YamlInjectScreen
 from .yaml_injector import has_frontmatter, inject_frontmatter, swap_template
+from .info_panel import CompilationInfo, InfoPanelWidget, make_timestamp
+from .utils.doc_structure import extract_sections
 
 # ---------------------------------------------------------------------------
 # Fontes disponíveis: (id interno, rótulo exibido na TUI)
@@ -241,8 +246,12 @@ class Mark2TeXApp(App):
                     yield Button("⊙", id="copy-console-btn", classes="console-action-btn")
                 yield RichLog(id="console-panel", highlight=False, markup=False, wrap=True)
             with Vertical(id="preview-panel"):
-                with ScrollableContainer(id="preview-scroll"):
-                    yield Markdown("", id="preview-content")
+                with TabbedContent(id="preview-tabs", initial="tab-md"):
+                    with TabPane(t("info.tab_markdown"), id="tab-md"):
+                        with ScrollableContainer(id="preview-scroll"):
+                            yield Markdown("", id="preview-content")
+                    with TabPane(t("info.tab_pdf"), id="tab-pdf", disabled=True):
+                        yield InfoPanelWidget(id="info-panel")
         yield Footer()
 
     def on_mount(self) -> None:
@@ -389,6 +398,7 @@ class Mark2TeXApp(App):
                 self.query_one("#status-file", Label).update(f"Arquivo  : {self.selected_file}")
                 self._update_preview(item.label_text)
                 self._check_yaml_badge(item)
+                self._reset_info_tab()
         elif event.list_view.id == "template-list" and isinstance(item, OptionItem):
             self.selected_template = item.label_text
             self.query_one("#status-template", Label).update(f"Template : {self.selected_template}")
@@ -404,6 +414,11 @@ class Mark2TeXApp(App):
             item.add_class("file-item--no-yaml")
         else:
             item.remove_class("file-item--no-yaml")
+
+    def _reset_info_tab(self) -> None:
+        tab = self.query_one("#tab-pdf", TabPane)
+        tab.disabled = True
+        self.query_one("#preview-tabs", TabbedContent).active = "tab-md"
 
     def _update_preview(self, filename: str) -> None:
         filepath = self._current_dir / filename
@@ -580,6 +595,11 @@ class Mark2TeXApp(App):
         ui("console", (f"{t('compile.start')} {selected_file} com template '{selected_template}'...", "#5ab4bc"))
         if selected_font:
             ui("console", (f"🔤 {t('font.using')} {selected_font}", "#5ab4bc"))
+
+        status = "error"
+        pages: int | None = None
+        warnings: list[str] = []
+
         try:
             for line in self.docker_manager.compile(
                 selected_file, selected_template, font=selected_font
@@ -596,14 +616,28 @@ class Mark2TeXApp(App):
                     # Official milestone: jump directly, no ceiling check needed.
                     ui("progress", percent)
                     ui("console", (f"⏳ Processing... {percent}%", "white"))
+                    if percent == 100:
+                        status = "success"
                     continue
                 # Bump the bar by 1 for ⚠️/❌/🔄 lines, but never cross
                 # into the next milestone's territory (avoids rewinds).
                 if result.startswith(("⚠️", "⚠", "❌", "🔄")):
                     ui("progress_bump", None)
+                if result.startswith(("⚠️", "⚠")):
+                    warnings.append(result)
+                # Parse page count from latexmk output line
+                if "páginas" in result or "pages" in result.lower():
+                    import re
+                    m = re.search(r"(\d+)\s+p[áa]g", result)
+                    if not m:
+                        m = re.search(r"(\d+)\s+page", result, re.IGNORECASE)
+                    if m:
+                        pages = int(m.group(1))
                 ui("console", (result, "white"))
         except Exception as exc:  # noqa: BLE001
             ui("console", (f"{t('compile.error')}: {exc}", "#e05c5c"))
+
+        ui("compilation_done", (status, pages, warnings, selected_file))
 
     def _apply_ui_update(self, action: str, value=None) -> None:
         _logger.debug("UI APPLY - %s: %s", action, value)
@@ -619,6 +653,21 @@ class Mark2TeXApp(App):
             elif action == "console":
                 message, style = value
                 self._log_console(message, style=style)
+            elif action == "compilation_done":
+                status, pages, warnings, md_path = value
+                info = CompilationInfo(
+                    filename=self.selected_file or "—",
+                    pages=pages,
+                    template=self.selected_template or "—",
+                    last_compiled=make_timestamp(),
+                    status=status,
+                    sections=extract_sections(md_path) if md_path else [],
+                    warnings=warnings,
+                )
+                self.query_one("#info-panel", InfoPanelWidget).update_info(info)
+                tab = self.query_one("#tab-pdf", TabPane)
+                tab.disabled = False
+                self.query_one("#preview-tabs", TabbedContent).active = "tab-pdf"
         except Exception as exc:  # noqa: BLE001
             print(f"[UI Error] {action}: {exc}")
 

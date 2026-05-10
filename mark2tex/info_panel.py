@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import datetime
 from dataclasses import dataclass, field
+from typing import Any
 
 from rich.text import Text
 from textual.app import RenderResult
@@ -45,8 +46,8 @@ class InfoPanelWidget(Widget):
     }
     """
 
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
         self._info = CompilationInfo()
 
     # ------------------------------------------------------------------
