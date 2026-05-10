@@ -588,31 +588,33 @@ YamlInjectScreen {
     padding: 0;
 }
 
+/* Tab strip: solid teal-tinted background so it reads as a
+   navigation bar rather than floating text above the content */
 TabbedContent Tabs {
     background: transparent;
-    border-bottom: solid #03656b 40%;
-    height: 2;
+    height: 3;
     padding: 0 1;
 }
 
 TabbedContent Tab {
     background: transparent;
     color: #7a7f84;
-    padding: 0 2;
+    padding: 0 3;
+    margin-right: 1;
 }
 
 TabbedContent Tab:hover {
-    background: transparent;
-    color: #fafafa;
+    background: #03656b 20%;
+    color: #d0d5d8;
 }
 
+/* Active tab: filled background makes the selected state unambiguous */
 TabbedContent Tab.-active {
-    background: transparent;
+    background: #03656b;
     color: #fafafa;
     text-style: bold;
-    border-bottom: solid #03656b;
 }
 
 TabbedContent Tab:disabled {
-    color: #444444;
+    color: #3a3f44;
 }

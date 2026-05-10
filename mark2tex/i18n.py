@@ -225,8 +225,8 @@ _STRINGS: dict[str, dict[str, str]] = {
         "validator.invalid_lang": "⚠️ O valor de 'lang' ({lang}) não é reconhecido. Valores aceitos: {accepted}.",
         "validator.warnings_header": "── Avisos do cabeçalho YAML (a compilação continua) ──",
         # Info panel (tabbed preview)
-        "info.tab_markdown":   "📄 Markdown",
-        "info.tab_pdf":        "📊 Info PDF",
+        "info.tab_markdown":   "Markdown",
+        "info.tab_pdf":        "Info PDF",
         "info.pages":          "Páginas geradas:",
         "info.template":       "Template:",
         "info.last_compiled":  "Última compilação:",
@@ -331,7 +331,7 @@ _STRINGS: dict[str, dict[str, str]] = {
         "log.refs_empty": "⚠️ Empty references section",
         "log.latexmk_generic": "🔧 Latexmk: {msg}",
         "log.fontspec_error": "✗ Font error [{code}]: {hint}",
-        # log.hint_* — actionable hints for LaTeX/XeLaTeX errors
+        # log.hint_*
         "log.hint_undefined_cmd": "check for a typo or a missing \\usepackage",
         "log.hint_math_mode": "wrap math expressions in $...$",
         "log.hint_math_display": "check that the equation environment is closed",
@@ -384,7 +384,7 @@ _STRINGS: dict[str, dict[str, str]] = {
         "log.hint_font_feature": "OpenType feature not supported by this font",
         "log.hint_font_script": "OpenType script does not exist in this font",
         "log.hint_font_language": "OpenType language not available in this font",
-        # build.sh — build script status messages
+        # build.sh
         "build.starting": "🚀 Starting build for {file} using template {template}...",
         "build.md_converted": "✅ Markdown converted to LaTeX.",
         "build.full_build": "🔧 Full build: no previous cache found.",
@@ -461,8 +461,8 @@ _STRINGS: dict[str, dict[str, str]] = {
         "validator.invalid_lang": "⚠️ The 'lang' value ({lang}) is not recognised. Accepted values: {accepted}.",
         "validator.warnings_header": "── YAML header warnings (compilation continues) ──",
         # Info panel (tabbed preview)
-        "info.tab_markdown":   "📄 Markdown",
-        "info.tab_pdf":        "📊 PDF Info",
+        "info.tab_markdown":   "Markdown",
+        "info.tab_pdf":        "PDF Info",
         "info.pages":          "Pages generated:",
         "info.template":       "Template:",
         "info.last_compiled":  "Last compiled:",
