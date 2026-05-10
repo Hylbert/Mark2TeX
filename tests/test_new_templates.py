@@ -215,7 +215,7 @@ class TestValidateNotasAula:
         assert validate(p, "notas-aula") == []
 
     def test_missing_title(self, tmp_path: Path) -> None:
-        fm = NOTAS_VALID.replace('title: "Notas de Aula"\n', "")
+        fm = NOTAS_VALID.replace('title: "Introdução à Programação"\n', "")
         p = _write_md(tmp_path, fm)
         errors = validate(p, "notas-aula")
         assert "title" in _fields(errors)
