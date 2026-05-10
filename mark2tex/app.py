@@ -121,6 +121,12 @@ def _copy_to_clipboard(text: str) -> None:
     )
 
 
+def _pdf_exists_for(md_path: str) -> bool:
+    """Return True if a PDF was produced next to the source Markdown file."""
+    pdf = Path(md_path).with_suffix(".pdf")
+    return pdf.exists() and pdf.stat().st_size > 0
+
+
 class OptionItem(ListItem):
     def __init__(self, label_text: str, item_id: str | None = None) -> None:
         super().__init__(Label(label_text), id=item_id)
@@ -635,6 +641,12 @@ class Mark2TeXApp(App):
                 ui("console", (result, "white"))
         except Exception as exc:  # noqa: BLE001
             ui("console", (f"{t('compile.error')}: {exc}", "#e05c5c"))
+
+        # If the process exited with a non-zero code but the PDF was still
+        # written to disk (common with xelatex non-fatal warnings), treat
+        # the compilation as successful so the info panel reflects reality.
+        if status == "error" and _pdf_exists_for(selected_file):
+            status = "success"
 
         ui("compilation_done", (status, pages, warnings, selected_file))
 
