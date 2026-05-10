@@ -1,0 +1,247 @@
+\documentclass[
+  12pt,
+  oneside,
+  a4paper,
+  chapter=TITLE,
+  english,
+  portuguese
+]{abntex2}
+
+% --- CODIFICAÇÃO ---
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+% -------------------------------------------------------------------
+% FONTE  —  controlada por flags booleanas geradas pelo build.sh
+%
+%   font-arial     → Liberation Sans     (métricas idênticas à Arial)
+%   font-helvetica → Nimbus Sans         (Helvetica livre, URW)
+%   font-ubuntu    → Ubuntu              (família clássica, estáticas disponíveis)
+%   font-times     → TeX Gyre Termes     (clone livre do Times New Roman)
+%
+% Padrão (nenhuma flag): TeX Gyre Termes — ABNT NBR 14724 recomendada
+% -------------------------------------------------------------------
+\usepackage{fontspec}
+$if(font-arial)$
+  \setmainfont{Liberation Sans}
+$else$$if(font-helvetica)$
+  \setmainfont{Nimbus Sans}
+$else$$if(font-ubuntu)$
+  \setmainfont{Ubuntu}
+$else$
+  \setmainfont{TeX Gyre Termes}
+$endif$$endif$$endif$
+
+% --- IDIOMA (XeLaTeX-nativo, integra com fontspec) ---
+\usepackage{polyglossia}
+\setdefaultlanguage[variant=brazilian]{portuguese}
+
+% --- MARGENS (ABNT NBR 10719) ---
+\usepackage[a4paper,top=3cm,left=3cm,right=2cm,bottom=2cm]{geometry}
+
+% --- ESPAÇAMENTO (1,5 entrelinhas) ---
+\usepackage{setspace}
+\OnehalfSpacing
+
+% --- PACOTES ESSENCIAIS ---
+\usepackage{graphicx}
+\usepackage{indentfirst}
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{calc}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{textcomp}
+\usepackage{color,xcolor}
+\usepackage{listings}
+\usepackage{fancyvrb}
+\usepackage{upquote}
+\usepackage{csquotes}
+\usepackage{microtype}
+\usepackage{hyperref}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=black,
+  filecolor=black,
+  urlcolor=black,
+  citecolor=black,
+}
+
+% --- SUPORTE A CÓDIGO (Pandoc) ---
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+\newenvironment{Shaded}{}{}
+\newcommand{\passthrough}[1]{#1}
+\newcommand{\KeywordTok}[1]{\textcolor{blue}{\textbf{#1}}}
+\newcommand{\ControlFlowTok}[1]{\textcolor{blue}{\textbf{#1}}}
+\newcommand{\StringTok}[1]{\textcolor{blue}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor{gray}{\textit{#1}}}
+\newcommand{\FunctionTok}[1]{\textcolor{cyan}{#1}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OtherTok}[1]{#1}
+\newcommand{\ErrorTok}[1]{\textcolor{red}{#1}}
+\newcommand{\DataTypeTok}[1]{\textcolor{purple}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor{orange}{#1}}
+\newcommand{\AttributeTok}[1]{\textcolor{orange}{#1}}
+\newcommand{\BuiltInTok}[1]{\textcolor{purple}{#1}}
+\newcommand{\ImportTok}[1]{\textcolor{teal}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor{black}{#1}}
+\newcommand{\OperatorTok}[1]{#1}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor{violet}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor{gray}{\itshape #1}}
+\newcommand{\AnnotationTok}[1]{\textcolor{red}{\textbf{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor{gray}{\itshape #1}}
+\newcommand{\ConstantTok}[1]{\textcolor{red}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor{violet}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor{green}{#1}}
+\newcommand{\CharTok}[1]{\textcolor{green}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor{orange}{#1}}
+\newcommand{\FloatTok}[1]{\textcolor{orange}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor{purple}{\textbf{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor{gray}{\itshape #1}}
+\newcommand{\WarningTok}[1]{\textcolor{red}{\textbf{#1}}}
+\newcommand{\AlertTok}[1]{\textcolor{red}{\textbf{#1}}}
+
+% -------------------------------------------------------------------
+% METADADOS
+% -------------------------------------------------------------------
+\titulo{$title$}
+\autor{$for(author)$$if(author.name)$$author.name$$else$$author$$endif$$sep$\\$endfor$}
+\instituicao{$if(institution)$$institution$$else$Instituição de Ensino$endif$}
+\local{$if(city)$$city$$else$Cidade$endif$}
+\data{$if(date)$$date$$else$\today$endif$}
+
+% -------------------------------------------------------------------
+% NORMALIZAÇÃO DOS TÍTULOS
+% -------------------------------------------------------------------
+\renewcommand{\ABNTEXchapterfont}{\bfseries}
+\renewcommand{\ABNTEXchapterfontsize}{\normalsize}
+
+% -------------------------------------------------------------------
+\begin{document}
+\frenchspacing
+
+% =====================================================================
+% CAPA
+% =====================================================================
+\begin{capa}
+  \center
+
+  $if(logo)$
+  \includegraphics[width=$if(logo-width)$$logo-width$$else$0.12$endif$\textwidth]{$logo$}\\[0.3cm]
+  $endif$
+
+  {\ABNTEXchapterfont\bfseries\large
+    \MakeUppercase{$if(institution)$$institution$$else$INSTITUIÇÃO DE ENSINO$endif$}\\
+    $if(department)$\MakeUppercase{$department$}\\$endif$
+    $if(course)$\MakeUppercase{$course$}$endif$
+  }\\[2.5cm]
+
+  {\ABNTEXchapterfont\bfseries\large
+    $for(author)$$if(author.name)$\MakeUppercase{$author.name$}$else$\MakeUppercase{$author$}$endif$$sep$\\$endfor$
+  }\\[4cm]
+
+  {\ABNTEXchapterfont\bfseries\large
+    \MakeUppercase{$title$}$if(subtitle)$: $subtitle$$endif$
+  }\\[1cm]
+
+  $if(report-type)$
+  {\large $report-type$}\\[\fill]
+  $else$
+  \vfill
+  $endif$
+
+  {\ABNTEXchapterfont\large
+    \MakeUppercase{$if(city)$$city$$else$CIDADE$endif$}$if(state)$ -- $state$$endif$\\
+    $if(date)$$date$$else$\today$endif$
+  }
+\end{capa}
+
+% =====================================================================
+% FOLHA DE ROSTO
+% =====================================================================
+\begin{folhaderosto}
+  \center
+
+  {\ABNTEXchapterfont\bfseries\large
+    $for(author)$$if(author.name)$\MakeUppercase{$author.name$}$else$\MakeUppercase{$author$}$endif$$sep$\\$endfor$
+  }\\[15\baselineskip]
+
+  {\ABNTEXchapterfont\bfseries\large
+    \MakeUppercase{$title$}$if(subtitle)$: $subtitle$$endif$
+  }\\[2cm]
+
+  \hspace*{8cm}
+  \parbox{8cm}{\normalsize\setlength{\parskip}{0pt}\setlength{\parindent}{0pt}\normalfont
+    $if(nature)$$nature$$else$%
+      $if(report-type)$$report-type$.$else$Relatório técnico.$endif$
+      $if(course)$ Curso de $course$.$endif$
+      $if(institution)$ $institution$$if(campus)$, $campus$$endif$.$endif$
+    $endif$
+  }\\[0.8cm]
+
+  $if(supervisor)$
+  \hspace*{8cm}
+  \parbox{8cm}{\normalsize\normalfont
+    $if(supervisor-label)$$supervisor-label$$else$Supervisor(a)$endif$: $supervisor$
+  }\\[0.5cm]
+  $endif$
+
+  \vfill
+
+  {\ABNTEXchapterfont\large
+    \MakeUppercase{$if(city)$$city$$else$CIDADE$endif$}$if(state)$ -- $state$$endif$\\
+    $if(date)$$date$$else$\today$endif$
+  }
+\end{folhaderosto}
+
+$if(abstract-pt)$
+\newpage
+\thispagestyle{empty}
+\begin{resumoumacoluna}
+\noindent\textbf{RESUMO:}\vspace{\onelineskip}
+
+$abstract-pt$
+
+\vspace{\onelineskip}
+\noindent\textbf{Palavras-chave}: $if(keywords-pt)$$keywords-pt$$endif$.
+\end{resumoumacoluna}
+\clearpage
+$endif$
+
+$if(list-of-figures)$
+\pdfbookmark[0]{\listfigurename}{lof}
+\listoffigures*
+\cleardoublepage
+$endif$
+
+$if(list-of-tables)$
+\pdfbookmark[0]{\listtablename}{lot}
+\listoftables*
+\cleardoublepage
+$endif$
+
+\pdfbookmark[0]{\contentsname}{toc}
+\tableofcontents*
+\cleardoublepage
+
+\textual
+\setcounter{secnumdepth}{3}
+
+$body$
+
+\postextual
+
+$if(bibliography)$
+\bibliographystyle{abntex2-alf}
+\bibliography{$bibliography$}
+$endif$
+
+$if(appendix)$
+\begin{apendicesenv}
+$appendix$
+\end{apendicesenv}
+$endif$
+
+\end{document}
