@@ -26,6 +26,12 @@ def test_subcommand_uninstall_exists():
     args = parser.parse_args(["uninstall"])
     assert args.command == "uninstall"
 
+def test_subcommand_template_list_exists():
+    parser = build_parser()
+    args = parser.parse_args(["template", "list"])
+    assert args.command == "template"
+    assert args.action == "list"
+
 def test_default_command_is_tui():
     parser = build_parser()
     args = parser.parse_args([])
@@ -46,3 +52,12 @@ def test_uninstall_command_calls_uninstall_assets() -> None:
                 from mark2tex.cli import main
                 main()
         mock_uninstall.assert_called_once()
+
+
+def test_template_list_runs_without_crashing() -> None:
+    # We only assert that main() runs and calls print at least once.
+    with patch("builtins.print") as mock_print:
+        with patch("sys.argv", ["mark2tex", "template", "list"]):
+            from mark2tex.cli import main
+            main()
+        assert mock_print.called

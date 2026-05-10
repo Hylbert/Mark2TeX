@@ -67,6 +67,9 @@ _REQUIRED_EXTRA: dict[str, tuple[str, ...]] = {
     "dissertacao-abnt": ("year", "institution", "program", "advisor"),
     "relatorio-abnt":   ("institution",),
     "artigo-acm":       (),
+    "tese-abnt":        ("year", "institution", "program", "advisor"),
+    "artigo-apa":       (),
+    "notas-aula":       (),
 }
 
 # Default placeholder values copied from yaml_injector._TEMPLATE_FIELDS
@@ -91,6 +94,9 @@ _PLACEHOLDERS: frozenset[str] = frozenset({
     "Programa de Pós-Graduação em Nome da Área",
     "Mestre em Nome da Área",
     "Relatório de Estágio Supervisionado",
+    "Título da Tese",
+    "Doutor em Nome da Área",
+    "Notas de Aula",
 })
 
 _VALID_LANGS: frozenset[str] = frozenset({

@@ -92,6 +92,33 @@ _TEMPLATE_FIELDS: dict[str, dict[str, str]] = {
         # acmart uses babel internally; 'english' is the safe default.
         "lang": "english",
     },
+    "tese-abnt": {
+        "title": "Título da Tese",
+        "author": "Autor",
+        "date": "",
+        "template": "tese-abnt",
+        "lang": "pt-BR",
+        "year": "",
+        "institution": "Nome da Instituição de Ensino",
+        "program": "Programa de Pós-Graduação em Nome da Área",
+        "advisor": "Prof. Dr. Nome do Orientador",
+        "degree": "Doutor em Nome da Área",
+    },
+    "artigo-apa": {
+        "title": "Article Title in APA Style",
+        "author": "Author",
+        "date": "",
+        "template": "artigo-apa",
+        "lang": "english",
+        "institution": "Institution name",
+    },
+    "notas-aula": {
+        "title": "Notas de Aula",
+        "author": "Seu Nome",
+        "date": "",
+        "template": "notas-aula",
+        "lang": "pt-BR",
+    },
 }
 
 _DEFAULT_FIELDS: dict[str, str] = {

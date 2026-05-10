@@ -1,0 +1,7 @@
+name: "Notas de Aula"
+slug: "notas-aula"
+norm: "article"
+document_type: "notas"
+level: "generico"
+language: "pt-BR"
+description: "Template enxuto de notas de aula/estudo baseado em article."

@@ -4,9 +4,10 @@ from __future__ import annotations
 import argparse
 import sys
 
-from .docker_manager import clean_cache, uninstall_docker_assets
+from .docker_manager import DockerManager, clean_cache, uninstall_docker_assets
 from .main import main as run_app
 from .setup_env import ensure_environment
+from .template_meta import load_template_meta
 from .yaml_injector import has_backup, restore_file
 
 
@@ -59,6 +60,21 @@ def build_parser() -> argparse.ArgumentParser:
         help="Path to the .md file whose cache should be removed (optional)",
     )
 
+    template_cmd = subparsers.add_parser(
+        "template",
+        help="Inspect available templates",
+    )
+    template_cmd.add_argument(
+        "action",
+        choices=["list"],
+        help="Action to perform (currently only 'list')",
+    )
+    template_cmd.add_argument(
+        "--verbose",
+        action="store_true",
+        help="Show detailed information for each template",
+    )
+
     return parser
 
 
@@ -86,6 +102,39 @@ def _run_clean(file: str | None) -> None:
     else:
         print(t("clean.error").format(path=path), file=sys.stderr)
         sys.exit(1)
+
+
+def _run_template_list(verbose: bool) -> None:
+    """Print available templates, optionally enriched with metadata."""
+    mgr = DockerManager()
+    slugs = mgr.list_templates()
+    meta = load_template_meta(mgr.templates_dir)
+
+    if not verbose:
+        for slug in slugs:
+            print(slug)
+        return
+
+    for slug in slugs:
+        info = meta.get(slug)
+        if not info:
+            print(slug)
+            continue
+        line = f"{info.slug}: {info.name}"
+        details: list[str] = []
+        if info.norm:
+            details.append(info.norm)
+        if info.document_type:
+            details.append(info.document_type)
+        if info.level:
+            details.append(info.level)
+        if info.language:
+            details.append(info.language)
+        if details:
+            line += " [" + ", ".join(details) + "]"
+        if info.description:
+            line += f"\n  {info.description}"
+        print(line)
 
 
 def main() -> None:
@@ -130,6 +179,10 @@ def main() -> None:
 
     if command == "clean":
         _run_clean(getattr(args, "file", None))
+        return
+
+    if command == "template":
+        _run_template_list(bool(getattr(args, "verbose", False)))
         return
 
     # Default: open TUI (with first-run onboarding if needed)

@@ -1,0 +1,7 @@
+name: "Artigo – APA 7th edition"
+slug: "artigo-apa"
+norm: "APA 7th edition"
+document_type: "artigo"
+level: "graduacao-pos"
+language: "english"
+description: "Articles and manuscripts formatted according to APA 7th edition (apa7 class)."

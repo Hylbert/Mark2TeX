@@ -1,0 +1,27 @@
+% Notas de aula / estudo em formato artigo enxuto
+\documentclass[11pt]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[portuguese,english]{babel}
+\usepackage{geometry}
+\geometry{a4paper,margin=2.5cm}
+
+\usepackage{graphicx}
+\usepackage{amsmath,amssymb}
+\usepackage{hyperref}
+
+% Layout mais arejado para leitura de notas
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.5em}
+
+\title{$title$}
+\author{$for(author)$$if(author.name)$$author.name$$else$$author$$endif$$sep$, $endfor$}
+\date{$if(date)$$date$$else$\today$endif$}
+
+\begin{document}
+\maketitle
+
+$body$
+
+\end{document}

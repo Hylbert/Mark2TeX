@@ -1,0 +1,28 @@
+% Tese ABNT NBR 14724:2011 (doutorado)
+\documentclass[
+  12pt,
+  oneside,
+  a4paper,
+  chapter=TITLE,
+  english,
+  portuguese
+]{abntex2}
+
+% Demais pacotes e configurações seguem o mesmo padrão do tcc-abnt/dissertacao-abnt
+% (margens, fontes, idioma, listas, sumário etc.) para manter a experiência
+% consistente entre os tipos de trabalho.
+
+% TODO: when this template is promoted to stable, consider refactoring common
+% preamble pieces into a shared partial to avoid duplication.
+
+\title{$title$}
+\author{$for(author)$$if(author.name)$$author.name$$else$$author$$endif$$sep$\\$endfor$}
+\date{$if(date)$$date$$else$\today$endif$}
+
+\begin{document}
+
+\maketitle
+
+$body$
+
+\end{document}
