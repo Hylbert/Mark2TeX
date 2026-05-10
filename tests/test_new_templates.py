@@ -14,7 +14,6 @@ import yaml
 from mark2tex.frontmatter_validator import ValidationError, validate
 from mark2tex.yaml_injector import build_frontmatter, swap_template
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
