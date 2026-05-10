@@ -61,6 +61,37 @@ _TEMPLATE_FIELDS: dict[str, dict[str, str]] = {
         "template": "projeto",
         "lang": "pt-BR",
     },
+    # --- new templates ---
+    "dissertacao-abnt": {
+        "title": "Título da Dissertação",
+        "author": "Autor",
+        "date": "",
+        "template": "dissertacao-abnt",
+        "lang": "pt-BR",
+        "year": "",
+        "institution": "Nome da Instituição de Ensino",
+        "program": "Programa de Pós-Graduação em Nome da Área",
+        "advisor": "Prof. Dr. Nome do Orientador",
+        "degree": "Mestre em Nome da Área",
+    },
+    "relatorio-abnt": {
+        "title": "Título do Relatório",
+        "author": "Autor",
+        "date": "",
+        "template": "relatorio-abnt",
+        "lang": "pt-BR",
+        "institution": "Nome da Instituição de Ensino",
+        "course": "Nome do Curso",
+        "report-type": "Relatório de Estágio Supervisionado",
+    },
+    "artigo-acm": {
+        "title": "Article Title",
+        "author": "Author",
+        "date": "",
+        "template": "artigo-acm",
+        # acmart uses babel internally; 'english' is the safe default.
+        "lang": "english",
+    },
 }
 
 _DEFAULT_FIELDS: dict[str, str] = {

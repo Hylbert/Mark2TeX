@@ -59,10 +59,14 @@ _REQUIRED_COMMON: tuple[str, ...] = ("title", "author", "template")
 
 # Extra required fields per template
 _REQUIRED_EXTRA: dict[str, tuple[str, ...]] = {
-    "tcc-abnt":    ("year", "institution", "course", "advisor"),
-    "artigo-abnt": ("institution",),
-    "artigo-ieee": (),
-    "doc-tecnica": (),
+    "tcc-abnt":        ("year", "institution", "course", "advisor"),
+    "artigo-abnt":     ("institution",),
+    "artigo-ieee":     (),
+    "doc-tecnica":     (),
+    # --- new templates ---
+    "dissertacao-abnt": ("year", "institution", "program", "advisor"),
+    "relatorio-abnt":   ("institution",),
+    "artigo-acm":       (),
 }
 
 # Default placeholder values copied from yaml_injector._TEMPLATE_FIELDS
@@ -81,6 +85,12 @@ _PLACEHOLDERS: frozenset[str] = frozenset({
     "Nome do Curso",
     "Nome do Departamento",
     "Nome do Campus",
+    # new templates
+    "Título da Dissertação",
+    "Título do Relatório",
+    "Programa de Pós-Graduação em Nome da Área",
+    "Mestre em Nome da Área",
+    "Relatório de Estágio Supervisionado",
 })
 
 _VALID_LANGS: frozenset[str] = frozenset({
