@@ -1,0 +1,101 @@
+% ACM Primary Article Template — sigconf (proceedings)
+% Reference: https://authors.acm.org/proceedings/production-information/preparing-your-article-with-latex
+\documentclass[sigconf,nonacm]{acmart}
+
+% nonacm flag disables rights/copyright box for local preview;
+% remove it when submitting to an official ACM venue.
+
+% --- CODIFICAÇÃO ---
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+% --- PACOTES ESSENCIAIS ---
+\usepackage{graphicx}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{textcomp}
+\usepackage{color,xcolor}
+\usepackage{listings}
+\usepackage{booktabs}
+\usepackage{fancyvrb}
+\usepackage{upquote}
+\usepackage{csquotes}
+\usepackage{microtype}
+
+% --- SUPORTE A CÓDIGO (Pandoc) ---
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+\newenvironment{Shaded}{}{}
+\newcommand{\passthrough}[1]{#1}
+\newcommand{\KeywordTok}[1]{\textcolor{blue}{\textbf{#1}}}
+\newcommand{\ControlFlowTok}[1]{\textcolor{blue}{\textbf{#1}}}
+\newcommand{\StringTok}[1]{\textcolor{blue}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor{gray}{\textit{#1}}}
+\newcommand{\FunctionTok}[1]{\textcolor{cyan}{#1}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OtherTok}[1]{#1}
+\newcommand{\ErrorTok}[1]{\textcolor{red}{#1}}
+\newcommand{\DataTypeTok}[1]{\textcolor{purple}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor{orange}{#1}}
+\newcommand{\AttributeTok}[1]{\textcolor{orange}{#1}}
+\newcommand{\BuiltInTok}[1]{\textcolor{purple}{#1}}
+\newcommand{\ImportTok}[1]{\textcolor{teal}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor{black}{#1}}
+\newcommand{\OperatorTok}[1]{#1}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor{violet}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor{gray}{\itshape #1}}
+\newcommand{\AnnotationTok}[1]{\textcolor{red}{\textbf{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor{gray}{\itshape #1}}
+\newcommand{\ConstantTok}[1]{\textcolor{red}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor{violet}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor{green}{#1}}
+\newcommand{\CharTok}[1]{\textcolor{green}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor{orange}{#1}}
+\newcommand{\FloatTok}[1]{\textcolor{orange}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor{purple}{\textbf{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor{gray}{\itshape #1}}
+\newcommand{\WarningTok}[1]{\textcolor{red}{\textbf{#1}}}
+\newcommand{\AlertTok}[1]{\textcolor{red}{\textbf{#1}}}
+
+% -------------------------------------------------------------------
+% METADADOS
+% -------------------------------------------------------------------
+\title{$title$}
+$if(subtitle)$\subtitle{$subtitle$}$endif$
+
+$for(author)$
+$if(author.name)$
+\author{$author.name$}
+$if(author.affiliation)$\affiliation{\institution{$author.affiliation$}}$endif$
+$if(author.email)$\email{$author.email$}$endif$
+$else$
+\author{$author$}
+$endif$
+$endfor$
+
+$if(acm-doi)$\acmDOI{$acm-doi$}$endif$
+$if(acm-isbn)$\acmISBN{$acm-isbn$}$endif$
+
+% -------------------------------------------------------------------
+\begin{document}
+
+$if(abstract)$
+\begin{abstract}
+$abstract$
+\end{abstract}
+$endif$
+
+$if(keywords)$
+\keywords{$keywords$}
+$endif$
+
+\maketitle
+
+$body$
+
+$if(bibliography)$
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{$bibliography$}
+$endif$
+
+\end{document}
