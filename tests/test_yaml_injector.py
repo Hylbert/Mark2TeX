@@ -1,8 +1,11 @@
 """Tests for mark2tex.yaml_injector."""
 from __future__ import annotations
 
+import re
 from pathlib import Path
 from unittest.mock import patch
+
+import yaml
 
 from mark2tex.yaml_injector import (
     build_frontmatter,
@@ -12,6 +15,18 @@ from mark2tex.yaml_injector import (
     restore_file,
     swap_template,
 )
+
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+def _parse_fm(text: str) -> dict:
+    """Extract and parse the YAML frontmatter from a document string."""
+    m = re.search(r'^---(.*?)---', text, re.DOTALL)
+    assert m, "No frontmatter found in text"
+    return yaml.safe_load(m.group(1)) or {}
+
 
 # ---------------------------------------------------------------------------
 # has_frontmatter
@@ -41,13 +56,15 @@ def test_has_frontmatter_returns_true_on_unreadable_file(tmp_path: Path) -> None
 
 def test_build_frontmatter_contains_template_key() -> None:
     fm = build_frontmatter("tcc-abnt")
-    assert 'template: "tcc-abnt"' in fm
+    data = _parse_fm(fm)
+    assert data["template"] == "tcc-abnt"
 
 
 def test_build_frontmatter_contains_lang_for_artigo_ieee() -> None:
     # babel does not accept BCP-47 codes; the default must be 'english'
     fm = build_frontmatter("artigo-ieee")
-    assert 'lang: "english"' in fm
+    data = _parse_fm(fm)
+    assert data["lang"] == "english"
 
 
 def test_build_frontmatter_starts_and_ends_with_dashes() -> None:
@@ -59,7 +76,8 @@ def test_build_frontmatter_starts_and_ends_with_dashes() -> None:
 
 def test_build_frontmatter_unknown_template_uses_defaults() -> None:
     fm = build_frontmatter("unknown-template")
-    assert 'template: "unknown-template"' in fm
+    data = _parse_fm(fm)
+    assert data["template"] == "unknown-template"
 
 
 # ---------------------------------------------------------------------------
@@ -106,7 +124,8 @@ def test_inject_replaces_existing_yaml_silently(tmp_path: Path) -> None:
         inject_frontmatter(f, "artigo-ieee")
 
     content = f.read_text(encoding="utf-8")
-    assert 'template: "artigo-ieee"' in content
+    data = _parse_fm(content)
+    assert data["template"] == "artigo-ieee"
     bak_files = list(bak_dir.glob("*.bak"))
     assert len(bak_files) == 0
 
@@ -201,12 +220,12 @@ def test_swap_preserves_user_filled_common_fields(tmp_path: Path) -> None:
         encoding="utf-8",
     )
     result = swap_template(f, "doc-tecnica")
-    content = f.read_text(encoding="utf-8")
+    data = _parse_fm(f.read_text(encoding="utf-8"))
 
     assert result is True
-    assert 'title: "My Real Title"' in content
-    assert 'author: "Hylbert"' in content
-    assert 'lang: "en-US"' in content
+    assert data["title"] == "My Real Title"
+    assert data["author"] == "Hylbert"
+    assert data["lang"] == "en-US"
 
 
 def test_swap_updates_template_field(tmp_path: Path) -> None:
@@ -217,10 +236,9 @@ def test_swap_updates_template_field(tmp_path: Path) -> None:
         encoding="utf-8",
     )
     swap_template(f, "doc-tecnica")
-    content = f.read_text(encoding="utf-8")
+    data = _parse_fm(f.read_text(encoding="utf-8"))
 
-    assert 'template: "doc-tecnica"' in content
-    assert 'template: "artigo-ieee"' not in content
+    assert data["template"] == "doc-tecnica"
 
 
 def test_swap_adds_new_exclusive_fields_with_placeholder(tmp_path: Path) -> None:
@@ -269,9 +287,9 @@ def test_swap_preserves_user_value_for_shared_exclusive_field(tmp_path: Path) ->
         encoding="utf-8",
     )
     swap_template(f, "tcc-abnt")
-    content = f.read_text(encoding="utf-8")
+    data = _parse_fm(f.read_text(encoding="utf-8"))
 
-    assert 'institution: "UFAM"' in content
+    assert data["institution"] == "UFAM"
 
 
 def test_swap_returns_false_when_no_frontmatter(tmp_path: Path) -> None:

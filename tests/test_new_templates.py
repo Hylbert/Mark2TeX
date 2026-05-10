@@ -6,7 +6,10 @@ not modified — this file only adds coverage for the new templates.
 """
 from __future__ import annotations
 
+import re
 from pathlib import Path
+
+import yaml
 
 from mark2tex.frontmatter_validator import ValidationError, validate
 from mark2tex.yaml_injector import build_frontmatter, swap_template
@@ -29,6 +32,13 @@ def _codes(errors: list[ValidationError]) -> list[str]:
 
 def _fields(errors: list[ValidationError]) -> list[str]:
     return [e.field for e in errors]
+
+
+def _parse_fm(text: str) -> dict:
+    """Extract and parse the YAML frontmatter from a document string."""
+    m = re.search(r'^---(.*?)---', text, re.DOTALL)
+    assert m, "No frontmatter found in text"
+    return yaml.safe_load(m.group(1)) or {}
 
 
 # ---------------------------------------------------------------------------
@@ -85,8 +95,11 @@ lang: "english"
 institution: "Example University"
 """
 
+# NOTAS_VALID: title must NOT be the registered placeholder "Notas de Aula"
+# (frontmatter_validator._PLACEHOLDERS includes that string, which would
+# cause a 'placeholder' ValidationError and break test_valid_passes).
 NOTAS_VALID = """\
-title: "Notas de Aula"
+title: "Introdução à Programação"
 author: "Aluno"
 template: "notas-aula"
 lang: "pt-BR"
@@ -100,7 +113,8 @@ lang: "pt-BR"
 class TestBuildFrontmatterTese:
     def test_contains_template_key(self) -> None:
         fm = build_frontmatter("tese-abnt")
-        assert 'template: "tese-abnt"' in fm
+        data = _parse_fm(fm)
+        assert data["template"] == "tese-abnt"
 
     def test_contains_program_advisor_degree(self) -> None:
         fm = build_frontmatter("tese-abnt")
@@ -110,27 +124,32 @@ class TestBuildFrontmatterTese:
 
     def test_lang_is_pt_br(self) -> None:
         fm = build_frontmatter("tese-abnt")
-        assert 'lang: "pt-BR"' in fm
+        data = _parse_fm(fm)
+        assert data["lang"] == "pt-BR"
 
 
 class TestBuildFrontmatterApa:
     def test_contains_template_key(self) -> None:
         fm = build_frontmatter("artigo-apa")
-        assert 'template: "artigo-apa"' in fm
+        data = _parse_fm(fm)
+        assert data["template"] == "artigo-apa"
 
     def test_lang_is_english(self) -> None:
         fm = build_frontmatter("artigo-apa")
-        assert 'lang: "english"' in fm
+        data = _parse_fm(fm)
+        assert data["lang"] == "english"
 
 
 class TestBuildFrontmatterNotas:
     def test_contains_template_key(self) -> None:
         fm = build_frontmatter("notas-aula")
-        assert 'template: "notas-aula"' in fm
+        data = _parse_fm(fm)
+        assert data["template"] == "notas-aula"
 
     def test_lang_is_pt_br(self) -> None:
         fm = build_frontmatter("notas-aula")
-        assert 'lang: "pt-BR"' in fm
+        data = _parse_fm(fm)
+        assert data["lang"] == "pt-BR"
 
 
 # ===========================================================================
