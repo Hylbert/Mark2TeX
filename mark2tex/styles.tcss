@@ -574,3 +574,45 @@ YamlInjectScreen {
 .file-item--no-yaml {
     color: #e0a24a;
 }
+
+/* ════════════════════════════════════════════════════════════
+   TabbedContent — tabbed preview panel
+   ════════════════════════════════════════════════════════════ */
+
+#preview-tabs {
+    height: 1fr;
+}
+
+#preview-tabs > TabPane {
+    height: 1fr;
+    padding: 0;
+}
+
+TabbedContent Tabs {
+    background: transparent;
+    border-bottom: solid #03656b 40%;
+    height: 2;
+    padding: 0 1;
+}
+
+TabbedContent Tab {
+    background: transparent;
+    color: #7a7f84;
+    padding: 0 2;
+}
+
+TabbedContent Tab:hover {
+    background: transparent;
+    color: #fafafa;
+}
+
+TabbedContent Tab.-active {
+    background: transparent;
+    color: #fafafa;
+    text-style: bold;
+    border-bottom: solid #03656b;
+}
+
+TabbedContent Tab:disabled {
+    color: #444444;
+}

@@ -19,7 +19,6 @@ from textual.widgets import (
     Markdown,
     ProgressBar,
     RichLog,
-    Tab,
     TabbedContent,
     TabPane,
 )
@@ -28,15 +27,15 @@ from . import config as cfg
 from .docker_manager import DockerManager
 from .frontmatter_validator import validate as validate_frontmatter
 from .i18n import set_language, t
+from .info_panel import CompilationInfo, InfoPanelWidget, make_timestamp
 from .log_translator import LogTranslator
 from .onboarding import OnboardingScreen, is_first_run
 from .settings_screen import LanguageChanged, SettingsScreen
+from .utils.doc_structure import extract_sections
 from .utils.visuals import M2TBannerWidget, M2TMenuOption
 from .watcher import WatcherManager
 from .yaml_inject_screen import YamlInjectScreen
 from .yaml_injector import has_frontmatter, inject_frontmatter, swap_template
-from .info_panel import CompilationInfo, InfoPanelWidget, make_timestamp
-from .utils.doc_structure import extract_sections
 
 # ---------------------------------------------------------------------------
 # Fontes disponíveis: (id interno, rótulo exibido na TUI)
