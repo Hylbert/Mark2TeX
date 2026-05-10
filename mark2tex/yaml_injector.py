@@ -7,6 +7,7 @@ from datetime import date
 from pathlib import Path
 from typing import Any, cast
 
+import yaml
 from platformdirs import user_data_dir
 
 # ---------------------------------------------------------------------------
@@ -138,6 +139,27 @@ _COMMON_FIELDS: frozenset[str] = frozenset({"title", "author", "date", "lang"})
 # Helpers
 # ---------------------------------------------------------------------------
 
+def _yaml_scalar(value: str) -> str:
+    """Serialize a string value as a safe YAML scalar.
+
+    Uses PyYAML's own serializer so that special characters (colons,
+    quotes, backslashes, Unicode, etc.) are always quoted correctly.
+    Returns just the scalar representation — no trailing newline.
+
+    Examples::
+
+        _yaml_scalar('simple')          -> 'simple'
+        _yaml_scalar('Has: colon')      -> "'Has: colon'"
+        _yaml_scalar('Has "quotes"')    -> 'Has "quotes"'
+        _yaml_scalar("Has 'single'"  )  -> "Has 'single'"
+    """
+    # Dump a one-key mapping and strip the key prefix + trailing newline.
+    # yaml.dump always produces "k: <scalar>\n".
+    dumped = yaml.dump({"k": value}, allow_unicode=True, default_flow_style=False)
+    # dumped looks like "k: value\n" or "k: 'value'\n" etc.
+    return dumped[3:].rstrip("\n")
+
+
 def _backup_dir() -> Path:
     p = Path(user_data_dir("mark2tex", appauthor=False)) / "backups"
     p.mkdir(parents=True, exist_ok=True)
@@ -206,7 +228,7 @@ def build_frontmatter(template: str) -> str:
     fields["date"] = date.today().isoformat()
     lines = ["---"]
     for key, value in fields.items():
-        lines.append(f'{key}: "{value}"')
+        lines.append(f"{key}: {_yaml_scalar(value)}")
     lines.append("---")
     lines.append("")  # blank line after closing ---
     return "\n".join(lines) + "\n"
@@ -264,7 +286,7 @@ def swap_template(file_path: str | Path, new_template: str) -> bool:
     # Build new frontmatter block
     lines = ["---"]
     for key, value in merged.items():
-        lines.append(f'{key}: "{value}"')
+        lines.append(f"{key}: {_yaml_scalar(value)}")
     lines.append("---")
     lines.append("")
     new_fm = "\n".join(lines) + "\n"
