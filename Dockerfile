@@ -19,6 +19,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     fonts-urw-base35 \
     fonts-ubuntu \
     fonts-texgyre \
+    fonts-lmodern \
     make \
     bash \
     && rm -rf /var/lib/apt/lists/*

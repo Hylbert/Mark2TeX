@@ -1,0 +1,44 @@
+% Artigo em estilo APA 7ª edição (classe apa7)
+% Referência: CTAN apa7 package – https://ctan.org/pkg/apa7
+\documentclass[man]{apa7}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[american]{babel}
+\usepackage{csquotes}
+
+\usepackage{graphicx}
+\usepackage{amsmath,amssymb}
+\usepackage{hyperref}
+
+\title{$title$}
+\shorttitle{$if(shorttitle)$$shorttitle$$else$$title$$endif$}
+
+$for(author)$
+$if(author.name)$
+\author{$author.name$}
+$if(author.affiliation)$\affiliation{$author.affiliation$}$endif$
+$else$
+\author{$author$}
+$endif$
+$endfor$
+
+$if(course)$\course{$course$}$endif$
+$if(instructor)$\professor{$instructor$}$endif$
+$if(institution)$\affiliation{$institution$}$endif$
+
+\abstract{$if(abstract)$$abstract$$else$Resumo do artigo em até 250 palavras.$endif$}
+
+$if(keywords)$\keywords{$keywords$}$endif$
+
+\begin{document}
+\maketitle
+
+$body$
+
+$if(bibliography)$
+\bibliographystyle{apa7}
+\bibliography{$bibliography$}
+$endif$
+
+\end{document}
