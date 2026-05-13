@@ -207,6 +207,31 @@ cat > "$LATEXMKRC" << RCEOF
 \$out_dir = '/app';
 RCEOF
 
+# ---------------------------------------------------------------------------
+# Cache invalidation: compare the MD5 of the freshly-generated .tex against
+# the hash stored from the previous run.  When they differ (font change,
+# template change, content edit) the latexmk database (.fdb_latexmk) and
+# the intermediate XDV are stale and must be removed so latexmk performs a
+# full rebuild rather than reporting "Nothing to do".
+#
+# The .tex itself is deleted by the cleanup trap after every run, which is
+# why latexmk cannot detect the change on its own — by the time the next
+# run starts the file is gone and latexmk only has its cached hash to compare
+# against. Storing the hash ourselves closes this gap.
+# ---------------------------------------------------------------------------
+TEX_HASH_FILE="${CACHE_DIR}/.tex_hash"
+NEW_HASH=$(md5sum "$OUTPUT_NAME.tex" | cut -d' ' -f1)
+OLD_HASH=$(cat "$TEX_HASH_FILE" 2>/dev/null || echo "")
+
+if [[ "$NEW_HASH" != "$OLD_HASH" ]]; then
+    if [[ -n "$OLD_HASH" ]]; then
+        echo "🔄 Source changed — invalidating latexmk cache for a full rebuild."
+    fi
+    rm -f "${CACHE_DIR}/${DOC_STEM}.fdb_latexmk"
+    rm -f "${CACHE_DIR}/${DOC_STEM}.xdv"
+    echo "$NEW_HASH" > "$TEX_HASH_FILE"
+fi
+
 if [[ -f "${CACHE_DIR}/${DOC_STEM}.fdb_latexmk" ]]; then
     echo "⚡ Incremental build: reusing latexmk cache from previous run."
 else
