@@ -266,27 +266,25 @@ def test_compile_timeout_env_var_sets_constant():
 # uninstall helpers
 # ---------------------------------------------------------------------------
 
-@patch("mark2tex.docker_manager.docker.from_env")
-def test_uninstall_when_image_not_found(mock_docker):
+@patch("mark2tex.docker_manager.get_docker_client")
+def test_uninstall_when_image_not_found(mock_get_client):
     from docker.errors import ImageNotFound
 
     from mark2tex.docker_manager import uninstall_docker_assets
 
     mock_client = MagicMock()
-    mock_client.images.get.side_effect = ImageNotFound("not found")
-    mock_docker.return_value = mock_client
+    mock_client.images.remove.side_effect = ImageNotFound("not found")
+    mock_get_client.return_value = mock_client
     uninstall_docker_assets()  # Should not raise
 
 
-@patch("mark2tex.docker_manager.docker.from_env")
-def test_uninstall_docker_exception(mock_docker):
+@patch("mark2tex.docker_manager.get_docker_client")
+def test_uninstall_docker_exception(mock_get_client):
     from docker.errors import DockerException
 
     from mark2tex.docker_manager import uninstall_docker_assets
 
-    mock_client = MagicMock()
-    mock_client.images.get.side_effect = DockerException("Connection error")
-    mock_docker.return_value = mock_client
+    mock_get_client.side_effect = DockerException("Connection error")
     uninstall_docker_assets()  # Should not raise
 
 
