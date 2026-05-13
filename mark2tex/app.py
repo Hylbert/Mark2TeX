@@ -319,7 +319,15 @@ class Mark2TeXApp(App):
             key=lambda p: p.name.lower(),
         )
         md_files = sorted(
-            [e for e in entries if e.is_file() and e.suffix == ".md"],
+            [
+                e for e in entries
+                if e.is_file()
+                and e.suffix == ".md"
+                # Exclude the ephemeral pre-processed copy written by build.sh
+                # (e.g. thesis._processed.md) so it never appears in the
+                # file browser as a selectable document.
+                and not e.name.endswith("._processed.md")
+            ],
             key=lambda p: p.name.lower(),
         )
 

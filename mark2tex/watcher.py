@@ -20,6 +20,13 @@ _TEMP_SUFFIXES: frozenset[str] = frozenset({
     ".swp", ".swo", ".tmp", ".bak", ".orig", ".pyc",
 })
 
+# Name suffixes that identify ephemeral build artefacts produced by mark2tex
+# itself (e.g. thesis._processed.md written by build.sh before pandoc).
+# These must never trigger a rebuild — doing so would cause an infinite loop.
+_TEMP_NAME_SUFFIXES: frozenset[str] = frozenset({
+    "._processed.md",
+})
+
 
 class Mark2TeXWatcher(FileSystemEventHandler):
     def __init__(self, file_to_watch: str, callback, log_path: str = "") -> None:
@@ -32,13 +39,17 @@ class Mark2TeXWatcher(FileSystemEventHandler):
         return os.path.realpath(os.path.abspath(path))
 
     def _is_temp_file(self, path: str) -> bool:
-        """Return True if the path looks like an editor temp or swap file."""
+        """Return True if the path looks like an editor temp/swap file or a
+        mark2tex build artefact that must never trigger a rebuild."""
         p = Path(path)
         if p.suffix in _TEMP_SUFFIXES:
             return True
         if p.name.endswith("~"):
             return True
         if any(part in _IGNORE_DIRS for part in p.parts):
+            return True
+        # Ephemeral copies produced by build.sh (e.g. thesis._processed.md).
+        if any(p.name.endswith(s) for s in _TEMP_NAME_SUFFIXES):
             return True
         return False
 
