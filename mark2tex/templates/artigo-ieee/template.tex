@@ -2,7 +2,6 @@
 \IEEEoverridecommandlockouts
 
 % --- CODIFICAÇÃO ---
-\usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 
 % --- IDIOMA ---
@@ -11,6 +10,27 @@ $if(lang)$
 $else$
 \usepackage[english]{babel}
 $endif$
+
+% -------------------------------------------------------------------
+% FONTE  —  controlada por flags booleanas geradas pelo build.sh
+%
+%   font-arial     → Liberation Sans     (métricas idênticas à Arial)
+%   font-helvetica → Nimbus Sans         (Helvetica livre, URW)
+%   font-times     → TeX Gyre Termes     (clone livre do Times New Roman)
+%   font-ubuntu    → Ubuntu              (família clássica, estáticas disponíveis)
+%
+% Padrão (nenhuma flag): TeX Gyre Termes (IEEE recomenda Times New Roman)
+% -------------------------------------------------------------------
+\usepackage{fontspec}
+$if(font-arial)$
+  \setmainfont{Liberation Sans}
+$else$$if(font-helvetica)$
+  \setmainfont{Nimbus Sans}
+$else$$if(font-ubuntu)$
+  \setmainfont{Ubuntu}
+$else$
+  \setmainfont{TeX Gyre Termes}
+$endif$$endif$$endif$
 
 % --- PACOTES IEEE PADRÃO ---
 \usepackage{cite}

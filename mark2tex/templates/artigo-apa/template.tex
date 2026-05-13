@@ -2,10 +2,30 @@
 % Referência: CTAN apa7 package – https://ctan.org/pkg/apa7
 \documentclass[man]{apa7}
 
-\usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage[american]{babel}
 \usepackage{csquotes}
+
+% -------------------------------------------------------------------
+% FONTE  —  controlada por flags booleanas geradas pelo build.sh
+%
+%   font-arial     → Liberation Sans     (métricas idênticas à Arial)
+%   font-helvetica → Nimbus Sans         (Helvetica livre, URW)
+%   font-times     → TeX Gyre Termes     (clone livre do Times New Roman)
+%   font-ubuntu    → Ubuntu              (família clássica, estáticas disponíveis)
+%
+% Padrão (nenhuma flag): TeX Gyre Termes (APA recomenda Times New Roman)
+% -------------------------------------------------------------------
+\usepackage{fontspec}
+$if(font-arial)$
+  \setmainfont{Liberation Sans}
+$else$$if(font-helvetica)$
+  \setmainfont{Nimbus Sans}
+$else$$if(font-ubuntu)$
+  \setmainfont{Ubuntu}
+$else$
+  \setmainfont{TeX Gyre Termes}
+$endif$$endif$$endif$
 
 \usepackage{graphicx}
 \usepackage{amsmath,amssymb}

@@ -8,6 +8,29 @@
 % --- CODIFICAÇÃO ---
 \usepackage[T1]{fontenc}
 
+% -------------------------------------------------------------------
+% FONTE  —  controlada por flags booleanas geradas pelo build.sh
+%
+%   font-arial     → Liberation Sans     (métricas idênticas à Arial)
+%   font-helvetica → Nimbus Sans         (Helvetica livre, URW)
+%   font-times     → TeX Gyre Termes     (clone livre do Times New Roman)
+%   font-ubuntu    → Ubuntu              (família clássica, estáticas disponíveis)
+%
+% Padrão (nenhuma flag): fonte padrão do acmart
+% Nota: acmart carrega suas próprias fontes via \AtBeginDocument;
+%       sobrescrevemos no mesmo hook para garantir precedência.
+% -------------------------------------------------------------------
+\usepackage{fontspec}
+$if(font-arial)$
+  \AtBeginDocument{\setmainfont{Liberation Sans}}
+$else$$if(font-helvetica)$
+  \AtBeginDocument{\setmainfont{Nimbus Sans}}
+$else$$if(font-times)$
+  \AtBeginDocument{\setmainfont{TeX Gyre Termes}}
+$else$$if(font-ubuntu)$
+  \AtBeginDocument{\setmainfont{Ubuntu}}
+$endif$$endif$$endif$$endif$
+
 % --- PACOTES ESSENCIAIS ---
 \usepackage{graphicx}
 \usepackage{amsmath,amssymb,amsfonts}

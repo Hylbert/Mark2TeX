@@ -6,11 +6,30 @@
   a4paper
 ]{abntex2}
 
-% --- CODIFICAÇÃO E FONTE ---
+% --- CODIFICAÇÃO ---
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
+
+% -------------------------------------------------------------------
+% FONTE  —  controlada por flags booleanas geradas pelo build.sh
+%
+%   font-arial     → Liberation Sans     (métricas idênticas à Arial)
+%   font-helvetica → Nimbus Sans         (Helvetica livre, URW)
+%   font-times     → TeX Gyre Termes     (clone livre do Times New Roman)
+%   font-ubuntu    → Ubuntu              (família clássica, estáticas disponíveis)
+%
+% Padrão (nenhuma flag): TeX Gyre Termes — ABNT NBR 6022 recomendada
+% -------------------------------------------------------------------
 \usepackage{fontspec}
-\setmainfont{TeX Gyre Termes}
+$if(font-arial)$
+  \setmainfont{Liberation Sans}
+$else$$if(font-helvetica)$
+  \setmainfont{Nimbus Sans}
+$else$$if(font-ubuntu)$
+  \setmainfont{Ubuntu}
+$else$
+  \setmainfont{TeX Gyre Termes}
+$endif$$endif$$endif$
 
 % --- IDIOMA (XeLaTeX-nativo, integra com fontspec) ---
 \usepackage{polyglossia}
