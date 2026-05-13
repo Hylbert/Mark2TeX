@@ -13,6 +13,7 @@ import pytest
 from mark2tex.watcher import (
     _IGNORE_DIRS,
     _TEMP_SUFFIXES,
+    _TEMP_NAME_SUFFIXES,
     Mark2TeXWatcher,
     WatcherManager,
 )
@@ -50,6 +51,11 @@ def test_ignore_dirs_contains_common_dirs():
         assert d in _IGNORE_DIRS
 
 
+def test_temp_name_suffixes_contains_processed_md() -> None:
+    """_TEMP_NAME_SUFFIXES must declare the ephemeral build artefact suffix."""
+    assert "._processed.md" in _TEMP_NAME_SUFFIXES
+
+
 # ---------------------------------------------------------------------------
 # _is_temp_file
 # ---------------------------------------------------------------------------
@@ -85,6 +91,26 @@ def test_is_temp_file_returns_false_for_normal_md(tmp_path):
     assert watcher._is_temp_file(str(target)) is False
 
 
+@pytest.mark.parametrize("filename", [
+    "/home/user/thesis._processed.md",
+    "/project/docs/chapter1._processed.md",
+    "/tmp/output._processed.md",
+])
+def test_is_temp_file_returns_true_for_processed_md_artefact(filename, tmp_path) -> None:
+    """._processed.md copies written by build.sh must be classified as temp files."""
+    watcher = Mark2TeXWatcher(str(tmp_path / "document.md"), MagicMock())
+    assert watcher._is_temp_file(filename) is True
+
+
+def test_processed_md_does_not_trigger_callback(tmp_path) -> None:
+    """A watchdog event for a ._processed.md path must never invoke the rebuild callback."""
+    watcher, callback = _make_watcher(tmp_path)
+    artefact = str(tmp_path / "document._processed.md")
+    watcher.on_modified(_file_event(artefact))
+    watcher.on_created(_file_event(artefact))
+    callback.assert_not_called()
+
+
 # ---------------------------------------------------------------------------
 # _should_trigger
 # ---------------------------------------------------------------------------
@@ -112,6 +138,12 @@ def test_should_trigger_false_for_unrelated_md(tmp_path):
 def test_should_trigger_false_for_git_path(tmp_path):
     watcher, _ = _make_watcher(tmp_path)
     assert watcher._should_trigger(str(tmp_path / ".git" / "index")) is False
+
+
+def test_should_trigger_false_for_processed_md(tmp_path) -> None:
+    """_should_trigger must return False for ._processed.md artefacts."""
+    watcher, _ = _make_watcher(tmp_path)
+    assert watcher._should_trigger(str(tmp_path / "document._processed.md")) is False
 
 
 # ---------------------------------------------------------------------------

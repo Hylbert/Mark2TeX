@@ -94,6 +94,7 @@ _STRINGS: dict[str, dict[str, str]] = {
         "log.bib_warn": "⚠️ [BibTeX] {msg}",
         "log.refs_empty": "⚠️ Seção de referências vazia",
         "log.latexmk_generic": "🔧 Latexmk: {msg}",
+        "log.latexmk_force_mode": "⚠️ Latexmk: erros encontrados no modo forçado — compilação continuada",
         "log.fontspec_error": "✗ Erro de fonte [{code}]: {hint}",
         # log.hint_* — dicas acionáveis para erros LaTeX/XeLaTeX
         "log.hint_undefined_cmd": "verifique typo no comando ou \\usepackage necessário",
@@ -160,6 +161,7 @@ _STRINGS: dict[str, dict[str, str]] = {
         "build.cleaning": "🧹 Limpando arquivos temporários de build...",
         "build.warn_no_state": "⚠️ Build falhou sem estado do latexmk — limpando cache para retry limpo.",
         "build.warn_state_kept": "⚠️ Build falhou mas estado do latexmk preservado — próxima execução será incremental.",
+        "build.warn_missing_image": "⚠️ Imagem não encontrada: {img} — substituída por marcador no documento.",
         # Onboarding
         "onboarding.title": " 👋  Bem-vindo ao Mark2TeX ",
         "onboarding.welcome": "Parece que é a primeira vez que você usa o Mark2TeX.",
@@ -330,6 +332,7 @@ _STRINGS: dict[str, dict[str, str]] = {
         "log.bib_warn": "⚠️ [BibTeX] {msg}",
         "log.refs_empty": "⚠️ Empty references section",
         "log.latexmk_generic": "🔧 Latexmk: {msg}",
+        "log.latexmk_force_mode": "⚠️ Latexmk: errors encountered in force mode — compilation continued",
         "log.fontspec_error": "✗ Font error [{code}]: {hint}",
         # log.hint_*
         "log.hint_undefined_cmd": "check for a typo or a missing \\usepackage",
@@ -396,6 +399,7 @@ _STRINGS: dict[str, dict[str, str]] = {
         "build.cleaning": "🧹 Cleaning up ephemeral build files...",
         "build.warn_no_state": "⚠️ Build failed with no latexmk state — wiping cache for a clean retry.",
         "build.warn_state_kept": "⚠️ Build failed but latexmk state preserved — next run will resume incrementally.",
+        "build.warn_missing_image": "⚠️ Image not found: {img} — replaced with placeholder in the document.",
         # Onboarding
         "onboarding.title": " 👋  Welcome to Mark2TeX ",
         "onboarding.welcome": "This looks like your first time running Mark2TeX.",

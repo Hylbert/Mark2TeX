@@ -125,3 +125,49 @@ def test_latex_warning_labels_changed_suppressed() -> None:
         "LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right."
     )
     assert result is None
+
+
+# ── Missing image warning ────────────────────────────────────
+
+def test_missing_image_warning_returns_translated_message() -> None:
+    """MISSING_IMAGE:<path> emitted by build.sh must produce a translated warning."""
+    result = log_translator("\u26a0\ufe0f MISSING_IMAGE:./assets/foto.png")
+    assert result is not None
+    assert "foto.png" in result
+
+
+def test_missing_image_warning_contains_path_with_spaces() -> None:
+    """Path with spaces must be preserved verbatim in the translated output."""
+    result = log_translator("\u26a0\ufe0f MISSING_IMAGE:./my images/diagram.png")
+    assert result is not None
+    assert "my images/diagram.png" in result
+
+
+def test_missing_image_warning_is_not_suppressed() -> None:
+    """The MISSING_IMAGE line must never be suppressed (return value must not be None)."""
+    result = log_translator("\u26a0\ufe0f MISSING_IMAGE:missing.jpg")
+    assert result is not None
+
+
+# ── Latexmk noise suppression ───────────────────────────────
+
+def test_latexmk_moving_noise_suppressed() -> None:
+    """'Latexmk: Moving ...' lines from acmart.cls must be suppressed."""
+    result = log_translator("Latexmk: Moving 'output.pdf' to 'output.pdf'")
+    assert result is None
+
+
+def test_latexmk_fls_noise_suppressed() -> None:
+    """'Latexmk: Fls file lists log file ...' is internal bookkeeping and must be suppressed."""
+    result = log_translator("Latexmk: Fls file lists log file 'output.log', won't treat it as a source")
+    assert result is None
+
+
+# ── Force-mode errors ────────────────────────────────────────
+
+def test_latexmk_force_mode_translated() -> None:
+    """'Latexmk: Errors, in force_mode' must be translated via the dedicated i18n key."""
+    result = log_translator("Latexmk: Errors, in force_mode, so continuing")
+    assert result is not None
+    # Must not echo the raw latexmk line back to the user
+    assert "Errors, in force_mode" not in result

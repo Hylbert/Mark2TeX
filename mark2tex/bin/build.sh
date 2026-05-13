@@ -96,6 +96,8 @@ cleanup() {
     echo "🧹 Cleaning up ephemeral build files..."
     rm -f "$OUTPUT_NAME".tex || true
     rm -f "$OUTPUT_NAME".fls || true
+    # Remove the pre-processed markdown copy if it exists.
+    rm -f "${OUTPUT_NAME}._processed.md" || true
     # Remove any stray PDF that xdvipdfmx may write inside the cache dir.
     rm -f "${CACHE_DIR}/${doc_stem}.pdf" || true
 
@@ -111,6 +113,38 @@ cleanup() {
 trap cleanup EXIT
 
 echo "🚀 Starting build for $INPUT_FILE using template $TEMPLATE_TYPE..."
+
+# ---------------------------------------------------------------------------
+# Pre-check: scan for local image references and replace missing ones with
+# a plain-text placeholder so XeLaTeX can compile the full document instead
+# of producing an empty/0-page PDF.
+#
+# Remote URLs (http/https) are skipped — they pass straight through to
+# \includegraphics and are handled by the LaTeX run itself.
+# ---------------------------------------------------------------------------
+MISSING_IMAGES=()
+PROCESSED_INPUT="${OUTPUT_NAME}._processed.md"
+cp "$INPUT_FILE" "$PROCESSED_INPUT"
+
+while IFS= read -r img_path; do
+    [[ "$img_path" =~ ^https?:// ]] && continue
+    if [[ ! -f "$img_path" ]]; then
+        MISSING_IMAGES+=("$img_path")
+        # Escape special regex characters in the path for sed.
+        escaped_path=$(printf '%s' "$img_path" | sed 's/[\[\]\\.*^$(){}+?|]/\\&/g')
+        # Replace every ![alt](path) that uses this missing path with a
+        # visible plain-text marker.  The replacement text is safe for both
+        # Markdown and the LaTeX that pandoc generates from it.
+        sed -i "s|!\[[^]]*\](${escaped_path})|[IMAGE NOT FOUND: ${img_path}]|g" "$PROCESSED_INPUT"
+    fi
+done < <(grep -oP '!\[[^\]]*\]\(\K[^)]+' "$INPUT_FILE")
+
+for img in "${MISSING_IMAGES[@]}"; do
+    echo "⚠️ MISSING_IMAGE:${img}"
+done
+
+# Hand the (possibly modified) copy to pandoc.
+INPUT_FILE="$PROCESSED_INPUT"
 
 # Only pass --bibliography to pandoc if the source .md actually contains
 # citations ([@key] Pandoc syntax or \cite{key} LaTeX syntax).
@@ -172,6 +206,31 @@ cat > "$LATEXMKRC" << RCEOF
 \$aux_dir = '${CACHE_DIR}';
 \$out_dir = '/app';
 RCEOF
+
+# ---------------------------------------------------------------------------
+# Cache invalidation: compare the MD5 of the freshly-generated .tex against
+# the hash stored from the previous run.  When they differ (font change,
+# template change, content edit) the latexmk database (.fdb_latexmk) and
+# the intermediate XDV are stale and must be removed so latexmk performs a
+# full rebuild rather than reporting "Nothing to do".
+#
+# The .tex itself is deleted by the cleanup trap after every run, which is
+# why latexmk cannot detect the change on its own — by the time the next
+# run starts the file is gone and latexmk only has its cached hash to compare
+# against. Storing the hash ourselves closes this gap.
+# ---------------------------------------------------------------------------
+TEX_HASH_FILE="${CACHE_DIR}/.tex_hash"
+NEW_HASH=$(md5sum "$OUTPUT_NAME.tex" | cut -d' ' -f1)
+OLD_HASH=$(cat "$TEX_HASH_FILE" 2>/dev/null || echo "")
+
+if [[ "$NEW_HASH" != "$OLD_HASH" ]]; then
+    if [[ -n "$OLD_HASH" ]]; then
+        echo "🔄 Source changed — invalidating latexmk cache for a full rebuild."
+    fi
+    rm -f "${CACHE_DIR}/${DOC_STEM}.fdb_latexmk"
+    rm -f "${CACHE_DIR}/${DOC_STEM}.xdv"
+    echo "$NEW_HASH" > "$TEX_HASH_FILE"
+fi
 
 if [[ -f "${CACHE_DIR}/${DOC_STEM}.fdb_latexmk" ]]; then
     echo "⚡ Incremental build: reusing latexmk cache from previous run."
@@ -242,15 +301,17 @@ done
 LATEXMK_EXIT=$(cat "$LATEXMK_EXIT_FILE" 2>/dev/null || echo 1)
 rm -f "$LATEXMK_EXIT_FILE"
 
-if [[ "$LATEXMK_EXIT" -ne 0 ]]; then
-    # latexmk failed — let the cleanup trap handle cache wiping.
-    exit "$LATEXMK_EXIT"
-fi
-
+# PDF existence is the authoritative success criterion: xelatex running in
+# force mode (-f) may exit non-zero even after producing a valid PDF (e.g.
+# when a recoverable error such as a missing-image placeholder was hit).
+# Only propagate the latexmk exit code when no PDF was generated at all.
 if [[ -f "${OUTPUT_NAME}.pdf" ]]; then
     echo "✅ PDF generated successfully: ${OUTPUT_NAME}.pdf"
     echo "PROGRESS:100%"
     sync
+elif [[ "$LATEXMK_EXIT" -ne 0 ]]; then
+    # latexmk failed and produced no PDF — let the cleanup trap handle cache wiping.
+    exit "$LATEXMK_EXIT"
 else
     echo "❌ Error: PDF was not generated."
     exit 1
