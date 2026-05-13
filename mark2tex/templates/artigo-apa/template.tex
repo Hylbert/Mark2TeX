@@ -2,7 +2,9 @@
 % Referência: CTAN apa7 package – https://ctan.org/pkg/apa7
 \documentclass[man]{apa7}
 
-\usepackage[T1]{fontenc}
+% inputenc and fontenc are pdfLaTeX-only; XeLaTeX handles UTF-8 natively
+% and uses fontspec for font selection instead of T1/lmodern.
+\usepackage{fontspec}
 \usepackage[american]{babel}
 \usepackage{csquotes}
 
@@ -30,6 +32,16 @@ $endif$$endif$$endif$
 \usepackage{graphicx}
 \usepackage{amsmath,amssymb}
 \usepackage{hyperref}
+
+$if(font-arial)$
+\setmainfont{Arial}
+$else$$if(font-helvetica)$
+\setmainfont{Helvetica}
+$else$$if(font-ubuntu)$
+\setmainfont{Ubuntu}
+$else$$if(font-times)$
+\setmainfont{Times New Roman}
+$endif$$endif$$endif$$endif$
 
 \title{$title$}
 \shorttitle{$if(shorttitle)$$shorttitle$$else$$title$$endif$}
