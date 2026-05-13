@@ -94,6 +94,7 @@ _STRINGS: dict[str, dict[str, str]] = {
         "log.bib_warn": "⚠️ [BibTeX] {msg}",
         "log.refs_empty": "⚠️ Seção de referências vazia",
         "log.latexmk_generic": "🔧 Latexmk: {msg}",
+        "log.latexmk_force_mode": "⚠️ Latexmk: erros encontrados no modo forçado — compilação continuada",
         "log.fontspec_error": "✗ Erro de fonte [{code}]: {hint}",
         # log.hint_* — dicas acionáveis para erros LaTeX/XeLaTeX
         "log.hint_undefined_cmd": "verifique typo no comando ou \\usepackage necessário",
@@ -331,6 +332,7 @@ _STRINGS: dict[str, dict[str, str]] = {
         "log.bib_warn": "⚠️ [BibTeX] {msg}",
         "log.refs_empty": "⚠️ Empty references section",
         "log.latexmk_generic": "🔧 Latexmk: {msg}",
+        "log.latexmk_force_mode": "⚠️ Latexmk: errors encountered in force mode — compilation continued",
         "log.fontspec_error": "✗ Font error [{code}]: {hint}",
         # log.hint_*
         "log.hint_undefined_cmd": "check for a typo or a missing \\usepackage",
