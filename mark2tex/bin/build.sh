@@ -96,6 +96,8 @@ cleanup() {
     echo "🧹 Cleaning up ephemeral build files..."
     rm -f "$OUTPUT_NAME".tex || true
     rm -f "$OUTPUT_NAME".fls || true
+    # Remove the pre-processed markdown copy if it exists.
+    rm -f "${OUTPUT_NAME}._processed.md" || true
     # Remove any stray PDF that xdvipdfmx may write inside the cache dir.
     rm -f "${CACHE_DIR}/${doc_stem}.pdf" || true
 
@@ -111,6 +113,38 @@ cleanup() {
 trap cleanup EXIT
 
 echo "🚀 Starting build for $INPUT_FILE using template $TEMPLATE_TYPE..."
+
+# ---------------------------------------------------------------------------
+# Pre-check: scan for local image references and replace missing ones with
+# a plain-text placeholder so XeLaTeX can compile the full document instead
+# of producing an empty/0-page PDF.
+#
+# Remote URLs (http/https) are skipped — they pass straight through to
+# \includegraphics and are handled by the LaTeX run itself.
+# ---------------------------------------------------------------------------
+MISSING_IMAGES=()
+PROCESSED_INPUT="${OUTPUT_NAME}._processed.md"
+cp "$INPUT_FILE" "$PROCESSED_INPUT"
+
+while IFS= read -r img_path; do
+    [[ "$img_path" =~ ^https?:// ]] && continue
+    if [[ ! -f "$img_path" ]]; then
+        MISSING_IMAGES+=("$img_path")
+        # Escape special regex characters in the path for sed.
+        escaped_path=$(printf '%s' "$img_path" | sed 's/[\[\]\\.*^$(){}+?|]/\\&/g')
+        # Replace every ![alt](path) that uses this missing path with a
+        # visible plain-text marker.  The replacement text is safe for both
+        # Markdown and the LaTeX that pandoc generates from it.
+        sed -i "s|!\[[^]]*\](${escaped_path})|[IMAGE NOT FOUND: ${img_path}]|g" "$PROCESSED_INPUT"
+    fi
+done < <(grep -oP '!\[[^\]]*\]\(\K[^)]+' "$INPUT_FILE")
+
+for img in "${MISSING_IMAGES[@]}"; do
+    echo "⚠️ MISSING_IMAGE:${img}"
+done
+
+# Hand the (possibly modified) copy to pandoc.
+INPUT_FILE="$PROCESSED_INPUT"
 
 # Only pass --bibliography to pandoc if the source .md actually contains
 # citations ([@key] Pandoc syntax or \cite{key} LaTeX syntax).
