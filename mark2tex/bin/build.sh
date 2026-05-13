@@ -276,15 +276,17 @@ done
 LATEXMK_EXIT=$(cat "$LATEXMK_EXIT_FILE" 2>/dev/null || echo 1)
 rm -f "$LATEXMK_EXIT_FILE"
 
-if [[ "$LATEXMK_EXIT" -ne 0 ]]; then
-    # latexmk failed — let the cleanup trap handle cache wiping.
-    exit "$LATEXMK_EXIT"
-fi
-
+# PDF existence is the authoritative success criterion: xelatex running in
+# force mode (-f) may exit non-zero even after producing a valid PDF (e.g.
+# when a recoverable error such as a missing-image placeholder was hit).
+# Only propagate the latexmk exit code when no PDF was generated at all.
 if [[ -f "${OUTPUT_NAME}.pdf" ]]; then
     echo "✅ PDF generated successfully: ${OUTPUT_NAME}.pdf"
     echo "PROGRESS:100%"
     sync
+elif [[ "$LATEXMK_EXIT" -ne 0 ]]; then
+    # latexmk failed and produced no PDF — let the cleanup trap handle cache wiping.
+    exit "$LATEXMK_EXIT"
 else
     echo "❌ Error: PDF was not generated."
     exit 1
