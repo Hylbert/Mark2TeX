@@ -31,7 +31,7 @@ _RE_FONTSPEC_ERR = re.compile(r"^fontspec error: \"(.+?)\"")
 _RE_BIBTEX_WARN  = re.compile(r"^Warning--(.*)")
 _RE_XDVIPDFMX    = re.compile(r"^xdvipdfmx:")
 # build.sh status line patterns
-_RE_BUILD_STARTING   = re.compile(r"^\ud83d\ude80 Starting build for (.+) using template (.+?)\.\.\.")
+_RE_BUILD_STARTING   = re.compile(r"^\U0001f680 Starting build for (.+) using template (.+?)\.\.\.")
 _RE_BUILD_PDF_OK     = re.compile(r"^\u2705 PDF generated successfully: (.+)")
 _RE_BUILD_WARN_FAIL  = re.compile(r"^\u26a0\ufe0f\s+Build failed (.+)")
 _RE_MISSING_IMAGE    = re.compile(r"^\u26a0\ufe0f MISSING_IMAGE:(.+)$")
@@ -218,13 +218,13 @@ class LogTranslator:
         if stripped == "\u2705 Markdown converted to LaTeX.":
             return t("build.md_converted")
 
-        if stripped == "\ud83d\udd27 Full build: no previous cache found.":
+        if stripped == "\U0001f527 Full build: no previous cache found.":
             return t("build.full_build")
 
         if stripped == "\u26a1 Incremental build: reusing latexmk cache from previous run.":
             return t("build.incremental")
 
-        if stripped == "\ud83d\udd28 Compiling PDF with latexmk...":
+        if stripped == "\U0001f528 Compiling PDF with latexmk...":
             return t("build.compiling_pdf")
 
         m = _RE_BUILD_PDF_OK.match(stripped)
@@ -234,10 +234,10 @@ class LogTranslator:
         if stripped == "\u274c Error: PDF was not generated.":
             return t("build.pdf_error")
 
-        if stripped == "\ud83c\udf89 Process complete!":
+        if stripped == "\U0001f389 Process complete!":
             return t("build.complete")
 
-        if stripped == "\ud83e\uddf9 Cleaning up ephemeral build files...":
+        if stripped == "\U0001f9f9 Cleaning up ephemeral build files...":
             return t("build.cleaning")
 
         if "Build failed with no latexmk state" in stripped:
@@ -355,6 +355,15 @@ class LogTranslator:
                 return t("log.bib_file").format(fname=fname)
             if "Found input bbl" in msg or "Log file says" in msg or "Examining" in msg:
                 return None
+            # File-management noise from acmart.cls + xelatex — not actionable.
+            if "Moving" in msg:
+                return None
+            # Internal latexmk file-list bookkeeping — suppress.
+            if "Fls file lists log file" in msg or "won't treat it as a source" in msg:
+                return None
+            # latexmk -f continued past recoverable errors — use dedicated key.
+            if "Errors, in force_mode" in msg:
+                return t("log.latexmk_force_mode")
             return t("log.latexmk_generic").format(msg=msg)
 
         # ── This is XeTeX / BibTeX ───────────────────────────────────────────
