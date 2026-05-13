@@ -8,9 +8,10 @@ import threading
 from importlib import resources
 from pathlib import Path
 
-import docker
 from docker.errors import DockerException, ImageNotFound
 from platformdirs import user_cache_dir, user_config_dir, user_data_dir
+
+from .docker_client import get_docker_client
 
 IMAGE_NAME = "mark2tex:latest"
 IMAGE_HUB  = "hylbert/mark2tex:latest"
@@ -270,7 +271,7 @@ def uninstall_docker_assets() -> None:
 
     # ── Docker images ────────────────────────────────────────────────────────
     try:
-        client = docker.from_env()
+        client = get_docker_client()
         for tag in (IMAGE_HUB, IMAGE_NAME):
             try:
                 client.images.remove(tag, force=True)

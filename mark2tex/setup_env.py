@@ -12,7 +12,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-import docker
 from docker.errors import DockerException, ImageNotFound
 from rich.console import Console
 from rich.live import Live
@@ -27,6 +26,8 @@ from rich.progress import (
     TransferSpeedColumn,
 )
 from rich.text import Text
+
+from .docker_client import get_docker_client
 
 # Palette aligned with check_renderer.py and styles.tcss
 _TEAL = "#03656b"
@@ -77,7 +78,7 @@ def _check_docker_daemon() -> None:
 
 
 def _ensure_image() -> None:
-    client = _get_docker_client()
+    client = _get_client()
 
     try:
         client.images.get(LOCAL_TAG)
@@ -91,9 +92,9 @@ def _ensure_image() -> None:
     _build_locally(client)
 
 
-def _get_docker_client():
+def _get_client():
     try:
-        return docker.from_env()
+        return get_docker_client()
     except DockerException as exc:
         _console.print(f"[{_RED}]❌  Erro ao acessar o Docker: {exc}[/]")
         sys.exit(1)
@@ -236,7 +237,6 @@ def _build_locally(client) -> None:
                 if error_line:
                     spinner.update(task, description=f"[{_RED}]{error_line[:72]}[/]")
                 elif stream_line and stream_line != "\n":
-                    # Show only Step lines to avoid flooding
                     if stream_line.lower().startswith("step"):
                         spinner.update(task, description=f"[{_TEAL}]{stream_line[:72]}[/]")
 
