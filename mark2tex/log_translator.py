@@ -31,9 +31,10 @@ _RE_FONTSPEC_ERR = re.compile(r"^fontspec error: \"(.+?)\"")
 _RE_BIBTEX_WARN  = re.compile(r"^Warning--(.*)")
 _RE_XDVIPDFMX    = re.compile(r"^xdvipdfmx:")
 # build.sh status line patterns
-_RE_BUILD_STARTING   = re.compile(r"^🚀 Starting build for (.+) using template (.+?)\.\.\.")
-_RE_BUILD_PDF_OK     = re.compile(r"^✅ PDF generated successfully: (.+)")
-_RE_BUILD_WARN_FAIL  = re.compile(r"^⚠️\s+Build failed (.+)")
+_RE_BUILD_STARTING   = re.compile(r"^\ud83d\ude80 Starting build for (.+) using template (.+?)\.\.\.")
+_RE_BUILD_PDF_OK     = re.compile(r"^\u2705 PDF generated successfully: (.+)")
+_RE_BUILD_WARN_FAIL  = re.compile(r"^\u26a0\ufe0f\s+Build failed (.+)")
+_RE_MISSING_IMAGE    = re.compile(r"^\u26a0\ufe0f MISSING_IMAGE:(.+)$")
 # Polyglossia wraps its "Asking to add empty feature" message across two lines.
 # The first line ends mid-word (e.g. "...font (Languag") and the continuation
 # starts with fragments like 'e="Pt-BR" to langtag' or 's for pt-BR.'.
@@ -74,7 +75,7 @@ _SUPPRESS_PREFIX = (
     "Package hyperref Warning: Suppressing empty link",
     "Changed files, or newly in use",
     "The top-level auxiliary file",
-    "Em caso de dúvidas",
+    "Em caso de d\u00favidas",
     "http://www.abntex",
     "See the LaTeX manual",
     "Type  H <return>",
@@ -204,39 +205,39 @@ class LogTranslator:
                 self._suppressing_continuation = False
             return None
 
-        # ── PROGRESS directive ─────────────────────────────────────────────
+        # ── PROGRESS directive ───────────────────────────────────────────────
         m = _RE_PROGRESS.match(stripped)
         if m:
             return f"__PROGRESS__{m.group(1)}"
 
-        # ── build.sh status lines ───────────────────────────────────────────────
+        # ── build.sh status lines ─────────────────────────────────────────────────
         m = _RE_BUILD_STARTING.match(stripped)
         if m:
             return t("build.starting").format(file=m.group(1), template=m.group(2))
 
-        if stripped == "✅ Markdown converted to LaTeX.":
+        if stripped == "\u2705 Markdown converted to LaTeX.":
             return t("build.md_converted")
 
-        if stripped == "🔧 Full build: no previous cache found.":
+        if stripped == "\ud83d\udd27 Full build: no previous cache found.":
             return t("build.full_build")
 
-        if stripped == "⚡ Incremental build: reusing latexmk cache from previous run.":
+        if stripped == "\u26a1 Incremental build: reusing latexmk cache from previous run.":
             return t("build.incremental")
 
-        if stripped == "🔨 Compiling PDF with latexmk...":
+        if stripped == "\ud83d\udd28 Compiling PDF with latexmk...":
             return t("build.compiling_pdf")
 
         m = _RE_BUILD_PDF_OK.match(stripped)
         if m:
             return t("build.pdf_ok").format(filename=m.group(1))
 
-        if stripped == "❌ Error: PDF was not generated.":
+        if stripped == "\u274c Error: PDF was not generated.":
             return t("build.pdf_error")
 
-        if stripped == "🎉 Process complete!":
+        if stripped == "\ud83c\udf89 Process complete!":
             return t("build.complete")
 
-        if stripped == "🧹 Cleaning up ephemeral build files...":
+        if stripped == "\ud83e\uddf9 Cleaning up ephemeral build files...":
             return t("build.cleaning")
 
         if "Build failed with no latexmk state" in stripped:
@@ -245,12 +246,16 @@ class LogTranslator:
         if "Build failed but latexmk state preserved" in stripped:
             return t("build.warn_state_kept")
 
-        # ── Script-owned messages (emoji prefix) — pass through ───────────────
+        m = _RE_MISSING_IMAGE.match(stripped)
+        if m:
+            return t("build.warn_missing_image").format(img=m.group(1).strip())
+
+        # ── Script-owned messages (emoji prefix) — pass through ───────────────────
         first_char = stripped[0]
         if ord(first_char) > 127 and first_char not in ("(", "\\", "/"):
             return stripped
 
-        # ── Suppress: .sty / .cls / TexLive system paths ────────────────────
+        # ── Suppress: .sty / .cls / TexLive system paths ──────────────────────
         if _RE_STY_PATH.match(stripped):
             return None
         if stripped.startswith("/usr/share/texlive") or stripped.startswith("/etc/texmf"):
@@ -294,7 +299,7 @@ class LogTranslator:
         if re.match(r"^[()./\\]+$", stripped):
             return None
 
-        # ── xdvipdfmx messages — suppress (driver-level noise) ───────────────
+        # ── xdvipdfmx messages — suppress (driver-level noise) ─────────────────
         if _RE_XDVIPDFMX.match(stripped):
             return None
 
@@ -302,7 +307,7 @@ class LogTranslator:
         if _RE_POLYGLOSSIA_CONT.match(stripped):
             return None
 
-        # ── l.N location line ─────────────────────────────────────────────────────
+        # ── l.N location line ──────────────────────────────────────────────────────
         m = _RE_LINE_REF.match(stripped)
         if m:
             lineno = m.group(1)
@@ -319,18 +324,18 @@ class LogTranslator:
                 return t("log.line_ref_ctx").format(n=lineno, ctx=ctx_clean)
             return t("log.line_ref").format(n=lineno)
 
-        # ── Rc files ──────────────────────────────────────────────────────────────
+        # ── Rc files ───────────────────────────────────────────────────────────────────
         if stripped == "Rc files read:":
             return t("log.config_reading")
         if re.match(r"^/etc/[Ll]atex", stripped):
             return t("log.config_file").format(path=stripped)
 
-        # ── Output written ─────────────────────────────────────────────────────
+        # ── Output written ────────────────────────────────────────────────────────
         m = _RE_OUTPUT_WRITTEN.match(stripped)
         if m:
             return t("log.output_written").format(fmt=m.group(1), pages=m.group(2))
 
-        # ── Latexmk ──────────────────────────────────────────────────────────────
+        # ── Latexmk ────────────────────────────────────────────────────────────────
         m = _RE_LATEXMK.match(stripped)
         if m:
             msg = m.group(1).strip()
@@ -362,7 +367,7 @@ class LogTranslator:
             v = ver.group(1) if ver else ""
             return t("log.engine_bibtex").format(ver=v)
 
-        # ── Document Class ─────────────────────────────────────────────────────
+        # ── Document Class ────────────────────────────────────────────────────────
         m = _RE_DOC_CLASS.match(stripped)
         if m:
             cls = m.group(1)
@@ -372,7 +377,7 @@ class LogTranslator:
             v = f" {ver.group(0)}" if ver else ""
             return t("log.doc_class").format(cls=cls, ver=v)
 
-        # ── Rule / Run ──────────────────────────────────────────────────────────
+        # ── Rule / Run ───────────────────────────────────────────────────────────
         if _RE_RULE_CHANGE.match(stripped):
             return None
 
@@ -391,7 +396,7 @@ class LogTranslator:
                 return t("log.running_bibtex").format(arg=arg)
             return t("log.running_cmd").format(cmd=cmd[:80])
 
-        # ── fontspec errors (XeLaTeX) ──────────────────────────────────────────
+        # ── fontspec errors (XeLaTeX) ───────────────────────────────────────────
         m = _RE_FONTSPEC_ERR.match(stripped)
         if m:
             code = m.group(1)
@@ -399,7 +404,7 @@ class LogTranslator:
             hint = t(hint_key) if hint_key else code
             return t("log.fontspec_error").format(code=code, hint=hint)
 
-        # ── LaTeX errors ─────────────────────────────────────────────────────────
+        # ── LaTeX errors ───────────────────────────────────────────────────────────
         m = _RE_LATEX_ERROR.match(stripped)
         if m:
             msg  = m.group(1)
@@ -418,7 +423,7 @@ class LogTranslator:
             self._after_error = True
             return result
 
-        # ── Overfull / Underfull ────────────────────────────────────────────────
+        # ── Overfull / Underfull ──────────────────────────────────────────────────
         m = _RE_OVERFULL.match(stripped)
         if m:
             kind, amount, l1, l2 = m.groups()
@@ -439,7 +444,7 @@ class LogTranslator:
                 return t("log.underfull").format(amount=amount, l1=l1, l2=l2)
             return t("log.overfull").format(amount=amount, l1=l1, l2=l2)
 
-        # ── Package / LaTeX warnings ───────────────────────────────────────────
+        # ── Package / LaTeX warnings ─────────────────────────────────────────────
         m = _RE_PKG_WARN.match(stripped)
         if m:
             pkg, msg = m.group(1), m.group(2)
@@ -460,7 +465,7 @@ class LogTranslator:
                 return t("log.undefined_refs")
             return t("log.latex_warn").format(msg=msg)
 
-        # ── BibTeX ───────────────────────────────────────────────────────────────────
+        # ── BibTeX ────────────────────────────────────────────────────────────────────
         if stripped.startswith("The style file"):
             sty = stripped.replace("The style file", "").strip()
             return t("log.bib_style").format(sty=sty)
@@ -492,7 +497,7 @@ class LogTranslator:
         return stripped
 
 
-# ── Module-level wrapper ───────────────────────────────────────────────────────────
+# ── Module-level wrapper ──────────────────────────────────────────────────────────────────
 # Each call creates a fresh LogTranslator so that isolated single-line
 # callers (e.g. unit tests, one-off utilities) never inherit state from
 # a previous call.  Code that processes a multi-line log stream should
