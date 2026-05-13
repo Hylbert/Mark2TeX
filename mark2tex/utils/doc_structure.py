@@ -47,7 +47,10 @@ def extract_sections(md_path: str | Path) -> list[str]:
         level = len(m.group(1))           # 1, 2, or 3
         title = m.group(2).strip()
         # Strip inline Markdown formatting (bold, italic, code)
-        title = re.sub(r"[*_`]{1,2}(.+?)[*_`]{1,2}", r"\1", title)
+        title = re.sub(r"\*\*(.+?)\*\*", r"\1", title)   # **bold**
+        title = re.sub(r"\*(.+?)\*",     r"\1", title)   # *italic*
+        title = re.sub(r"_(.+?)_",       r"\1", title)   # _italic_
+        title = re.sub(r"`(.+?)`",       r"\1", title)   # `code`
         indent = "  " * (level - 1)
         counter += 1
         sections.append(f"{indent}{counter}. {title}")
