@@ -6,16 +6,13 @@ need Docker installed.
 """
 from __future__ import annotations
 
-import os
-from pathlib import Path
-from unittest.mock import MagicMock, call, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 from docker.errors import DockerException
 
 import mark2tex.docker_client as dc
 from mark2tex.docker_client import get_docker_client
-
 
 # ---------------------------------------------------------------------------
 # Helpers

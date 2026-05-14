@@ -12,8 +12,8 @@ import pytest
 
 from mark2tex.watcher import (
     _IGNORE_DIRS,
-    _TEMP_SUFFIXES,
     _TEMP_NAME_SUFFIXES,
+    _TEMP_SUFFIXES,
     Mark2TeXWatcher,
     WatcherManager,
 )
