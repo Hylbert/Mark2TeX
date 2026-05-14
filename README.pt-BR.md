@@ -33,11 +33,14 @@
   </a>
 </div>
 
+
 <br>
+
 
 <p align="center">
   <img src="https://github.com/user-attachments/assets/e2ebac18-6c4e-4048-b79c-66bc6d7fdddf" width="900" alt="Demo Mark2TeX">
 </p>
+
 
 <br>
 
@@ -86,9 +89,11 @@ mark2tex check
 mark2tex
 ```
 
+
 <p align="center">
   <img src="https://github.com/user-attachments/assets/3d4a666e-e4b0-470c-8677-936bf49289bd" width="900" alt="Instalação Mark2TeX via pipx">
 </p>
+
 
 > **Primeira execução:** O Mark2TeX baixa automaticamente a imagem `mark2tex` do Docker Hub com
 > uma **barra de progresso Rich visual** — uma barra por layer mostrando velocidade de download,
@@ -121,7 +126,7 @@ mark2tex
 Executa seis verificações e exibe um relatório visual:
 
 ```
-──────────── Mark2TeX — Diagnóstico do Sistema  v0.2.2 ────────────
+──────────────── Mark2TeX — Diagnóstico do Sistema  v0.2.2 ────────────────
 
 ✅   Mark2TeX          0.2.2
 ✅   Docker (binário)  /usr/bin/docker
@@ -140,17 +145,19 @@ Executa seis verificações e exibe um relatório visual:
 
 Código de saída `0` quando não há erros; código `1` quando pelo menos uma verificação crítica falha — compatível com scripts e pipelines CI.
 
-## A TUI em destaque
+
+## A TUI em Destaque
 
 <p align="center">
   <img src="https://github.com/user-attachments/assets/036acf5a-d564-4173-9034-d603ec03f3ca" width="900" alt="Demo Watch Mode Mark2TeX">
 </p>
 
+
 1. Selecione um arquivo `.md` no painel esquerdo.
-2. Escolha um template (`tcc-abnt`, `artigo-ieee`, `doc-tecnica`, `projeto`).
+2. Escolha um template (`tcc-abnt`, `artigo-ieee`, `doc-tecnica`, etc.).
 3. Opcionalmente escolha uma fonte (`Liberation Serif`, `Liberation Sans`, `Nimbus Sans`, `Ubuntu`).
 4. Pressione **`c`** para compilar ou **`w`** para ativar o Watch Mode.
-5. Visualize o arquivo Markdown.
+5. Visualize o arquivo Markdown ou mude para a aba **Informações de Compilação** após um build para ver contagem de páginas, índice do documento e avisos do XeLaTeX.
 6. Monitore a saída do console em tempo real.
 
 ### Atalhos de teclado
@@ -167,6 +174,7 @@ Código de saída `0` quando não há erros; código `1` quando pelo menos uma v
 
 - **Builds Dockerizados** — sem instalação local de LaTeX; resultado idêntico em qualquer máquina.
 - **TUI interativa** — navegador de arquivos, seletor de template, console de log em tempo real e barra de progresso criados com [Textual](https://github.com/Textualize/textual).
+- **Painel de preview com abas** — duas abas: *Markdown* (preview do fonte) e *Informações de Compilação* (habilitada após cada build). A aba de informações exibe nome do arquivo, contagem de páginas, template, hora da última compilação, status do build, índice numerado do documento (h1–h3) e avisos acumulados do XeLaTeX.
 - **Navegação de diretórios** — o painel de arquivos abre no diretório de trabalho atual. Subpastas são listadas antes dos arquivos `.md`; pressione `Enter` em uma pasta para entrar nela. Um item `../` no topo da lista volta para a pasta pai.
 - **Onboarding no primeiro uso** — tela de boas-vindas exibida na primeira abertura com botão **"Inicializar projeto aqui"** que copia um `.md` de exemplo no diretório atual sem sair do app.
 - **Watch mode** — recompilação automática a cada salvamento do arquivo; arquivos temporários/swap (`.swp`, `.bak`, `~`) são ignorados; debounce de 1,5 s evita duplos disparos em editores com escrita em duas etapas (ex.: Obsidian).
@@ -175,6 +183,8 @@ Código de saída `0` quando não há erros; código `1` quando pelo menos uma v
 - **Worker exclusivo** — pressionar `c` duas vezes ou um disparo do Watch Mode durante um build cancela o worker anterior antes de iniciar um novo, eliminando linhas de log entrecruzadas.
 - **Validador de frontmatter** — antes de cada compilação, o YAML frontmatter é verificado: campos obrigatórios ausentes, valores placeholder não preenchidos, template incompatível e códigos `lang` inválidos. Avisos aparecem no console da TUI; erros críticos abortam o build antecipadamente.
 - **Troca de template** — mudar de template na TUI atualiza cirurgicamente `template:` e `date:` no frontmatter, adiciona campos ausentes com placeholders e remove campos exclusivos do template antigo — sem tocar nos valores já preenchidos.
+- **Tratamento de imagens ausentes** — referências a imagens locais que não podem ser resolvidas são substituídas por um placeholder em texto simples antes do passo XeLaTeX, permitindo que o restante do documento compile normalmente. Um aviso traduzido no console indica o arquivo exato que está faltando.
+- **Detecção de socket Docker multiplataforma** — no macOS o socket Unix correto (Docker Desktop, Colima, Lima) é detectado automaticamente; no Windows uma mensagem de erro clara lista os runtimes suportados. Configuração manual de `DOCKER_HOST` não é mais necessária na maioria dos casos.
 - **Logs legíveis por humanos** — a saída bruta do XeLaTeX é analisada e traduzida para mensagens em linguagem simples.
 - **Seleção de fonte** — escolha entre Liberation Sans (Arial), Nimbus Sans (Helvetica), Liberation Serif (Times) e Ubuntu por documento.
 - **Suporte a bibliografia** — BibTeX via Pandoc + XeLaTeX; basta adicionar um `referencias.bib` ao lado do `.md`. O BibTeX só é invocado quando o documento contém marcadores de citação reais.
@@ -188,11 +198,16 @@ Código de saída `0` quando não há erros; código `1` quando pelo menos uma v
 
 | Template | Finalidade |
 |---|---|
-| `tcc-abnt` | Trabalho de Conclusão de Curso (ABNT) |
-| `artigo-ieee` | Artigo para conferência IEEE |
-| `artigo-abnt` | Artigo ABNT |
+| `tcc-abnt` | Trabalho de Conclusão de Curso (ABNT NBR 14724) |
+| `dissertacao-abnt` | Dissertação de Mestrado (ABNT NBR 14724) |
+| `tese-abnt` | Tese de Doutorado (ABNT NBR 14724) |
+| `artigo-abnt` | Artigo ABNT (NBR 6022) |
+| `artigo-ieee` | Artigo para conferência / periódico IEEE |
+| `artigo-acm` | Artigo para conferência ACM |
+| `artigo-apa` | Artigo no estilo APA |
+| `relatorio-abnt` | Relatório técnico (ABNT) |
+| `notas-aula` | Notas de aula |
 | `doc-tecnica` | Documentação técnica |
-| `projeto` | Proposta de projeto |
 
 ## Roadmap
 
@@ -209,50 +224,35 @@ Código de saída `0` quando não há erros; código `1` quando pelo menos uma v
 - [x] Worker exclusivo de compilação (cancela e reinicia)
 - [x] `mark2tex clean` — limpar cache latexmk de build
 - [x] Correção de race condition no Watch Mode (abortar container antigo antes do novo Pandoc)
-- [ ] Templates ABNT adicionais (dissertação, apresentação)
+- [x] Painel de preview com abas e aba de Informações de Compilação (contagem de páginas, índice, avisos)
+- [x] Detecção automática de socket Docker multiplataforma (macOS / Windows)
+- [x] Tratamento de imagens locais ausentes (aviso + placeholder, sem PDF vazio)
+- [x] Set de templates estendido: `dissertacao-abnt`, `tese-abnt`, `relatorio-abnt`, `artigo-acm`, `artigo-apa`, `notas-aula`
 
 Acompanhe as [issues abertas](https://github.com/Hylbert/Mark2TeX/issues) ou sugira novas funcionalidades.
 
 ## Troubleshooting
 
-### macOS: socket do Docker não encontrado (`Connection aborted. FileNotFoundError`)
+### macOS / Windows: socket do Docker não encontrado
 
-Se ao instalar via `pipx` no macOS você receber este erro:
+O Mark2TeX agora detecta automaticamente o socket Docker no macOS (Docker Desktop, Colima, Lima) e exibe uma mensagem de erro clara no Windows listando os runtimes suportados. Na maioria dos casos, nenhuma configuração manual é necessária.
 
-```
-❌  Erro ao acessar o Docker: Error while fetching server API version:
-('Connection aborted.', FileNotFoundError(2, 'No such file or directory'))
-```
-
-Isso ocorre porque o Docker Desktop no macOS coloca o socket Unix em
-`~/.docker/run/docker.sock`, e não no caminho padrão do Linux (`/var/run/docker.sock`)
-que o cliente Python do Docker tenta primeiro.
-
-**Solução — definir `DOCKER_HOST` permanentemente no shell:**
+Se ainda assim você encontrar um erro de conexão, defina `DOCKER_HOST` explicitamente:
 
 ```bash
-# Confirme que o socket existe (Docker Desktop precisa estar em execução)
-ls ~/.docker/run/docker.sock
+# Docker Desktop no macOS
+export DOCKER_HOST=unix://$HOME/.docker/run/docker.sock
 
-# Adicione a variável ao seu perfil de shell
-echo 'export DOCKER_HOST=unix://$HOME/.docker/run/docker.sock' >> ~/.zshrc
-source ~/.zshrc
-
-# Verifique
-mark2tex check
+# Colima
+export DOCKER_HOST=unix://$HOME/.colima/default/docker.sock
 ```
 
-> **Usando Colima em vez do Docker Desktop?** O caminho do socket é diferente:
-> ```bash
-> echo 'export DOCKER_HOST=unix://$HOME/.colima/default/docker.sock' >> ~/.zshrc
-> source ~/.zshrc
-> ```
+Adicione a linha ao seu `~/.zshrc` (ou `~/.bashrc`) e execute `source ~/.zshrc`. Em seguida, verifique com `mark2tex check`.
 
-> **Socket não está em `~/.docker/run/`?** Localize-o com:
+> **Socket não encontrado?** Localize-o com:
 > ```bash
 > find ~ -name "docker.sock" 2>/dev/null
 > ```
-> Em seguida, use o caminho encontrado no `DOCKER_HOST`.
 
 ## Como contribuir
 
