@@ -8,6 +8,35 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and 
 
 ## [Unreleased]
 
+### Added
+- **Tabbed preview panel** (`feat/tabbed-preview-panel`): the right-hand preview area now contains two tabs — *Markdown* (the existing source preview) and *Compilation Info* (shown after each build). The Compilation Info tab displays filename, page count, template, last compiled timestamp, build status, a numbered document outline (h1–h3, capped at 30 entries), and accumulated XeLaTeX warnings. The tab is disabled until the first build completes and re-disabled when a new file is selected.
+- `InfoPanelWidget` and `CompilationInfo` dataclass (`mark2tex/info_panel.py`): stateless Rich-based widget that renders the structured compilation summary; `make_timestamp()` helper returns a `HH:MM:SS` string for the last build time.
+- `extract_sections()` utility (`mark2tex/utils/doc_structure.py`): lightweight pure-stdlib parser that scans a Markdown file, skips YAML frontmatter, and returns a flat numbered list of h1–h3 headings with proportional indentation, capped at 30 entries.
+- **Cross-platform Docker client factory** (`feat/docker-client`, PR #56): `get_docker_client()` in `mark2tex/docker_client.py` probes the correct Unix socket on macOS (Docker Desktop → Colima → Lima → `/var/run/docker.sock`) and pings each candidate before returning the client. On Windows, wraps `docker.from_env()` and rewrites `DockerException` with an actionable message listing Docker Desktop, Rancher Desktop and Podman Desktop. On Linux, delegates to `docker.from_env()` unchanged. `DOCKER_HOST` is always honoured when set.
+- **Graceful handling of missing images** (`feat/graceful-missing-image`, PR #57): `build.sh` pre-scans the source `.md` for local image references before calling pandoc. For each path that cannot be resolved on the filesystem it emits a `MISSING_IMAGE:<path>` token and replaces the broken reference with a plain-text placeholder `[IMAGE NOT FOUND: <path>]`, so XeLaTeX compiles the remaining document normally instead of producing an empty or zero-page PDF. Remote URLs (http/https) are intentionally skipped.
+- `build.warn_missing_image` i18n key (pt_BR + en_US): receives the `{img}` placeholder so the translated warning names the exact file the user needs to fix.
+- `log.latexmk_force_mode` i18n key (pt_BR + en_US): surfaced in the TUI console when xelatex runs in force mode (`-f`).
+- `fonts-lmodern` installed in the Docker image alongside `fonts-texgyre`, enabling the `apa7` class and templates that depend on Latin Modern.
+- New templates added: `dissertacao-abnt`, `relatorio-abnt`, `artigo-acm`; `tese-abnt` completed per ABNT NBR 14724.
+- CI: `docker-publish.yml` now dispatches the Windows installer build automatically on a release tag.
+
+### Fixed
+- **`._processed.md` artefact visible in TUI and watcher** (`fix/app-watcher-processed-md`): `_populate_files()` now excludes paths whose name ends with `._processed.md`; `_TEMP_NAME_SUFFIXES` frozenset added to `watcher.py` so the ephemeral copy is classified as noise early and emits a clear debug log line.
+- **latexmk cache invalidation** (`fix/build`): `.tex` content hash is compared between runs; when the content changes the cache is invalidated so latexmk does not reuse stale intermediates.
+- **PDF existence overrides latexmk exit code**: xelatex with `-f` (force mode) may exit non-zero even when it successfully produced a PDF. `build.sh` now checks for the output PDF first and only propagates the latexmk exit code when the PDF was not generated.
+- **`log_translator.py`**: suppresses spurious `Moving` and `.fls` noise lines from latexmk output; handles `Errors` lines emitted in force mode without misclassifying them as build failures.
+- **`artigo-apa` template**: removed `pdfLaTeX`-only packages incompatible with XeLaTeX.
+- **Font selection in `artigo-abnt`, `artigo-acm`, `artigo-apa`, `artigo-ieee`**: all four templates were missing the `fontspec` conditional block present in `doc-tecnica` and `tcc-abnt`. Pattern copied from those templates (Arial → Liberation Sans, Helvetica → Nimbus Sans, Times → TeX Gyre Termes, Ubuntu → Ubuntu). Also removes `inputenc` from ACM/APA/IEEE since XeLaTeX handles UTF-8 natively and `inputenc` conflicts with `fontspec`.
+- **`artigo-acm` and `notas-aula`**: added `\tightlist` definition and removed `inputenc` for XeTeX compatibility.
+- **`notas-aula`**: added `listings` + `xcolor` packages to fix `lstlisting` error; added passthrough command to fix inline code undefined control sequence.
+- **`setup_env.py` and `docker_manager.py`**: replaced `docker.from_env()` calls with `get_docker_client()` from the new factory module; removed now-unused `import docker` top-level imports.
+- **Legacy `projeto` template** removed.
+
+### Tests
+- Unit tests for `InfoPanelWidget`, `CompilationInfo`, `make_timestamp()`, and `extract_sections()` (`test_info_panel.py`, `test_doc_structure.py`).
+- Tests for `MISSING_IMAGE` warning path in `log_translator.py`, latexmk noise suppression branches, and `._processed.md` filter in `watcher.py`.
+- Mock targets updated from `mark2tex.docker_manager.docker` to `mark2tex.docker_manager.get_docker_client` following the factory refactor.
+
 ---
 
 ## [0.3.1] — 2026-05-09
@@ -39,14 +68,14 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and 
 - Frontmatter validation integrated into `compile_specific_document()`: warnings are shown in the TUI console before the Docker worker starts. Non-critical warnings (placeholders, lang) do not block the build; missing required fields abort early and show a clear message.
 - `swap_template()` in `yaml_injector.py`: surgically patches the `template:` and `date:` fields when the user switches templates in the TUI. Common fields with user-filled values are preserved; missing fields for the new template are added with placeholders; fields exclusive to the old template are removed.
 - `mark2tex clean [file]` CLI subcommand: with no argument wipes the entire latexmk cache root; with a file argument removes only that document's cache bucket.
-- Latexmk incremental compilation: intermediate files (`.aux`, `.fdb_latexmk`, `.fls`, `.bbl`, `.xdv`) are persisted across runs in an OS-standard user cache directory (`~/.cache/mark2tex/<doc_hash>/` on Linux, `~/Library/Caches/mark2tex/<doc_hash>/` on macOS, `%LOCALAPPDATA%\mark2tex\Cache\<doc_hash>\` on Windows). The cache is mounted into the container via `--env M2T_CACHE_DIR` + volume bind, reducing re-compilation time from ~18 s to ~6 s on a 15-page document after a single-line edit.
+- Latexmk incremental compilation: intermediate files (`.aux`, `.fdb_latexmk`, `.fls`, `.bbl`, `.xdv`) are persisted across runs in an OS-standard user cache directory (`~/.cache/mark2tex/<doc_hash>/` on Linux, `~/Library/Caches/mark2tex/<doc_hash>/` on macOS, `%LOCALAPPDATA%\\mark2tex\\Cache\\<doc_hash>\\` on Windows). The cache is mounted into the container via `--env M2T_CACHE_DIR` + volume bind, reducing re-compilation time from ~18 s to ~6 s on a 15-page document after a single-line edit.
 - Per-run `.latexmkrc` generated inside `CACHE_DIR` with `$emulate_aux = 1` for TeX Live 2022/4.76 compatibility (avoids the `-aux-directory` flag that xelatex rejects).
 - Stale-cache guard in `build.sh`: if latexmk exits non-zero and no PDF is produced, the cache is wiped automatically so the next run starts clean.
 - `DockerManager.abort()`: sends SIGKILL to the active container process and waits up to 5 s — called synchronously before scheduling a new Watch Mode worker to eliminate the race condition where the old container's cleanup trap deleted the `.tex` file written by the new Pandoc run.
 - Compile subprocess timeout: default 300 s (5 min), overridable via `MARK2TEX_TIMEOUT` env var. On timeout the process is killed, the pipe drained, and a clear error message is shown in the TUI console.
 - Exclusive compilation worker (`group="compile"`, `exclusive=True`): Textual cancels any prior worker before starting a new one, preventing parallel builds, interleaved log lines, and race conditions on the Docker subprocess.
 - Watch Mode watcher improvements: temp/swap file filtering (`_TEMP_SUFFIXES`, `_IGNORE_DIRS` frozensets); debounce raised from 1.0 s to 1.5 s for editors that write in two stages (e.g. Obsidian); debug log is now conditional on `MARK2TEX_DEBUG` instead of always writing to `tui_console_debug.log`.
-- Typography improvements for ABNT templates: `polyglossia` replaces `babel` in `tcc-abnt` and `artigo-abnt` for native XeLaTeX language support and correct pt-BR hyphenation; `setspace` + `\OnehalfSpacing` enforces ABNT NBR 14724 / NBR 6022 1.5 line spacing; `csquotes` added to all templates for typographically correct quotation marks via `\enquote{}` and `\blockquote{}`.
+- Typography improvements for ABNT templates: `polyglossia` replaces `babel` in `tcc-abnt` and `artigo-abnt` for native XeLaTeX language support and correct pt-BR hyphenation; `setspace` + `\\OnehalfSpacing` enforces ABNT NBR 14724 / NBR 6022 1.5 line spacing; `csquotes` added to all templates for typographically correct quotation marks via `\\enquote{}` and `\\blockquote{}`.
 - `mark2tex uninstall` now removes both `hylbert/mark2tex:latest` and `mark2tex:latest` Docker tags, the user data directory (`~/.local/share/mark2tex/`, including backups and onboarding flag), and the user config directory (`~/.config/mark2tex/`). All output respects the user's language preference via `i18n.t()`.
 - `platformdirs` used throughout for cross-platform path resolution (user cache, data, and config directories).
 - `PyYAML` and `types-pyyaml` added as explicit dependencies.
@@ -55,17 +84,17 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and 
 ### Fixed
 - Progress bar rewind bug: `progress_bump` previously had no ceiling, allowing warning-heavy compilations (e.g. 60+ overfull-hbox lines per xelatex pass) to push the bar past 99% during an early phase, causing it to visually snap back when the next official `PROGRESS:N%` token arrived. The bar is now strictly non-decreasing for all documents.
 - `build.sh` status messages (`🚀 Starting build…`, `✅ Markdown converted…`, `🔧 Full build…`, `⚡ Incremental build…`, `🔨 Compiling PDF…`, `✅ PDF generated…`, `🎉 Process complete!`, `🧹 Cleaning up…`, `⚠️ Build failed…`) are now intercepted by `LogTranslator.translate()` before the generic emoji pass-through and mapped to `build.*` i18n keys, so they are properly translated according to the user's selected language.
-- `tcc-abnt` template: `\setdefaultlanguage` now uses `[variant=brazilian]{portuguese}` instead of the dynamic `{pt-BR}` value from the YAML `lang` field. The `pt-BR` BCP-47 code is not a valid polyglossia language identifier (`gloss-pt-BR.ldf` does not exist in TeX Live), which caused a LaTeX3 error on every compilation. The template is always Brazilian Portuguese, so the language setting is now fixed and correct.
+- `tcc-abnt` template: `\\setdefaultlanguage` now uses `[variant=brazilian]{portuguese}` instead of the dynamic `{pt-BR}` value from the YAML `lang` field. The `pt-BR` BCP-47 code is not a valid polyglossia language identifier (`gloss-pt-BR.ldf` does not exist in TeX Live), which caused a LaTeX3 error on every compilation. The template is always Brazilian Portuguese, so the language setting is now fixed and correct.
 - Mypy `no-any-return` error in `_load_index` resolved with `cast`.
 - Removed `click` dependency; CLI now uses `argparse` only.
 - Watch Mode race condition: `DockerManager.abort()` is now called synchronously before the new Pandoc run so the old container's cleanup trap cannot delete the freshly generated `.tex` file.
 - `build.sh` latexmk cache preservation: cache is never wiped on successful builds; on failure it is only wiped when `.fdb_latexmk` is absent (i.e. latexmk never completed a full pass).
-- `build.sh`: `--bibliography` is now only passed to Pandoc when the `.md` source contains actual citation markers (`[@key]` or `\cite{`). This prevents Pandoc from emitting `\bibliography{}` in citation-free documents and stops latexmk from scheduling Biber unnecessarily (eliminates the "missing `\item`" / empty `.bbl` loop).
+- `build.sh`: `--bibliography` is now only passed to Pandoc when the `.md` source contains actual citation markers (`[@key]` or `\\cite{`). This prevents Pandoc from emitting `\\bibliography{}` in citation-free documents and stops latexmk from scheduling Biber unnecessarily (eliminates the "missing `\\item`" / empty `.bbl` loop).
 - `artigo-ieee` default `lang` changed from `en-US` to `english` — Babel does not accept BCP-47 locale codes.
 - `WatcherManager` attributes annotated as `Optional[BaseObserver]` and `Optional[threading.Thread]` to satisfy mypy.
 - Watcher `_log()` legacy method removed; logging now goes through the standard-library logger used by `app.py`.
 - `latexmkrc` `$aux_dir`/`$out_dir` approach used instead of overriding `$xelatex` directly — prevents latexmk from losing track of `.fls`/`.xdv` files under TeX Live.
-- Emoji echo in `build.sh` replaced with literal UTF-8 characters (bash does not interpret `\uXXXX` in plain `echo`).
+- Emoji echo in `build.sh` replaced with literal UTF-8 characters (bash does not interpret `\\uXXXX` in plain `echo`).
 - `docker_manager.py`: removed extraneous `f`-prefix from static string.
 
 ### Tests
@@ -134,14 +163,14 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and 
 - Font selection flag (`--font arial | helvetica | times | ubuntu`) via `build.sh` and TUI.
 - `.gitattributes` enforcing LF line endings for all shell and text files.
 - `tocloft`-native TOC styling in `doc-tecnica` template (removes `hyperref` conflict).
-- `\tightlist` stub in `doc-tecnica` template (fixes Pandoc compact-list rendering).
+- `\\tightlist` stub in `doc-tecnica` template (fixes Pandoc compact-list rendering).
 - Community health files: `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `PULL_REQUEST_TEMPLATE.md`, issue templates.
 - Rewritten `README.md` and `README.pt-BR.md` with CLI commands table, feature list, and roadmap.
 - `docs/manual-de-uso.md` initial user manual.
 
 ### Fixed
-- CRLF line endings in `build.sh` causing `$'\r': command not found` on Windows Docker builds.
-- `\renewcommand{\contentsline}[4]` conflict with `hyperref` 5-argument redefinition.
+- CRLF line endings in `build.sh` causing `$'\\r': command not found` on Windows Docker builds.
+- `\\renewcommand{\\contentsline}[4]` conflict with `hyperref` 5-argument redefinition.
 - `ca-certificates` added to Dockerfile to fix `curl` SSL error (exit code 77).
 - `fontconfig` added to Dockerfile to fix `fc-cache not found` (exit code 127).
 - Templates: replaced `Liberation Serif` / `Times New Roman` with `TeX Gyre Termes` for reliable font availability inside the Docker container (`tcc-abnt`, `artigo-abnt`, `doc-tecnica`, `projeto`).
