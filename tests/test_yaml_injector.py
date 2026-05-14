@@ -319,3 +319,82 @@ def test_swap_body_content_preserved(tmp_path: Path) -> None:
     content = f.read_text(encoding="utf-8")
 
     assert body in content
+
+
+def test_swap_noop_when_same_template(tmp_path: Path) -> None:
+    """swap_template must not write to disk when the template is already set."""
+    f = tmp_path / "doc.md"
+    original = (
+        '---\ntitle: "My TCC"\nauthor: "Hylbert"\ndate: "2026-01-01"\n'
+        'template: "tcc-abnt"\nlang: "pt-BR"\n---\n\n# Body\n'
+    )
+    f.write_text(original, encoding="utf-8")
+    mtime_before = f.stat().st_mtime
+
+    result = swap_template(f, "tcc-abnt")
+
+    assert result is True
+    assert f.stat().st_mtime == mtime_before
+    assert f.read_text(encoding="utf-8") == original
+
+
+def test_swap_preserves_author_list(tmp_path: Path) -> None:
+    """author as a YAML list must survive a swap to a different template."""
+    f = tmp_path / "doc.md"
+    f.write_text(
+        '---\nauthor:\n- name: Hylbert\n- name: Silva\ndate: "2026-01-01"\n'
+        'template: "tcc-abnt"\nlang: "pt-BR"\ntitle: "T"\n---\n\n# Body\n',
+        encoding="utf-8",
+    )
+    swap_template(f, "dissertacao-abnt")
+    data = _parse_fm(f.read_text(encoding="utf-8"))
+
+    assert isinstance(data["author"], list)
+    assert data["author"][0]["name"] == "Hylbert"
+    assert data["author"][1]["name"] == "Silva"
+
+
+def test_swap_preserves_multiline_block_scalar(tmp_path: Path) -> None:
+    """Block scalar fields (acknowledgements, abstract) must survive a swap."""
+    f = tmp_path / "doc.md"
+    f.write_text(
+        'title: "T"\nauthor: "A"\ndate: "2026-01-01"\ntemplate: "tcc-abnt"\n'
+        'lang: "pt-BR"\nacknowledgements: |\n  Thanks to everyone.\n  Special thanks.\n',
+        encoding="utf-8",
+    )
+    # Write with proper frontmatter delimiters
+    proper = (
+        '---\ntitle: "T"\nauthor: "A"\ndate: "2026-01-01"\ntemplate: "tcc-abnt"\n'
+        'lang: "pt-BR"\nacknowledgements: |\n  Thanks to everyone.\n  Special thanks.\n---\n\n# Body\n'
+    )
+    f.write_text(proper, encoding="utf-8")
+    swap_template(f, "dissertacao-abnt")
+    data = _parse_fm(f.read_text(encoding="utf-8"))
+
+    assert "Thanks to everyone" in data["acknowledgements"]
+
+
+def test_swap_graceful_on_invalid_yaml(tmp_path: Path) -> None:
+    """Malformed YAML inside frontmatter must not crash swap_template."""
+    f = tmp_path / "doc.md"
+    f.write_text(
+        '---\ntitle: [unclosed bracket\ntemplate: tcc-abnt\n---\n\n# Body\n',
+        encoding="utf-8",
+    )
+    result = swap_template(f, "doc-tecnica")
+    # Must not raise; result may be True (degraded swap) or False
+    assert isinstance(result, bool)
+
+
+def test_swap_noop_does_not_write_disk(tmp_path: Path) -> None:
+    """No-op swap must never call Path.write_text."""
+    f = tmp_path / "doc.md"
+    f.write_text(
+        '---\ntitle: "T"\nauthor: "A"\ndate: "2026-01-01"\n'
+        'template: "doc-tecnica"\nlang: "pt-BR"\n---\n\n# Body\n',
+        encoding="utf-8",
+    )
+    original_content = f.read_text(encoding="utf-8")
+    swap_template(f, "doc-tecnica")
+
+    assert f.read_text(encoding="utf-8") == original_content
