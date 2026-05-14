@@ -165,6 +165,17 @@ case "$FONT_VALUE" in
     times)     FONT_ARGS="--metadata=font-times:true" ;;
 esac
 
+# Templates based on abntex2 without the 'article' option use \chapter as the
+# top-level division. Pass --top-level-division=chapter so that Pandoc maps
+# Markdown '#' headings to \chapter instead of \section, preventing the
+# '0.1 Introduction' numbering bug caused by a missing parent chapter counter.
+TOP_LEVEL_ARGS=""
+case "$TEMPLATE_TYPE" in
+    tcc-abnt|dissertacao-abnt|tese-abnt|relatorio-abnt)
+        TOP_LEVEL_ARGS="--top-level-division=chapter"
+        ;;
+esac
+
 TEMPLATE_PATH="$TEMPLATE_BASE/$TEMPLATE_TYPE/template.tex"
 
 pandoc "$INPUT_FILE" \
@@ -172,6 +183,7 @@ pandoc "$INPUT_FILE" \
     --pdf-engine=xelatex \
     $BIB_ARGS \
     $FONT_ARGS \
+    $TOP_LEVEL_ARGS \
     --wrap=preserve \
     --listings \
     -o "$OUTPUT_NAME.tex"
