@@ -166,7 +166,7 @@ class HelpScreen(ModalScreen):
                 yield Label("w            — " + t("btn.watch_on") + " / " + t("btn.watch_off"))
                 yield Label("Tab          — " + ("Navigate panels" if t("menu.exit") == "EXIT" else "Navegar entre painéis"))
                 yield Label("↑ ↓          — " + ("Navigate lists" if t("menu.exit") == "EXIT" else "Navegar nas listas"))
-                yield Label("Enter        — " + ("Enter folder / select file" if t("menu.exit") == "EXIT" else "Entrar na pasta / selecionar arquivo"))
+                yield Label("Enter        — " + ("Enter folder / select file / confirm template" if t("menu.exit") == "EXIT" else "Entrar na pasta / selecionar arquivo / confirmar template"))
                 yield Label("")
                 yield Label(t("help.flow_title"), id="help-commands-title")
                 yield Label(t("help.flow_1"))
@@ -413,9 +413,9 @@ class Mark2TeXApp(App):
                 self._check_yaml_badge(item)
                 self._reset_info_tab()
         elif event.list_view.id == "template-list" and isinstance(item, OptionItem):
-            self.selected_template = item.label_text
-            self.query_one("#status-template", Label).update(f"Template : {self.selected_template}")
-            self._apply_template_swap(item.label_text)
+            # Only update the status label as visual feedback while browsing.
+            # The actual swap is confirmed on Enter (on_list_view_selected).
+            self.query_one("#status-template", Label).update(f"Template : {item.label_text}")
         elif event.list_view.id == "font-list" and isinstance(item, FontItem):
             self.selected_font = item.font_id
             self.query_one("#status-font", Label).update(f"Fonte    : {item.display_label}")
@@ -514,7 +514,9 @@ class Mark2TeXApp(App):
                 abs_file,
                 selected_template,
                 lambda: self.compile_specific_document(
-                    selected_file, selected_template, selected_font
+                    selected_file,
+                    self.selected_template or selected_template,
+                    selected_font,
                 ),
             )
             self.is_watching = True
