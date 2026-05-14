@@ -355,19 +355,13 @@ def test_swap_preserves_author_list(tmp_path: Path) -> None:
 
 
 def test_swap_preserves_multiline_block_scalar(tmp_path: Path) -> None:
-    """Block scalar fields (acknowledgements, abstract) must survive a swap."""
+    """User-defined block scalar fields must survive a swap to a different template."""
     f = tmp_path / "doc.md"
     f.write_text(
-        'title: "T"\nauthor: "A"\ndate: "2026-01-01"\ntemplate: "tcc-abnt"\n'
-        'lang: "pt-BR"\nacknowledgements: |\n  Thanks to everyone.\n  Special thanks.\n',
+        '---\ntitle: "T"\nauthor: "A"\ndate: "2026-01-01"\ntemplate: "tcc-abnt"\n'
+        'lang: "pt-BR"\nacknowledgements: |\n  Thanks to everyone.\n  Special thanks.\n---\n\n# Body\n',
         encoding="utf-8",
     )
-    # Write with proper frontmatter delimiters
-    proper = (
-        '---\ntitle: "T"\nauthor: "A"\ndate: "2026-01-01"\ntemplate: "tcc-abnt"\n'
-        'lang: "pt-BR"\nacknowledgements: |\n  Thanks to everyone.\n  Special thanks.\n---\n\n# Body\n'
-    )
-    f.write_text(proper, encoding="utf-8")
     swap_template(f, "dissertacao-abnt")
     data = _parse_fm(f.read_text(encoding="utf-8"))
 

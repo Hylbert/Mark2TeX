@@ -243,6 +243,9 @@ def swap_template(file_path: str | Path, new_template: str) -> bool:
     - Fields exclusive to the new template are appended with their placeholder.
     - Fields exclusive to the old template (not in new template) are removed.
     - Common fields (title, author, date, lang) are always preserved.
+    - User-defined extra fields not belonging to any template are preserved
+      at the end of the frontmatter (e.g. acknowledgements, abstract-pt,
+      committee, abbreviations, symbols).
 
     Returns True on success, False on any I/O or parse error.
     Never raises.
@@ -291,6 +294,12 @@ def swap_template(file_path: str | Path, new_template: str) -> bool:
         else:
             # Field is new to this template — insert placeholder
             merged[key] = placeholder
+
+    # Preserve user-defined extra fields that are not part of any template
+    # definition (e.g. acknowledgements, abstract-pt, committee).
+    for key, value in current_full.items():
+        if key not in new_template_fields:
+            merged[key] = value
 
     # Build new frontmatter block
     new_fm = "---\n" + yaml.dump(
