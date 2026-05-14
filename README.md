@@ -154,11 +154,11 @@ Exit code `0` when no errors are found; exit code `1` when at least one error pr
 
 
 1. Select a `.md` file from the left panel.
-2. Choose a template (`tcc-abnt`, `artigo-ieee`, `doc-tecnica`, `projeto`).
+2. Choose a template (`tcc-abnt`, `artigo-ieee`, `doc-tecnica`, etc.).
 3. Optionally pick a font (`Liberation Serif`, `Liberation Sans`, `Nimbus Sans`, `Ubuntu`).
 4. Press **`c`** to compile or **`w`** to toggle Watch Mode.
-5. Preview the Markdown file
-6. Monitor real-time console output
+5. Preview the Markdown source or switch to the **Compilation Info** tab after a build to see page count, document outline, and XeLaTeX warnings.
+6. Monitor real-time console output.
 
 ### Keyboard shortcuts
 
@@ -174,6 +174,7 @@ Exit code `0` when no errors are found; exit code `1` when at least one error pr
 
 - **Dockerized builds** — zero local LaTeX installation; identical output on every machine.
 - **Interactive TUI** — file browser, template selector, real-time log console, and progress bar built with [Textual](https://github.com/Textualize/textual).
+- **Tabbed preview panel** — two tabs: *Markdown* (source preview) and *Compilation Info* (enabled after each build). The info tab shows filename, page count, template, last compiled time, build status, a numbered document outline (h1–h3), and accumulated XeLaTeX warnings.
 - **Directory navigation** — the file panel opens at the current working directory. Subdirectories are listed before `.md` files; press `Enter` on a folder to enter it. A `../` entry at the top of the list navigates back to the parent folder.
 - **First-run onboarding** — welcome screen shown on the first launch with a built-in "Initialise project here" button that copies an example `.md` into your current directory without leaving the app.
 - **Watch mode** — automatic recompilation on every file save; temp/swap files (`.swp`, `.bak`, `~`) are ignored; debounce of 1.5 s prevents double-triggers on two-stage saves (e.g. Obsidian).
@@ -182,6 +183,8 @@ Exit code `0` when no errors are found; exit code `1` when at least one error pr
 - **Exclusive worker** — pressing `c` twice or a Watch Mode trigger during a running build cancels the previous worker before starting a new one, eliminating interleaved log output.
 - **Frontmatter validator** — before each compilation the YAML frontmatter is checked for missing required fields, unfilled placeholder values, template mismatches, and invalid `lang` codes. Warnings appear in the TUI console; critical errors abort the build early.
 - **Template swap** — switching templates in the TUI surgically updates `template:` and `date:` in the frontmatter, adds missing fields with placeholders, and removes fields exclusive to the old template — all without touching the values you already filled in.
+- **Graceful missing-image handling** — local image references that cannot be resolved are replaced with a plain-text placeholder before the XeLaTeX pass, so the rest of the document compiles normally. A translated warning in the console names the exact missing file.
+- **Cross-platform Docker detection** — on macOS the correct Unix socket (Docker Desktop, Colima, Lima) is probed automatically; on Windows a clear error message lists the supported runtimes. Manual `DOCKER_HOST` configuration is no longer required in most cases.
 - **Human-readable logs** — raw XeLaTeX output is parsed and translated into plain-language messages.
 - **Font selection** — choose between Liberation Sans (Arial-compatible), Nimbus Sans (Helvetica), Liberation Serif (Times-compatible), and Ubuntu per document.
 - **Bibliography support** — BibTeX via Pandoc + XeLaTeX; just drop a `referencias.bib` alongside your `.md`. BibTeX is only invoked when actual citation markers are present in the source.
@@ -195,11 +198,16 @@ Exit code `0` when no errors are found; exit code `1` when at least one error pr
 
 | Template | Purpose |
 |---|---|
-| `tcc-abnt` | Undergraduate thesis (ABNT) |
-| `artigo-ieee` | IEEE conference paper |
-| `artigo-abnt` | ABNT journal article |
+| `tcc-abnt` | Undergraduate thesis (ABNT NBR 14724) |
+| `dissertacao-abnt` | Master's dissertation (ABNT NBR 14724) |
+| `tese-abnt` | Doctoral thesis (ABNT NBR 14724) |
+| `artigo-abnt` | ABNT journal article (NBR 6022) |
+| `artigo-ieee` | IEEE conference / journal paper |
+| `artigo-acm` | ACM conference paper |
+| `artigo-apa` | APA-style article |
+| `relatorio-abnt` | Technical report (ABNT) |
+| `notas-aula` | Lecture notes |
 | `doc-tecnica` | Technical documentation |
-| `projeto` | Project proposal |
 
 ## Roadmap
 
@@ -216,50 +224,35 @@ Exit code `0` when no errors are found; exit code `1` when at least one error pr
 - [x] Exclusive compilation worker (cancel-and-restart)
 - [x] `mark2tex clean` — wipe latexmk build cache
 - [x] Watch Mode race-condition fix (abort stale container before new Pandoc run)
-- [ ] Additional ABNT templates (dissertation, presentation)
+- [x] Tabbed preview panel with Compilation Info tab (page count, outline, warnings)
+- [x] Cross-platform Docker socket auto-detection (macOS / Windows)
+- [x] Graceful handling of missing local images (warning + placeholder, no empty PDF)
+- [x] Extended template set: `dissertacao-abnt`, `tese-abnt`, `relatorio-abnt`, `artigo-acm`, `artigo-apa`, `notas-aula`
 
 See open [issues](https://github.com/Hylbert/Mark2TeX/issues) to follow along or suggest features.
 
 ## Troubleshooting
 
-### macOS: Docker socket not found (`Connection aborted. FileNotFoundError`)
+### macOS / Windows: Docker socket not found
 
-If you see an error like this after installing via `pipx` on macOS:
+Mark2TeX now auto-detects the Docker socket on macOS (Docker Desktop, Colima, Lima) and provides a clear error message on Windows listing the supported runtimes. In most cases no manual configuration is needed.
 
-```
-❌  Erro ao acessar o Docker: Error while fetching server API version:
-('Connection aborted.', FileNotFoundError(2, 'No such file or directory'))
-```
-
-This happens because Docker Desktop on macOS places its Unix socket at
-`~/.docker/run/docker.sock` instead of the Linux default `/var/run/docker.sock`
-that the Python Docker client tries first.
-
-**Fix — set `DOCKER_HOST` permanently in your shell:**
+If you still see a connection error, you can set `DOCKER_HOST` explicitly:
 
 ```bash
-# Confirm the socket exists (Docker Desktop must be running)
-ls ~/.docker/run/docker.sock
+# Docker Desktop on macOS
+export DOCKER_HOST=unix://$HOME/.docker/run/docker.sock
 
-# Add the variable to your shell profile
-echo 'export DOCKER_HOST=unix://$HOME/.docker/run/docker.sock' >> ~/.zshrc
-source ~/.zshrc
-
-# Verify
-mark2tex check
+# Colima
+export DOCKER_HOST=unix://$HOME/.colima/default/docker.sock
 ```
 
-> **Using Colima instead of Docker Desktop?** The socket path is different:
-> ```bash
-> echo 'export DOCKER_HOST=unix://$HOME/.colima/default/docker.sock' >> ~/.zshrc
-> source ~/.zshrc
-> ```
+Add the line to your `~/.zshrc` (or `~/.bashrc`) and run `source ~/.zshrc`. Then verify with `mark2tex check`.
 
-> **Socket not at `~/.docker/run/`?** Locate it with:
+> **Socket not found?** Locate it with:
 > ```bash
 > find ~ -name "docker.sock" 2>/dev/null
 > ```
-> Then use the found path in `DOCKER_HOST`.
 
 ## Contributing
 
