@@ -114,9 +114,16 @@ $endif$$endif$$endif$
 
 % -------------------------------------------------------------------
 % NORMALIZAÇÃO DOS TÍTULOS PRÉ/PÓS-TEXTUAIS
+% ABNT NBR 14724 specifies 12 pt for all section headings.
+% abntex2 defaults to sizes larger than \normalsize for \section and
+% below; override all levels to match the chapter heading size.
 % -------------------------------------------------------------------
 \renewcommand{\ABNTEXchapterfont}{\bfseries}
 \renewcommand{\ABNTEXchapterfontsize}{\normalsize}
+\renewcommand{\ABNTEXsectionfontsize}{\normalsize}
+\renewcommand{\ABNTEXsubsectionfontsize}{\normalsize}
+\renewcommand{\ABNTEXsubsubsectionfontsize}{\normalsize}
+\renewcommand{\ABNTEXsubsubsubsectionfontsize}{\normalsize}
 
 % -------------------------------------------------------------------
 \begin{document}
