@@ -134,6 +134,13 @@ _DEFAULT_FIELDS: dict[str, str] = {
 # to decide what to add/remove when changing templates.
 _COMMON_FIELDS: frozenset[str] = frozenset({"title", "author", "date", "lang"})
 
+# Union of every key declared across all template definitions. Used by
+# swap_template to distinguish template-owned fields (which follow
+# add/remove rules) from user-defined extra fields (which are always kept).
+_ALL_TEMPLATE_KEYS: frozenset[str] = frozenset(
+    key for fields in _TEMPLATE_FIELDS.values() for key in fields
+)
+
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -243,6 +250,9 @@ def swap_template(file_path: str | Path, new_template: str) -> bool:
     - Fields exclusive to the new template are appended with their placeholder.
     - Fields exclusive to the old template (not in new template) are removed.
     - Common fields (title, author, date, lang) are always preserved.
+    - User-defined extra fields not belonging to any known template are
+      preserved at the end of the frontmatter (e.g. acknowledgements,
+      abstract-pt, committee, abbreviations, symbols).
 
     Returns True on success, False on any I/O or parse error.
     Never raises.
@@ -260,8 +270,17 @@ def swap_template(file_path: str | Path, new_template: str) -> bool:
     fm_raw = fm_match.group(0)  # includes opening/closing ---
     body = content[fm_match.end():]
 
-    # Current scalar values in the frontmatter
-    current_values = _parse_scalar_fields(fm_raw)
+    # Parse the full frontmatter with yaml.safe_load to preserve complex
+    # fields (lists, block scalars, nested mappings).
+    inner = fm_raw.strip().removeprefix("---").removesuffix("---").strip()
+    try:
+        current_full: dict[str, Any] = yaml.safe_load(inner) or {}
+    except yaml.YAMLError:
+        current_full = {}
+
+    # No-op: template is already the requested one — avoid unnecessary disk write.
+    if current_full.get("template") == new_template:
+        return True
 
     # Fields defined for the new template
     new_template_fields = dict(_TEMPLATE_FIELDS.get(new_template, _DEFAULT_FIELDS))
@@ -272,24 +291,32 @@ def swap_template(file_path: str | Path, new_template: str) -> bool:
     # 1. Start with new template field order
     # 2. For each field, prefer the user's current value unless it's a
     #    template-specific field not in the old frontmatter at all (new addition)
-    merged: dict[str, str] = {}
+    merged: dict[str, Any] = {}
     for key, placeholder in new_template_fields.items():
         if key in ("template", "date"):
             merged[key] = new_template_fields[key]
-        elif key in current_values:
+        elif key in current_full:
             # User may have filled this in — keep their value
-            merged[key] = current_values[key]
+            merged[key] = current_full[key]
         else:
             # Field is new to this template — insert placeholder
             merged[key] = placeholder
 
+    # Preserve user-defined extra fields: keys present in the current
+    # frontmatter that are not part of any known template definition.
+    # Template-owned keys that do not belong to the new template are
+    # intentionally dropped (covered by the loop above).
+    for key, value in current_full.items():
+        if key not in new_template_fields and key not in _ALL_TEMPLATE_KEYS:
+            merged[key] = value
+
     # Build new frontmatter block
-    lines = ["---"]
-    for key, value in merged.items():
-        lines.append(f"{key}: {_yaml_scalar(value)}")
-    lines.append("---")
-    lines.append("")
-    new_fm = "\n".join(lines) + "\n"
+    new_fm = "---\n" + yaml.dump(
+        merged,
+        allow_unicode=True,
+        default_flow_style=False,
+        sort_keys=False,
+    ) + "---\n\n"
 
     try:
         path.write_text(new_fm + body, encoding="utf-8")

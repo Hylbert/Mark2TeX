@@ -8,6 +8,9 @@ from unittest.mock import patch
 import yaml
 
 from mark2tex.yaml_injector import (
+    _bak_filename,
+    _parse_scalar_fields,
+    _yaml_scalar,
     build_frontmatter,
     has_backup,
     has_frontmatter,
@@ -28,6 +31,76 @@ def _parse_fm(text: str) -> dict:
 
 
 # ---------------------------------------------------------------------------
+# _yaml_scalar
+# ---------------------------------------------------------------------------
+
+class TestYamlScalar:
+    def test_simple_value(self) -> None:
+        assert _yaml_scalar("simple") == "simple"
+
+    def test_value_with_colon_is_quoted(self) -> None:
+        result = _yaml_scalar("Has: colon")
+        assert ":" in result
+        # Must be a valid quoted scalar (round-trip OK).
+        # yaml.safe_load returns a dict when parsing "k: <value>", so index ["k"].
+        assert yaml.safe_load(f"k: {result}")["k"] == "Has: colon"
+
+    def test_empty_string(self) -> None:
+        result = _yaml_scalar("")
+        assert yaml.safe_load(f"k: {result}")["k"] == ""
+
+    def test_unicode_preserved(self) -> None:
+        result = _yaml_scalar("Título com acentos")
+        assert yaml.safe_load(f"k: {result}")["k"] == "Título com acentos"
+
+    def test_no_trailing_newline(self) -> None:
+        assert not _yaml_scalar("hello").endswith("\n")
+
+
+# ---------------------------------------------------------------------------
+# _bak_filename
+# ---------------------------------------------------------------------------
+
+class TestBakFilename:
+    def test_no_slashes_in_result(self, tmp_path: Path) -> None:
+        f = tmp_path / "doc.md"
+        name = _bak_filename(f)
+        assert "/" not in name
+        assert "\\" not in name
+
+    def test_ends_with_bak(self, tmp_path: Path) -> None:
+        f = tmp_path / "doc.md"
+        assert _bak_filename(f).endswith(".bak")
+
+    def test_two_different_paths_yield_different_names(self, tmp_path: Path) -> None:
+        a = _bak_filename(tmp_path / "a.md")
+        b = _bak_filename(tmp_path / "b.md")
+        assert a != b
+
+
+# ---------------------------------------------------------------------------
+# _parse_scalar_fields
+# ---------------------------------------------------------------------------
+
+class TestParseScalarFields:
+    def test_simple_unquoted(self) -> None:
+        result = _parse_scalar_fields("title: My Title\nauthor: Alice\n")
+        assert result["title"] == "My Title"
+        assert result["author"] == "Alice"
+
+    def test_double_quoted_value_stripped(self) -> None:
+        result = _parse_scalar_fields('template: "tcc-abnt"\n')
+        assert result["template"] == "tcc-abnt"
+
+    def test_single_quoted_value_stripped(self) -> None:
+        result = _parse_scalar_fields("lang: 'pt-BR'\n")
+        assert result["lang"] == "pt-BR"
+
+    def test_empty_block(self) -> None:
+        assert _parse_scalar_fields("") == {}
+
+
+# ---------------------------------------------------------------------------
 # has_frontmatter
 # ---------------------------------------------------------------------------
 
@@ -44,7 +117,6 @@ def test_has_frontmatter_returns_false_when_no_yaml(tmp_path: Path) -> None:
 
 
 def test_has_frontmatter_returns_true_on_unreadable_file(tmp_path: Path) -> None:
-    """Non-existent file should not trigger injection (safe default)."""
     f = tmp_path / "missing.md"
     assert has_frontmatter(f) is True
 
@@ -60,7 +132,6 @@ def test_build_frontmatter_contains_template_key() -> None:
 
 
 def test_build_frontmatter_contains_lang_for_artigo_ieee() -> None:
-    # babel does not accept BCP-47 codes; the default must be 'english'
     fm = build_frontmatter("artigo-ieee")
     data = _parse_fm(fm)
     assert data["lang"] == "english"
@@ -113,7 +184,6 @@ def test_inject_prepends_yaml_to_content(tmp_path: Path) -> None:
 
 
 def test_inject_replaces_existing_yaml_silently(tmp_path: Path) -> None:
-    """Re-injection (template switch) should replace frontmatter without new backup."""
     f = tmp_path / "doc.md"
     f.write_text('---\ntitle: "Old"\ntemplate: "tcc-abnt"\n---\n\n# Content\n', encoding="utf-8")
     bak_dir = tmp_path / "backups"
@@ -127,6 +197,27 @@ def test_inject_replaces_existing_yaml_silently(tmp_path: Path) -> None:
     assert data["template"] == "artigo-ieee"
     bak_files = list(bak_dir.glob("*.bak"))
     assert len(bak_files) == 0
+
+
+def test_inject_returns_false_on_missing_file(tmp_path: Path) -> None:
+    f = tmp_path / "missing.md"
+    with patch("mark2tex.yaml_injector._backup_dir", return_value=tmp_path / "bak"):
+        result = inject_frontmatter(f, "tcc-abnt")
+    assert result is False
+
+
+def test_inject_returns_false_when_backup_write_fails(tmp_path: Path) -> None:
+    f = tmp_path / "doc.md"
+    f.write_text("# Hello\n", encoding="utf-8")
+    bak_dir = tmp_path / "backups"
+    bak_dir.mkdir(parents=True, exist_ok=True)
+
+    with (
+        patch("mark2tex.yaml_injector._backup_dir", return_value=bak_dir),
+        patch("pathlib.Path.write_bytes", side_effect=OSError("disk full")),
+    ):
+        result = inject_frontmatter(f, "tcc-abnt")
+    assert result is False
 
 
 # ---------------------------------------------------------------------------
@@ -211,7 +302,6 @@ def test_has_backup_false_before_injection(tmp_path: Path) -> None:
 # ---------------------------------------------------------------------------
 
 def test_swap_preserves_user_filled_common_fields(tmp_path: Path) -> None:
-    """title, author and lang filled by the user must survive a template swap."""
     f = tmp_path / "doc.md"
     f.write_text(
         '---\ntitle: "My Real Title"\nauthor: "Hylbert"\ndate: "2026-01-01"\n'
@@ -220,7 +310,6 @@ def test_swap_preserves_user_filled_common_fields(tmp_path: Path) -> None:
     )
     result = swap_template(f, "doc-tecnica")
     data = _parse_fm(f.read_text(encoding="utf-8"))
-
     assert result is True
     assert data["title"] == "My Real Title"
     assert data["author"] == "Hylbert"
@@ -236,12 +325,10 @@ def test_swap_updates_template_field(tmp_path: Path) -> None:
     )
     swap_template(f, "doc-tecnica")
     data = _parse_fm(f.read_text(encoding="utf-8"))
-
     assert data["template"] == "doc-tecnica"
 
 
 def test_swap_adds_new_exclusive_fields_with_placeholder(tmp_path: Path) -> None:
-    """Swapping to tcc-abnt must add advisor/institution/course/year."""
     f = tmp_path / "doc.md"
     f.write_text(
         '---\ntitle: "My Paper"\nauthor: "Hylbert"\ndate: "2026-01-01"\n'
@@ -250,7 +337,6 @@ def test_swap_adds_new_exclusive_fields_with_placeholder(tmp_path: Path) -> None
     )
     swap_template(f, "tcc-abnt")
     content = f.read_text(encoding="utf-8")
-
     assert "advisor" in content
     assert "institution" in content
     assert "course" in content
@@ -258,7 +344,6 @@ def test_swap_adds_new_exclusive_fields_with_placeholder(tmp_path: Path) -> None
 
 
 def test_swap_removes_exclusive_fields_of_old_template(tmp_path: Path) -> None:
-    """Swapping from tcc-abnt to artigo-ieee must drop advisor/institution/course/year."""
     f = tmp_path / "doc.md"
     f.write_text(
         '---\ntitle: "My TCC"\nauthor: "Hylbert"\ndate: "2026-01-01"\n'
@@ -269,7 +354,6 @@ def test_swap_removes_exclusive_fields_of_old_template(tmp_path: Path) -> None:
     )
     swap_template(f, "artigo-ieee")
     content = f.read_text(encoding="utf-8")
-
     assert "advisor" not in content
     assert "institution" not in content
     assert "course" not in content
@@ -277,7 +361,6 @@ def test_swap_removes_exclusive_fields_of_old_template(tmp_path: Path) -> None:
 
 
 def test_swap_preserves_user_value_for_shared_exclusive_field(tmp_path: Path) -> None:
-    """institution is in both artigo-abnt and tcc-abnt; user value must survive."""
     f = tmp_path / "doc.md"
     f.write_text(
         '---\ntitle: "T"\nauthor: "A"\ndate: "2026-01-01"\n'
@@ -287,12 +370,10 @@ def test_swap_preserves_user_value_for_shared_exclusive_field(tmp_path: Path) ->
     )
     swap_template(f, "tcc-abnt")
     data = _parse_fm(f.read_text(encoding="utf-8"))
-
     assert data["institution"] == "UFAM"
 
 
 def test_swap_returns_false_when_no_frontmatter(tmp_path: Path) -> None:
-    """Files without frontmatter must be left untouched; returns False."""
     f = tmp_path / "doc.md"
     f.write_text("# Just a heading\n", encoding="utf-8")
     result = swap_template(f, "doc-tecnica")
@@ -307,7 +388,6 @@ def test_swap_returns_false_on_missing_file(tmp_path: Path) -> None:
 
 
 def test_swap_body_content_preserved(tmp_path: Path) -> None:
-    """The markdown body after the closing --- must not be touched."""
     f = tmp_path / "doc.md"
     body = "\n# Introduction\n\nThis is my document body.\n"
     f.write_text(
@@ -317,5 +397,78 @@ def test_swap_body_content_preserved(tmp_path: Path) -> None:
     )
     swap_template(f, "doc-tecnica")
     content = f.read_text(encoding="utf-8")
-
     assert body in content
+
+
+def test_swap_noop_when_same_template(tmp_path: Path) -> None:
+    f = tmp_path / "doc.md"
+    original = (
+        '---\ntitle: "My TCC"\nauthor: "Hylbert"\ndate: "2026-01-01"\n'
+        'template: "tcc-abnt"\nlang: "pt-BR"\n---\n\n# Body\n'
+    )
+    f.write_text(original, encoding="utf-8")
+    mtime_before = f.stat().st_mtime
+    result = swap_template(f, "tcc-abnt")
+    assert result is True
+    assert f.stat().st_mtime == mtime_before
+    assert f.read_text(encoding="utf-8") == original
+
+
+def test_swap_preserves_author_list(tmp_path: Path) -> None:
+    f = tmp_path / "doc.md"
+    f.write_text(
+        '---\nauthor:\n- name: Hylbert\n- name: Silva\ndate: "2026-01-01"\n'
+        'template: "tcc-abnt"\nlang: "pt-BR"\ntitle: "T"\n---\n\n# Body\n',
+        encoding="utf-8",
+    )
+    swap_template(f, "dissertacao-abnt")
+    data = _parse_fm(f.read_text(encoding="utf-8"))
+    assert isinstance(data["author"], list)
+    assert data["author"][0]["name"] == "Hylbert"
+    assert data["author"][1]["name"] == "Silva"
+
+
+def test_swap_preserves_multiline_block_scalar(tmp_path: Path) -> None:
+    f = tmp_path / "doc.md"
+    f.write_text(
+        '---\ntitle: "T"\nauthor: "A"\ndate: "2026-01-01"\ntemplate: "tcc-abnt"\n'
+        'lang: "pt-BR"\nacknowledgements: |\n  Thanks to everyone.\n  Special thanks.\n---\n\n# Body\n',
+        encoding="utf-8",
+    )
+    swap_template(f, "dissertacao-abnt")
+    data = _parse_fm(f.read_text(encoding="utf-8"))
+    assert "Thanks to everyone" in data["acknowledgements"]
+
+
+def test_swap_graceful_on_invalid_yaml(tmp_path: Path) -> None:
+    f = tmp_path / "doc.md"
+    f.write_text(
+        '---\ntitle: [unclosed bracket\ntemplate: tcc-abnt\n---\n\n# Body\n',
+        encoding="utf-8",
+    )
+    result = swap_template(f, "doc-tecnica")
+    assert isinstance(result, bool)
+
+
+def test_swap_noop_does_not_write_disk(tmp_path: Path) -> None:
+    f = tmp_path / "doc.md"
+    f.write_text(
+        '---\ntitle: "T"\nauthor: "A"\ndate: "2026-01-01"\n'
+        'template: "doc-tecnica"\nlang: "pt-BR"\n---\n\n# Body\n',
+        encoding="utf-8",
+    )
+    original_content = f.read_text(encoding="utf-8")
+    swap_template(f, "doc-tecnica")
+    assert f.read_text(encoding="utf-8") == original_content
+
+
+def test_swap_returns_false_on_write_error(tmp_path: Path) -> None:
+    f = tmp_path / "doc.md"
+    f.write_text(
+        '---\ntitle: "T"\nauthor: "A"\ndate: "2026-01-01"\n'
+        'template: "artigo-ieee"\nlang: "en-US"\n---\n\n# Body\n',
+        encoding="utf-8",
+    )
+    with patch("pathlib.Path.write_text", side_effect=OSError("disk full")):
+        result = swap_template(f, "doc-tecnica")
+    assert result is False
