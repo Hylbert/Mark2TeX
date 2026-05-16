@@ -66,6 +66,13 @@ $endif$$endif$$endif$
   urlcolor=black,
   citecolor=black,
 }
+% --- FIGURE PLACEMENT ---
+% LaTeX's default float algorithm ([htbp]) repositions figures freely,
+% causing images to appear far from their insertion point and overlap
+% paragraphs. [H] forces each figure to appear exactly where declared.
+\usepackage{float}
+\usepackage{caption}
+\floatplacement{figure}{H}
 
 % --- SUPORTE A CÓDIGO (Pandoc) ---
 \DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
