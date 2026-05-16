@@ -31,6 +31,12 @@ $endif$$endif$$endif$
 \usepackage{xcolor}
 \usepackage{listings}
 \usepackage{float}
+% --- FIGURE PLACEMENT ---
+% LaTeX's default float algorithm ([htbp]) repositions figures freely,
+% causing images to appear far from their insertion point and overlap
+% paragraphs. [H] forces each figure to appear exactly where declared.
+\usepackage{caption}
+\floatplacement{figure}{H}
 \usepackage{enumitem}
 \usepackage{eso-pic}
 \usepackage{titlesec}

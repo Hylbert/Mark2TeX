@@ -68,6 +68,20 @@ $endif$$endif$$endif$
   urlcolor=black,
   citecolor=black,
 }
+% -------------------------------------------------------------------
+% POSICIONAMENTO DE FIGURAS
+% O algoritmo padrão de floats do LaTeX reposiciona figuras livremente,
+% fazendo-as aparecer longe do ponto de inserção no Markdown e, em
+% casos extremos, invadir parágrafos.
+%
+% Solução: pacote `float` com \floatplacement{figure}{H}  força cada
+% figura a ser renderizada exatamente onde foi declarada no fonte.
+% O pacote `caption` garante compatibilidade com o estilo de legendas
+% do abntex2 quando o posicionamento [H] está ativo.
+% -------------------------------------------------------------------
+\usepackage{float}
+\usepackage{caption}
+\floatplacement{figure}{H}
 
 % --- SUPORTE A CÓDIGO (Pandoc) ---
 \DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
