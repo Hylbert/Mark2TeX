@@ -34,16 +34,24 @@ def _make_label_event(list_view_id: str, label_text: str) -> SimpleNamespace:
 
 
 def _make_app() -> MagicMock:
-    """Return a MagicMock that mimics the subset of Mark2TeXApp used by the
-    tested methods.  We use MagicMock(spec=...) only for the app itself so
-    that attribute access is validated against the real class without
-    importing or instantiating the full Textual widget tree."""
-    from mark2tex.app import Mark2TeXApp
+    """Return a MagicMock that stands in for a fully-mounted Mark2TeXApp.
 
-    app = MagicMock(spec=Mark2TeXApp)
+    We intentionally do NOT use ``spec=Mark2TeXApp`` because several attributes
+    (``watcher_manager``, ``_current_dir``, ``_console_lines``, etc.) are
+    assigned dynamically inside ``on_mount`` and therefore do not appear on the
+    class object.  Using ``spec`` would cause ``AttributeError`` for every one
+    of those names.  Instead we create a plain MagicMock and set the attributes
+    that the tested methods actually read.
+    """
+    app = MagicMock()
+    # Instance attributes set in on_mount
     app.selected_template = None
     app.selected_file = None
+    app.selected_font = None
     app.is_watching = False
+    app.watcher_manager = MagicMock()
+    app._current_dir = MagicMock()
+    app._console_lines = []
     return app
 
 
@@ -54,27 +62,27 @@ def _make_app() -> MagicMock:
 
 class TestHighlightedTemplateLabel:
     """on_list_view_highlighted must update the status label when the user
-    browses the template list, but must NOT call _apply_template_swap and
-    must NOT mutate self.selected_template."""
+    browses the template list, but must NOT call ``_apply_template_swap`` and
+    must NOT mutate ``self.selected_template``."""
 
     def _run(self, app: MagicMock, label_text: str) -> None:
         """Call the real method body with the mocked app as *self*."""
+        import builtins
+
         from mark2tex.app import Mark2TeXApp, OptionItem
 
         event = _make_label_event("template-list", label_text)
+        real_isinstance = builtins.isinstance
 
         # OptionItem is a ListItem subclass — isinstance check inside the method
-        # requires the item to be a real OptionItem, so patch isinstance locally.
-        with patch("mark2tex.app.isinstance") as mock_isinstance:
-            # Make isinstance(item, OptionItem) return True for our fake item
-            def _isinstance(obj, cls):  # noqa: ANN001
-                if cls is OptionItem:
-                    return True
-                return builtins_isinstance(obj, cls)
+        # requires the item to be a real OptionItem, so we patch isinstance so
+        # that our SimpleNamespace item passes the OptionItem check.
+        def _isinstance(obj: object, cls: object) -> bool:  # noqa: ANN401
+            if cls is OptionItem:
+                return True
+            return real_isinstance(obj, cls)  # type: ignore[arg-type]
 
-            import builtins
-            builtins_isinstance = builtins.isinstance
-            mock_isinstance.side_effect = _isinstance
+        with patch("mark2tex.app.isinstance", side_effect=_isinstance):
             Mark2TeXApp.on_list_view_highlighted(app, event)
 
     def test_label_updated(self) -> None:
@@ -102,31 +110,26 @@ class TestHighlightedTemplateLabel:
 
 
 class TestWatchModeTemplateClosure:
-    """The lambda passed to WatcherManager.start_watching must read
-    self.selected_template at call time so that a mid-watch template
-    change (confirmed via Enter) is picked up by the next auto-recompilation."""
+    """The lambda passed to ``WatcherManager.start_watching`` must read
+    ``self.selected_template`` at call time so that a mid-watch template
+    change (confirmed via Enter) is picked up on the next auto-recompilation."""
 
-    def _start_watch(
-        self,
-        app: MagicMock,
-        initial_template: str,
-    ) -> MagicMock:
-        """Call toggle_watch_mode (start branch) and return the captured lambda."""
+    def _start_watch(self, app: MagicMock, initial_template: str) -> MagicMock:
+        """Call toggle_watch_mode (start branch) and return the captured callback."""
         from mark2tex.app import Mark2TeXApp
 
         app.selected_file = "thesis.md"
         app.selected_template = initial_template
         app.selected_font = None
         app._get_selection.return_value = ("thesis.md", initial_template, None)
+        app._current_dir.__truediv__ = lambda _self, _other: MagicMock()
 
         captured: list = []
 
-        def _fake_start(abs_file, template, callback):  # noqa: ARG001
+        def _fake_start(_abs_file: str, _template: str, callback) -> None:  # noqa: ANN001
             captured.append(callback)
 
         app.watcher_manager.start_watching.side_effect = _fake_start
-        app._current_dir = MagicMock()
-        app._current_dir.__truediv__ = lambda self, other: MagicMock()  # noqa: ARG005
 
         with patch("mark2tex.app.isinstance", side_effect=isinstance):
             Mark2TeXApp.toggle_watch_mode(app)
@@ -138,7 +141,7 @@ class TestWatchModeTemplateClosure:
         app = _make_app()
         callback = self._start_watch(app, "tcc-abnt")
 
-        # selected_template has not changed — lambda must fall back to captured value
+        # selected_template unchanged — lambda must fall back to the captured value
         app.selected_template = None
         callback()
         app.compile_specific_document.assert_called_once()
