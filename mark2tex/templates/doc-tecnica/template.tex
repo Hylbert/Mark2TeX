@@ -37,6 +37,14 @@ $endif$$endif$$endif$
 % paragraphs. [H] forces each figure to appear exactly where declared.
 \usepackage{caption}
 \floatplacement{figure}{H}
+% --- IMAGE ASPECT RATIO ---
+% Ensures that specifying only width or only height in Markdown image
+% attributes scales the missing dimension proportionally. When both are
+% given they act as maximum bounds, preventing distortion in all cases.
+\makeatletter
+\let\Oldincludegraphics\includegraphics
+\renewcommand{\includegraphics}[2][]{\Oldincludegraphics[keepaspectratio,#1]{#2}}
+\makeatother
 \usepackage{enumitem}
 \usepackage{eso-pic}
 \usepackage{titlesec}
