@@ -146,14 +146,31 @@ done
 # Hand the (possibly modified) copy to pandoc.
 INPUT_FILE="$PROCESSED_INPUT"
 
-# Only pass --bibliography to pandoc if the source .md actually contains
-# citations ([@key] Pandoc syntax or \cite{key} LaTeX syntax).
-# Passing --bibliography unconditionally causes pandoc to emit \bibliography{}
-# in the .tex, which makes latexmk always schedule bibtex — even with -bibtex-
-# — leading to a 'Missing bbl / missing \item' loop on citation-free docs.
+# ---------------------------------------------------------------------------
+# Bibliography resolution
+#
+# Read the `bibliography` field directly from the YAML frontmatter of the
+# source .md file. If the field is present and the corresponding .bib file
+# exists on disk, pass --bibliography to Pandoc so it populates the
+# $bibliography$ template variable — which in turn triggers the
+# \bibliographystyle + \bibliography block in the LaTeX template.
+#
+# --citeproc is intentionally NOT used: templates such as tcc-abnt rely on
+# the native BibTeX flow (abntex2-alf style). --citeproc would intercept
+# the references, resolve them internally, and inject the formatted list
+# into $body$, bypassing the post-textual \bibliography{} command entirely.
+# BibTeX is handled by latexmk in a subsequent step.
+# ---------------------------------------------------------------------------
 BIB_ARGS=""
-if [[ -f "referencias.bib" ]] && grep -qE '\[@[^]]+\]|\\cite\{' "$INPUT_FILE" 2>/dev/null; then
-    BIB_ARGS="--bibliography=referencias.bib --citeproc"
+BIB_FIELD=$(grep -m1 '^bibliography:' "$INPUT_FILE" | sed 's/^bibliography:[[:space:]]*//' | tr -d '"'"'" | tr -d '[:space:]')
+if [[ -n "$BIB_FIELD" ]]; then
+    BIB_FILE="${BIB_FIELD}.bib"
+    if [[ -f "$BIB_FILE" ]]; then
+        BIB_ARGS="--bibliography=${BIB_FILE}"
+        echo "📚 Bibliography file found: ${BIB_FILE}"
+    else
+        echo "⚠️  Bibliography field set to '${BIB_FIELD}' but '${BIB_FILE}' was not found in the working directory."
+    fi
 fi
 
 # Convert --font to boolean metadata flags for Pandoc.
@@ -276,10 +293,11 @@ sync
 # real latexmk exit code across the subshell boundary.
 #
 # -bibtex- unconditionally disables bibtex in latexmk.
-# Citation-free docs never emit \bibliography{} (guarded above), so latexmk
-# has no reason to schedule bibtex regardless. When citations are present,
-# pandoc's --citeproc resolves them at the Markdown→LaTeX step, so bibtex
-# is also not needed at the latexmk level.
+# When a .bib file is present, Pandoc populates $bibliography$ in the
+# template, causing \bibliography{} to be emitted in the .tex. latexmk
+# must then run BibTeX to generate the .bbl file. The -bibtex- flag is
+# therefore replaced with -bibtex so latexmk schedules BibTeX automatically
+# whenever \bibliography{} is detected in the .tex source.
 # ---------------------------------------------------------------------------
 LATEXMK_EXIT_FILE="${CACHE_DIR}/.latexmk_exit"
 
@@ -291,7 +309,7 @@ LATEXMK_EXIT_FILE="${CACHE_DIR}/.latexmk_exit"
         -f \
         -interaction=nonstopmode \
         -shell-escape \
-        -bibtex- \
+        -bibtex \
         -r "$LATEXMKRC" \
         "$OUTPUT_NAME.tex"
     echo $? > "$LATEXMK_EXIT_FILE"
