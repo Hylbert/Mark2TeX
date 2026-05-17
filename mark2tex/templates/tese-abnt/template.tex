@@ -87,9 +87,6 @@ $endif$$endif$$endif$
 % in the preamble, making it a permanent no-op. No heading can
 % suppress the indent — the 1.3 cm \parindent is always applied.
 % -------------------------------------------------------------------
-\makeatletter
-\let\@afterindentfalse\@afterindenttrue
-\makeatother
 
 % --- PANDOC CODE HIGHLIGHTING ---
 \DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
@@ -394,10 +391,13 @@ $endif$
 % TEXTUAL BODY
 % =====================================================================
 \textual
+\makeatletter
+\let\@afterindentfalse\@afterindenttrue
+\makeatother
 \setcounter{secnumdepth}{3}
 % Fix: \textual resets internal spacing state in abntex2, causing the first
-% paragraph of the body to lose its indentation. Restoring \parindent here
-% ensures consistent indentation across all body paragraphs.
+% paragraph of the body to lose its indentation. Restoring \parindent and
+% forcing indentation for the first paragraph.
 \setlength{\parindent}{1.3cm}
 
 $body$
