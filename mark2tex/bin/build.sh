@@ -143,6 +143,29 @@ for img in "${MISSING_IMAGES[@]}"; do
     echo "⚠️ MISSING_IMAGE:${img}"
 done
 
+# ---------------------------------------------------------------------------
+# Smart heading numbering: if the user already wrote an explicit numeric
+# prefix in a Markdown heading (e.g. `# 1 Introduction`, `## 1.1 Background`,
+# `### 1.1.1 Details`), strip that prefix before passing to pandoc.
+# This prevents LaTeX from duplicating the number that the auto-counter
+# would add (e.g. avoiding `1 1 Introduction` in the PDF).
+#
+# Patterns matched and stripped (YAML frontmatter is left untouched):
+#   # N Title          →  # Title
+#   ## N.N Title       →  ## Title
+#   ### N.N.N Title    →  ### Title
+#
+# Headings without a leading numeric prefix are left completely unchanged.
+# ---------------------------------------------------------------------------
+sed -i \
+    -e 's/^\(# \)\([0-9]\+\. \+\)/\1/' \
+    -e 's/^\(## \)\([0-9]\+\.[0-9]\+\. \+\)/\1/' \
+    -e 's/^\(### \)\([0-9]\+\.[0-9]\+\.[0-9]\+\. \+\)/\1/' \
+    -e 's/^\(# \)\([0-9]\+ \+\)/\1/' \
+    -e 's/^\(## \)\([0-9]\+\.[0-9]\+ \+\)/\1/' \
+    -e 's/^\(### \)\([0-9]\+\.[0-9]\+\.[0-9]\+ \+\)/\1/' \
+    "$PROCESSED_INPUT"
+
 # Hand the (possibly modified) copy to pandoc.
 INPUT_FILE="$PROCESSED_INPUT"
 
