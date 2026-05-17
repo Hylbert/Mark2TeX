@@ -74,6 +74,20 @@ $endif$$endif$$endif$
 \usepackage{caption}
 \floatplacement{figure}{H}
 
+% -------------------------------------------------------------------
+% FIRST-PARAGRAPH INDENT AFTER CHAPTER HEADING
+%
+% abntex2's \chapter calls \@afterindentfalse internally, which
+% instructs LaTeX to suppress indentation on the first paragraph after
+% every heading — regardless of \parindent value and even with the
+% indentfirst package loaded, because abntex2 redefines \chapter in a
+% way that bypasses the indentfirst hook.
+%
+% Fix: redefine \@afterindentfalse as an alias for \@afterindenttrue
+% in the preamble, making it a permanent no-op. No heading can
+% suppress the indent — the 1.3 cm \parindent is always applied.
+% -------------------------------------------------------------------
+
 % --- PANDOC CODE HIGHLIGHTING ---
 \DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
 \newenvironment{Shaded}{}{}
@@ -377,7 +391,14 @@ $endif$
 % TEXTUAL BODY
 % =====================================================================
 \textual
+\makeatletter
+\let\@afterindentfalse\@afterindenttrue
+\makeatother
 \setcounter{secnumdepth}{3}
+% Fix: \textual resets internal spacing state in abntex2, causing the first
+% paragraph of the body to lose its indentation. Restoring \parindent and
+% forcing indentation for the first paragraph.
+\setlength{\parindent}{1.3cm}
 
 $body$
 

@@ -18,7 +18,12 @@
 %   font-helvetica → Nimbus Sans         (Helvetica livre, URW)
 %   font-ubuntu    → Ubuntu              (família clássica, estáticas disponíveis)
 %   font-times     → TeX Gyre Termes     (clone livre do Times New Roman)
+%   font-arial     → Liberation Sans     (métricas idênticas à Arial)
+%   font-helvetica → Nimbus Sans         (Helvetica livre, URW)
+%   font-ubuntu    → Ubuntu              (família clássica, estáticas disponíveis)
+%   font-times     → TeX Gyre Termes     (clone livre do Times New Roman)
 %
+% Padrão (nenhuma flag): TeX Gyre Termes — ABNT NBR 14724 recomendada
 % Padrão (nenhuma flag): TeX Gyre Termes — ABNT NBR 14724 recomendada
 % -------------------------------------------------------------------
 \usepackage{fontspec}
@@ -73,6 +78,20 @@ $endif$$endif$$endif$
 \usepackage{float}
 \usepackage{caption}
 \floatplacement{figure}{H}
+
+% -------------------------------------------------------------------
+% RECUO DO PRIMEIRO PARÁGRAFO APÓS CAPÍTULO
+%
+% O \chapter do abntex2 chama \@afterindentfalse internamente, o que
+% instrui o LaTeX a suprimir o recuo do primeiro parágrafo após cada
+% título — independentemente do valor de \parindent e mesmo com o
+% pacote indentfirst carregado, pois o abntex2 redefine \chapter de
+% forma a contornar o hook do indentfirst.
+%
+% Solução: redefine \@afterindentfalse como alias de \@afterindenttrue
+% no preâmbulo, tornando-o no-op permanente. Nenhum heading pode mais
+% suprimir o recuo — o \parindent de 1.3 cm é sempre aplicado.
+% -------------------------------------------------------------------
 
 % --- SUPORTE A CÓDIGO (Pandoc) ---
 \DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
@@ -341,7 +360,14 @@ $endif$
 \cleardoublepage
 
 \textual
+\makeatletter
+\let\@afterindentfalse\@afterindenttrue
+\makeatother
 \setcounter{secnumdepth}{3}
+% Fix: \textual resets internal spacing state in abntex2, causing the first
+% paragraph of the body to lose its indentation. Restoring \parindent and
+% forcing indentation for the first paragraph.
+\setlength{\parindent}{1.3cm}
 
 $body$
 
