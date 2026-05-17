@@ -242,6 +242,10 @@ $endif$
 
 \textual
 \setcounter{secnumdepth}{3}
+% Fix: \textual resets internal spacing state in abntex2, causing the first
+% paragraph of the body to lose its indentation. Restoring \parindent here
+% ensures consistent indentation across all body paragraphs.
+\setlength{\parindent}{1.3cm}
 
 $body$
 
