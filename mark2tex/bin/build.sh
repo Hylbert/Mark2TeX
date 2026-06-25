@@ -100,6 +100,11 @@ cleanup() {
     rm -f "${OUTPUT_NAME}._processed.md" || true
     # Remove any stray PDF that xdvipdfmx may write inside the cache dir.
     rm -f "${CACHE_DIR}/${doc_stem}.pdf" || true
+    # Remove SyncTeX file from the output dir ($out_dir=/app).
+    # xelatex writes it to the output directory, not the cache, so the cache
+    # cleanup above does not catch it.  -synctex=0 in latexmkrc prevents
+    # generation; this rm is a safety net for older cache entries.
+    rm -f "$OUTPUT_NAME".synctex.gz || true
 
     if [[ $exit_code -ne 0 && ! -f "${OUTPUT_NAME}.pdf" ]]; then
         if [[ ! -f "${CACHE_DIR}/${doc_stem}.fdb_latexmk" ]]; then
@@ -156,15 +161,24 @@ done
 #   ### N.N.N Title    →  ### Title
 #
 # Headings without a leading numeric prefix are left completely unchanged.
+#
+# Set `preserve-heading-numbers: true` in the document's YAML frontmatter
+# to opt out of stripping — useful when LaTeX auto-numbering is disabled
+# and the numeric prefixes are intentional (e.g. form section numbers).
 # ---------------------------------------------------------------------------
-sed -i \
-    -e 's/^\(# \)\([0-9]\+\. \+\)/\1/' \
-    -e 's/^\(## \)\([0-9]\+\.[0-9]\+\. \+\)/\1/' \
-    -e 's/^\(### \)\([0-9]\+\.[0-9]\+\.[0-9]\+\. \+\)/\1/' \
-    -e 's/^\(# \)\([0-9]\+ \+\)/\1/' \
-    -e 's/^\(## \)\([0-9]\+\.[0-9]\+ \+\)/\1/' \
-    -e 's/^\(### \)\([0-9]\+\.[0-9]\+\.[0-9]\+ \+\)/\1/' \
-    "$PROCESSED_INPUT"
+PRESERVE_NUMBERS=$(grep -m1 '^preserve-heading-numbers:' "$INPUT_FILE" | \
+    sed 's/^preserve-heading-numbers:[[:space:]]*//' | tr -d '"'"'" | tr -d '[:space:]')
+
+if [[ "$PRESERVE_NUMBERS" != "true" ]]; then
+    sed -i \
+        -e 's/^\(# \)\([0-9]\+\. \+\)/\1/' \
+        -e 's/^\(## \)\([0-9]\+\.[0-9]\+\. \+\)/\1/' \
+        -e 's/^\(### \)\([0-9]\+\.[0-9]\+\.[0-9]\+\. \+\)/\1/' \
+        -e 's/^\(# \)\([0-9]\+ \+\)/\1/' \
+        -e 's/^\(## \)\([0-9]\+\.[0-9]\+ \+\)/\1/' \
+        -e 's/^\(### \)\([0-9]\+\.[0-9]\+\.[0-9]\+ \+\)/\1/' \
+        "$PROCESSED_INPUT"
+fi
 
 # Hand the (possibly modified) copy to pandoc.
 INPUT_FILE="$PROCESSED_INPUT"
@@ -218,14 +232,22 @@ esac
 
 TEMPLATE_PATH="$TEMPLATE_BASE/$TEMPLATE_TYPE/template.tex"
 
+# Filtro de referências cruzadas (@fig:id → Figura~\ref{fig:id}).
+# Activado automaticamente quando crossref.lua está presente no diretório
+# de templates (montado em runtime — não requer rebuild da imagem Docker).
+CROSSREF_ARGS=""
+if [[ -f "${TEMPLATE_BASE}/crossref.lua" ]]; then
+    CROSSREF_ARGS="--lua-filter ${TEMPLATE_BASE}/crossref.lua"
+fi
+
 pandoc "$INPUT_FILE" \
     --template="$TEMPLATE_PATH" \
     --pdf-engine=xelatex \
     $BIB_ARGS \
     $FONT_ARGS \
     $TOP_LEVEL_ARGS \
+    $CROSSREF_ARGS \
     --wrap=preserve \
-    --listings \
     -o "$OUTPUT_NAME.tex"
 
 echo "✅ Markdown converted to LaTeX."
@@ -257,19 +279,27 @@ cat > "$LATEXMKRC" << RCEOF
 \$emulate_aux = 1;
 \$aux_dir = '${CACHE_DIR}';
 \$out_dir = '/app';
+# Disable SyncTeX: not needed in this pipeline and generates a .synctex.gz
+# in \$out_dir (/app) that would be left in the user's working directory.
+# -interaction and other flags are injected by latexmk via %O at runtime.
+\$xelatex = 'xelatex -synctex=0 %O %S';
 RCEOF
 
 # ---------------------------------------------------------------------------
-# Cache invalidation: compare the MD5 of the freshly-generated .tex against
-# the hash stored from the previous run.  When they differ (font change,
-# template change, content edit) the latexmk database (.fdb_latexmk) and
-# the intermediate XDV are stale and must be removed so latexmk performs a
-# full rebuild rather than reporting "Nothing to do".
+# Source-change detection (logging only — latexmk handles its own deps)
 #
-# The .tex itself is deleted by the cleanup trap after every run, which is
-# why latexmk cannot detect the change on its own — by the time the next
-# run starts the file is gone and latexmk only has its cached hash to compare
-# against. Storing the hash ourselves closes this gap.
+# pandoc generates the .tex at the START of every run, so the file already
+# exists when latexmk runs.  latexmk stores MD5 hashes of all input files
+# in .fdb_latexmk and detects changes itself:
+#
+#   • Same content  → "Nothing to do" (0 xelatex passes — near-instant)
+#   • Text change   → reruns xelatex once if the .aux stays stable
+#   • Structural change (TOC/refs/bib) → 2–3 passes until stable
+#
+# Deleting .fdb_latexmk here would defeat this and force a full rebuild on
+# every content edit. We keep it and let latexmk's own tracking do the work.
+# The hash below is used only for the user-facing "source changed" message
+# and for the .aux corruption guard that follows.
 # ---------------------------------------------------------------------------
 TEX_HASH_FILE="${CACHE_DIR}/.tex_hash"
 NEW_HASH=$(md5sum "$OUTPUT_NAME.tex" | cut -d' ' -f1)
@@ -277,15 +307,39 @@ OLD_HASH=$(cat "$TEX_HASH_FILE" 2>/dev/null || echo "")
 
 if [[ "$NEW_HASH" != "$OLD_HASH" ]]; then
     if [[ -n "$OLD_HASH" ]]; then
-        echo "🔄 Source changed — invalidating latexmk cache for a full rebuild."
+        echo "🔄 Source changed — latexmk will rerun the affected passes."
     fi
-    rm -f "${CACHE_DIR}/${DOC_STEM}.fdb_latexmk"
-    rm -f "${CACHE_DIR}/${DOC_STEM}.xdv"
     echo "$NEW_HASH" > "$TEX_HASH_FILE"
 fi
 
+# ---------------------------------------------------------------------------
+# Corrupt .aux guard
+#
+# When xelatex aborts mid-write (OOM, kill, -f recoverable error) the .aux
+# file can be left filled with null bytes (^^@).  latexmk's own state does
+# not cover this case, so the next pass reads the garbage and hits 100
+# "invalid character" errors — while the old PDF (still on disk) causes the
+# script to report success, silently keeping the document stale.
+#
+# Fix: scan the .aux for null bytes before invoking latexmk.  A healthy .aux
+# is pure text and never contains them.  grep -qP '\x00' exits on the first
+# match, so it costs almost nothing on valid files.  When corruption is
+# detected, wipe .aux + the latexmk state so the next pass rebuilds cleanly.
+# ---------------------------------------------------------------------------
+AUX_FILE="${CACHE_DIR}/${DOC_STEM}.aux"
+if [[ -f "$AUX_FILE" ]] && grep -qP '\x00' "$AUX_FILE" 2>/dev/null; then
+    echo "⚠️  Corrupt .aux detected — clearing intermediate cache for a clean rebuild."
+    rm -f "$AUX_FILE"
+    rm -f "${CACHE_DIR}/${DOC_STEM}.fdb_latexmk"
+    rm -f "${CACHE_DIR}/${DOC_STEM}.xdv"
+fi
+
 if [[ -f "${CACHE_DIR}/${DOC_STEM}.fdb_latexmk" ]]; then
-    echo "⚡ Incremental build: reusing latexmk cache from previous run."
+    if [[ "$NEW_HASH" == "$OLD_HASH" ]]; then
+        echo "⚡ Source unchanged — latexmk will verify dependencies (may be a no-op)."
+    else
+        echo "⚡ Incremental build: reusing latexmk cache from previous run."
+    fi
 else
     echo "🔧 Full build: no previous cache found."
 fi
